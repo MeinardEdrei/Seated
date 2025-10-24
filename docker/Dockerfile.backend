@@ -1,0 +1,18 @@
+# build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /app
+
+COPY ../backend/SeatedBackend/*csproj ./
+RUN dotnet restore
+
+COPY ../backend/SeatedBackend/ ./
+RUN dotnet publish -c Release -o out
+
+# runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/out .
+
+ENV ASPNETCORE_URLS=http://+:5165 # changing Kestrel's default listening port to 5165
+EXPOSE 5165
+ENTRYPOINT ["dotnet", "SeatedBackend.dll"]

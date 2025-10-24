@@ -1,0 +1,87 @@
+# ------------------------
+# OS & Editor junk files
+# ------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.log
+*.tmp
+
+# ------------------------
+# Node / React Native
+# ------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+expo-debug.log
+.expo/
+.expo-shared/
+android/
+ios/
+build/
+dist/
+.env
+.env.*.local
+package-lock.json
+yarn.lock
+
+# ------------------------
+# React Native specific
+# ------------------------
+*.iml
+.gradle/
+.idea/
+.vscode/
+*.keystore
+*.jks
+
+# ------------------------
+# .NET / ASP.NET Backend
+# ------------------------
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+*.dbmdl
+*.bak
+*.sqlite
+*.pdb
+
+# ------------------------
+# Logs and cache
+# ------------------------
+logs/
+*.log
+*.tlog
+*.vspscc
+*.vscode/
+__pycache__/
+.cache/
+
+# ------------------------
+# Build results
+# ------------------------
+/[Bb]uild/
+*.msi
+*.exe
+*.dll
+*.nupkg
+
+# ------------------------
+# EF Core Migrations
+# ------------------------
+# Migrations/
+
+# ------------------------
+# Environment config
+# ------------------------
+appsettings.Development.json
+secrets.json
+.env
+.env.local
+
