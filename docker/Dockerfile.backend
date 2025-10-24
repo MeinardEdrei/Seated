@@ -2,10 +2,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app
 
-COPY ../backend/SeatedBackend/*csproj ./
+COPY backend/SeatedBackend/*csproj ./
 RUN dotnet restore
 
-COPY ../backend/SeatedBackend/ ./
+COPY backend/SeatedBackend/ ./
 RUN dotnet publish -c Release -o out
 
 # runtime
