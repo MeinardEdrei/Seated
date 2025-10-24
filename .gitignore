@@ -40,6 +40,12 @@ yarn.lock
 # ------------------------
 # .NET / ASP.NET Backend
 # ------------------------
+**/bin/
+**/obj/
+*.dll
+*.exe
+*.pdb
+*.cache+
 bin/
 obj/
 *.user
