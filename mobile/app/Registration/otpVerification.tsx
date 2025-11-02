@@ -20,7 +20,7 @@ export default function OTPVerification() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
-  const inputRefs = useRef([]);
+  const inputRefs = useRef<Array<TextInput | null>>([]);
   const router = useRouter();
 
   const handleBack = () => router.back();
@@ -36,8 +36,8 @@ export default function OTPVerification() {
     }
   }, [timer]);
 
-  const handleChange = (text, index) => {
-    if (isNaN(text)) return;
+  const handleChange = (text: string, index: number) => {
+    if (isNaN(Number(text))) return;
 
     const newOtp = [...otp];
     newOtp[index] = text;
@@ -45,13 +45,16 @@ export default function OTPVerification() {
 
     // Auto-focus next input
     if (text && index < 5) {
-      inputRefs.current[index + 1].focus();
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
-  const handleKeyPress = (e, index) => {
+  const handleKeyPress = (
+    e: { nativeEvent: { key: string } },
+    index: number
+  ) => {
     if (e.nativeEvent.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1].focus();
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
@@ -61,7 +64,7 @@ export default function OTPVerification() {
       setCanResend(false);
       setOtp(["", "", "", "", "", ""]);
       Alert.alert("Success", "OTP has been resent to your email address");
-      inputRefs.current[0].focus();
+      inputRefs.current[0]?.focus();
     }
   };
 
@@ -123,7 +126,9 @@ export default function OTPVerification() {
                       {otp.map((digit, index) => (
                         <TextInput
                           key={index}
-                          ref={(ref) => (inputRefs.current[index] = ref)}
+                          ref={(ref) => {
+                            inputRefs.current[index] = ref;
+                          }}
                           style={styles.otpInput}
                           value={digit}
                           onChangeText={(text) => handleChange(text, index)}
