@@ -62,7 +62,7 @@ This will start:
 - ⚙️ Backend API (ASP.NET Core)
 - 🧭 phpMyAdmin (database management UI)
 
-### 4. Stop the Containers
+### 5. Stop the Containers
 
 To stop and remove all running containers:
 
@@ -70,7 +70,7 @@ To stop and remove all running containers:
 docker compose -f docker/docker-compose.dev.yml down
 ```
 
-### 5. Access the Services
+### 6. Access the Services
 
 - Backend API (test endpoint): http://localhost:5165/weatherforecast
 - phpMyAdmin: http://localhost:8080
