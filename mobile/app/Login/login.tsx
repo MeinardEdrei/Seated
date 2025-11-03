@@ -29,27 +29,18 @@ export default function login() {
     // Implement Google Sign-In logic here
   };
 
-  const handleEmailSignIn = async () => {
-    console.log("Sign in with email:", email);
+const handleEmailSignIn = () => {
+  console.log("Sign in with email:", email);
 
-    // Basic email validation
-    if (!email) {
-      setShowInvalidEmailModal(true);
-      return;
-    }
+  // If the email input is empty, show the invalid modal
+  if (!email.trim()) {
+    setShowInvalidEmailModal(true);
+    return;
+  }
 
-    // Example: Check if email exists in your system
-    // Replace this with your actual API call
-    const emailExists = await checkEmailExists(email);
-
-    if (!emailExists) {
-      setShowInvalidEmailModal(true);
-      return;
-    }
-
-    // Proceed with sign-in logic
-    // Your authentication logic here
-  };
+  // Otherwise, redirect to Home page
+  router.push("/(tabs)/Homepage/home");
+};
 
   // Mock function - replace with your actual API call
   const checkEmailExists = async (email: string): Promise<boolean> => {
