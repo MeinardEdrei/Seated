@@ -15,27 +15,71 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 
 import styles from "./loginStyles";
+import InvalidEmailModal from "./InvalidEmailModal";
+// import InvalidEmailModal from "./InvalidEmailModal"; // Adjust path as needed
 
 export default function login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showInvalidEmailModal, setShowInvalidEmailModal] = useState(false);
   const router = useRouter();
 
   const handleGoogleSignIn = () => {
     console.log("Continue with Google");
     // Implement Google Sign-In logic here
-    // You'll need to integrate @react-native-google-signin/google-signin
   };
 
-  const handleEmailSignIn = () => {
+  const handleEmailSignIn = async () => {
     console.log("Sign in with email:", email);
-    // Implement your email sign-in logic here
+
+    // Basic email validation
+    if (!email) {
+      setShowInvalidEmailModal(true);
+      return;
+    }
+
+    // Example: Check if email exists in your system
+    // Replace this with your actual API call
+    const emailExists = await checkEmailExists(email);
+
+    if (!emailExists) {
+      setShowInvalidEmailModal(true);
+      return;
+    }
+
+    // Proceed with sign-in logic
+    // Your authentication logic here
+  };
+
+  // Mock function - replace with your actual API call
+  const checkEmailExists = async (email: string): Promise<boolean> => {
+    // This is where you'd call your backend API
+    // For demo purposes, returning false to show the modal
+
+    // Example API call:
+    // try {
+    //   const response = await fetch('YOUR_API_ENDPOINT/check-email', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ email })
+    //   });
+    //   const data = await response.json();
+    //   return data.exists;
+    // } catch (error) {
+    //   console.error('Error checking email:', error);
+    //   return false;
+    // }
+
+    return false; // Simulating email not found
   };
 
   const handleSignUp = () => {
     router.push("/Registration/registration");
     console.log("Navigate to sign up");
-    // Navigate to sign up screen using navigation prop
+  };
+
+  const closeModal = () => {
+    setShowInvalidEmailModal(false);
   };
 
   return (
@@ -148,6 +192,9 @@ export default function login() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+
+      {/* Invalid Email Modal */}
+      <InvalidEmailModal visible={showInvalidEmailModal} onClose={closeModal} />
     </>
   );
 }
