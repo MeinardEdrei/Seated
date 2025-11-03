@@ -35,21 +35,21 @@ namespace SeatedBackend.Controllers
             // Otp
             var otp = new Random().Next(100000, 999999).ToString();
 
-            // var user = new User
-            // {
-            //     Email = dto.Email,
-            //     Role = UserRole.Guest,
-            //     IsVerified = false,
-            //     OtpCode = otp,
-            //     OtpExpiresAt = System.DateTime.UtcNow.AddMinutes(5)
-            // };
-            // _context.Users.Add(user);
-            // await _context.SaveChangesAsync();
+            var user = new User
+            {
+                Email = dto.Email,
+                Role = UserRole.Guest,
+                IsVerified = false,
+                OtpCode = otp,
+                OtpExpiresAt = System.DateTime.UtcNow.AddMinutes(5)
+            };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
             Console.WriteLine($"OTP for {dto.Email}: {otp}");
             Console.WriteLine($"User Role for {dto.Email}: " + DetectUserRole(dto.Email));
 
-            await _emailService.SendEmailAsync(dto.Email, otp);
+            // await _emailService.SendEmailAsync(dto.Email, otp);
 
             return Ok(new { message = "OTP sent to email" });
         }
