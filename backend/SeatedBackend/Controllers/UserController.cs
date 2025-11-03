@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SeatedBackend.Services;
 using SeatedBackend.DTOs;
 using SeatedBackend.Models;
 using SeatedBackend.Data;
@@ -12,10 +13,12 @@ namespace SeatedBackend.Controllers
     public class UserController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly EmailService _emailService;
 
-        public UserController(ApplicationDbContext context)
+        public UserController(ApplicationDbContext context, EmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         [HttpPost("send-otp")]
@@ -45,6 +48,8 @@ namespace SeatedBackend.Controllers
 
             Console.WriteLine($"OTP for {dto.Email}: {otp}");
             Console.WriteLine($"User Role for {dto.Email}: " + DetectUserRole(dto.Email));
+
+            await _emailService.SendEmailAsync(dto.Email, otp);
 
             return Ok(new { message = "OTP sent to email" });
         }
