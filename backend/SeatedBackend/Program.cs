@@ -29,6 +29,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.MapControllers();
 
+// Custom Middleware Here:
+app.UseMiddleware<SeatedBackend.Middleware.RequestLoggingMiddleware>();
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
