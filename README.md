@@ -40,7 +40,15 @@ MYSQL_PASSWORD=your_password
 MYSQL_PORT=3306
 ```
 
-### 3. Start the Containers
+### 3. Build the Docker Images 
+From the project root (Seated/), run:
+
+```bash
+docker compose -f docker/docker-compose.dev.yml build
+```
+
+
+### 4. Start the Containers
 
 From the project root (Seated/), run:
 
