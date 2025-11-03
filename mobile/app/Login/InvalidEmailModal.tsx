@@ -23,7 +23,7 @@ export default function InvalidEmailModal({
     >
       <Pressable style={{ flex: 1 }} onPress={onClose}>
         {/* ✅ Blur background */}
-        <BlurView intensity={70} tint="dark" style={styles.blurOverlay}>
+        <BlurView intensity={5} tint="dark" style={styles.blurOverlay}>
           <Pressable
             style={styles.modalContainer}
             onPress={(e) => e.stopPropagation()}
