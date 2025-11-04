@@ -40,7 +40,7 @@ export default StyleSheet.create({
   redContainer:{
     backgroundColor: "#941418",
     borderTopLeftRadius: 30,
-    borderRightLeftRadius: 30,
+    borderTopRightRadius: 30,
   },
 
   // ===== Sign Up Section =====
