@@ -48,7 +48,7 @@ export default function Registration() {
           {/* Sign-up Section */}
           <SafeAreaView
             edges={["bottom"]}
-            style={{ backgroundColor: "#941418", borderRadius: 30 }}
+            style={styles.redContainer}
           >
             <View style={styles.signUpSection}>
               <View style={styles.textContainer}>
