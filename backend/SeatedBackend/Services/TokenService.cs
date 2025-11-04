@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -10,6 +11,7 @@ namespace SeatedBackend.Services
     public interface ITokenService
     {
         string GenerateToken(User user);
+        string GenerateRefreshToken(int size = 64);
     }
 
     public class TokenService : ITokenService
@@ -21,6 +23,7 @@ namespace SeatedBackend.Services
             _jwtSettings = jwtSettings;
         }
 
+        // Access Token
         public string GenerateToken(User user)
         {
             // User data
@@ -44,6 +47,16 @@ namespace SeatedBackend.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        // Refresh Token
+        public string GenerateRefreshToken(int size = 64)
+        {
+            var randomNumber = new byte[size];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+
+            return Convert.ToBase64String(randomNumber);
         }
     }
 }
