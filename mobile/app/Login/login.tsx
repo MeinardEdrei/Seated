@@ -14,7 +14,7 @@ import { Mail } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 
-import styles from "./loginStyles";
+import styles from "../Styles/loginStyles";
 import InvalidEmailModal from "./InvalidEmailModal";
 // import InvalidEmailModal from "./InvalidEmailModal"; // Adjust path as needed
 

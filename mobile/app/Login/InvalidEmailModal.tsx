@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Modal, TouchableOpacity, Pressable } from "react-native";
 import { X } from "lucide-react-native";
 import { BlurView } from "expo-blur";
-import styles from "./InvalidModalStyles";
+import styles from "../Styles/InvalidModalStyles";
 
 //Define prop types for clarity and type safety
 interface InvalidEmailModalProps {
