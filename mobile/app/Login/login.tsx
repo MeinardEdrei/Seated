@@ -107,7 +107,7 @@ const handleEmailSignIn = () => {
             {/* Main Content Card */}
             <SafeAreaView
               edges={["bottom"]}
-              style={{ backgroundColor: "#941418", borderRadius: 30 }}
+              style={styles.redContainer}
             >
               <View style={styles.signInSection}>
                 <View style={styles.textContainer}>

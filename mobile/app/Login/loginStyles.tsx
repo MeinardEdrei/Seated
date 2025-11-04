@@ -22,6 +22,12 @@ export default StyleSheet.create({
     resizeMode: "contain",
   },
 
+  redContainer:{
+    backgroundColor: "#941418",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+  },
+
   // ===== Illustration Section =====
   illustrationContainer: {
     alignItems: "center",
