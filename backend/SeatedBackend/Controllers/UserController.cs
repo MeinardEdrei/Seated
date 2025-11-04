@@ -52,7 +52,7 @@ namespace SeatedBackend.Controllers
             Console.WriteLine($"OTP for {dto.Email}: {otp}");
             Console.WriteLine($"User Role for {dto.Email}: " + DetectUserRole(dto.Email));
 
-            // await _emailService.SendEmailAsync(dto.Email, otp);
+            await _emailService.SendEmailAsync(dto.Email, otp);
 
             return Ok(new { message = "OTP sent to email" });
         }
@@ -95,12 +95,51 @@ namespace SeatedBackend.Controllers
             if (user == null)
                 return Unauthorized(new { message = "Invalid Email." });
 
-            var token = _tokenService.GenerateToken(user);
+            var accessToken = _tokenService.GenerateToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(60);
+            await _context.SaveChangesAsync();
 
             return Ok(new
             {
-                token,
-                user = new { id = user.UserId, email = user.Email, role = user.Role }
+                accessToken,
+                refreshToken,
+                user = new { id = user.UserId, email = user.Email, role = user.Role.ToString() }
+            });
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshRequestDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(req.RefreshToken))
+                return BadRequest(new { message = "Refresh token required." });
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == req.RefreshToken);
+            if (user == null)
+                return Unauthorized(new { message = "Invalid refresh token." });
+
+            if (!user.RefreshTokenExpiresAt.HasValue || user.RefreshTokenExpiresAt.Value < DateTime.UtcNow)
+            {
+                user.RefreshToken = null;
+                user.RefreshTokenExpiresAt = null;
+                await _context.SaveChangesAsync();
+                return Unauthorized(new { message = "Refresh token expired. Please login again." });
+            }
+
+            // Generate new access token & reset refresh token
+            var newAccessToken = _tokenService.GenerateToken(user);
+            var newRefreshToken = _tokenService.GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(60);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                accessToken = newAccessToken,
+                refreshToken = newRefreshToken
             });
         }
 
