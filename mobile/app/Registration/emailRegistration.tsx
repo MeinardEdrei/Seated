@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import { ChevronLeft, Mail } from "lucide-react-native";
-import styles from "./emailRegistrationStyles";
+import styles from "../Styles/emailRegistrationStyles";
 
 export default function EmailRegistration() {
   const [email, setEmail] = useState("");

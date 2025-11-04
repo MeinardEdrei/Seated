@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import styles from "./otpVerificationStyles";
+import styles from "../Styles/otpVerificationStyles";
 import {
   View,
   Text,
