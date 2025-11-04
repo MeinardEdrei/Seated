@@ -42,4 +42,9 @@ namespace SeatedBackend.DTOs
         [Required, EmailAddress, MaxLength(100)]
         public string Email { get; set; } = string.Empty;
     }
+
+    public class RefreshRequestDto
+    {
+        public string RefreshToken { get; set; } = string.Empty;
+    }
 }
