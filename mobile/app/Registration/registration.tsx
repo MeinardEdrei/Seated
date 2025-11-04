@@ -3,13 +3,21 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import styles from "../Styles/RegistrationPageStyles";
+import {signInWithGoogle} from "../../auth/googleAuth";
 
 export default function Registration() {
   const router = useRouter();
 
-  const handleGoogleSignUp = () => {
-    console.log("Sign up with Google");
+  const handleGoogleSignUp = async () => {
+    const loggedInUser = await signInWithGoogle();
+    if (loggedInUser) {
+      // Navigate to the home page or dashboard after successful sign-in
+      router.push("/(tabs)/Homepage/home");
+    } else {
+      console.log("Google Sign-In failed");
+    }
   };
+
 
   const handleEmailSignUp = () => {
     router.push("/Registration/emailRegistration");
@@ -19,6 +27,7 @@ export default function Registration() {
     router.push("/Login/login");
     console.log("Navigate to Sign In");
   };
+
 
   return (
     <>

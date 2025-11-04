@@ -69,6 +69,7 @@ const handleEmailSignIn = () => {
     console.log("Navigate to sign up");
   };
 
+
   const closeModal = () => {
     setShowInvalidEmailModal(false);
   };
