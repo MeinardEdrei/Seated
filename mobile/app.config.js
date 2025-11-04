@@ -12,12 +12,13 @@ export default {
       supportsTablet: true
     },
     extra: {
-      apiKey: process.env.FIREBASE_API_KEY,
-      authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      appId: process.env.FIREBASE_APP_ID,
-      googleWebClientId: process.env.GOOGLE_WEB_CLIENT_ID,
-      apiUrl: process.env.API_URL
+      FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
+      FIREBASE_AUTH_DOMAIN: process.env.FIREBASE_AUTH_DOMAIN,
+      FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
+      FIREBASE_APP_ID: process.env.FIREBASE_APP_ID,
+      GOOGLE_WEB_CLIENT_ID: process.env.GOOGLE_WEB_CLIENT_ID,
+      API_URL: process.env.API_URL,
+      EXPO_USERNAME: process.env.EXPO_USERNAME
     },
     android: {
       adaptiveIcon: {
@@ -47,7 +48,8 @@ export default {
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      "@react-native-google-signin/google-signin"
     ],
     experiments: {
       typedRoutes: true,

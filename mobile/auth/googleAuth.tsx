@@ -1,35 +1,65 @@
 import * as WebBrowser from "expo-web-browser";
-import * as AuthSession from "expo-auth-session";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import { auth } from "../services/firebase";
+import { useState } from "react";
 import Constants from "expo-constants";
-
-const GOOGLE_WEB_CLIENT_ID = Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID; 
 
 WebBrowser.maybeCompleteAuthSession();
 
-export async function signInWithGoogle() {
-  const redirectUri = AuthSession.makeRedirectUri({
-    useProxy: __DEV__,          // true for Expo Go, false for production build
-    native: "com.seatedapp://auth",
-  });
+export function useGoogleAuth() {
+  const [loading, setLoading] = useState(false);
 
-  const authUrl =
-    "https://accounts.google.com/o/oauth2/v2/auth" +
-    `?client_id=${GOOGLE_WEB_CLIENT_ID}` +
-    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-    `&response_type=token` +
-    `&scope=profile%20email`;
+  const promptAsync = async () => {
+    setLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.addScope("profile");
+      provider.addScope("email");
 
-  const result = await AuthSession.startAsync({ authUrl });
+      const clientId = Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID;
+      const username = Constants.expoConfig?.extra?.EXPO_USERNAME;
 
-  if (result.type === "success") {
-    const credential = GoogleAuthProvider.credential(null, result.params.access_token);
-    await signInWithCredential(auth, credential);  // Firebase manages tokens
-    return auth.currentUser;                        // returns logged-in user info
-  } else {
-    console.log("Login cancelled or failed:", result.type);
-    return null;
-  }
+      const redirectUri = `https://auth.expo.io/@${username}/mobile`;
+      const scope = encodeURIComponent("openid profile email");
+      const responseType = "id_token token";
+      const nonce = Math.random().toString(36).substring(7);
+      
+
+      const authUrl =
+        `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+        `response_type=${responseType}&` +
+        `scope=${scope}&` +
+        `nonce=${nonce}`;
+
+      const result = await WebBrowser.openAuthSessionAsync(
+        authUrl,
+        redirectUri,
+      );
+      console.log("==================");
+      console.log("Client ID:", clientId);
+      console.log("Redirect URI:", redirectUri);
+      console.log("==================");
+      if (result.type === "success" && result.url) {
+        const params = new URLSearchParams(result.url.split("#")[1]);
+        const idToken = params.get("id_token");
+
+        if (idToken) {
+          const credential = GoogleAuthProvider.credential(idToken);
+          const userCredential = await signInWithCredential(auth, credential);
+          console.log("Signed in:", userCredential.user);
+        }
+      }
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    request: { loading },
+    promptAsync,
+  };
 }
-

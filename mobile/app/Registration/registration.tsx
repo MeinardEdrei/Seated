@@ -3,20 +3,31 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import styles from "../Styles/RegistrationPageStyles";
-import {signInWithGoogle} from "../../auth/googleAuth";
+import {useGoogleAuth} from "../../auth/googleAuth";
+import {useEffect} from "react";
+import {auth} from "../../services/firebase";
 
 export default function Registration() {
   const router = useRouter();
+  const {request, promptAsync} = useGoogleAuth();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) {
+        router.push("/(tabs)/Homepage/home");
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleGoogleSignUp = async () => {
-    const loggedInUser = await signInWithGoogle();
-    if (loggedInUser) {
-      // Navigate to the home page or dashboard after successful sign-in
-      router.push("/(tabs)/Homepage/home");
-    } else {
-      console.log("Google Sign-In failed");
+    try {
+      await promptAsync();
+    } catch (error) {
+      console.error("Google Sign-Up Error:", error);
     }
-  };
+ };
 
 
   const handleEmailSignUp = () => {
