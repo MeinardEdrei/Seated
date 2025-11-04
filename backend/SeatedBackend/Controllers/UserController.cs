@@ -14,11 +14,14 @@ namespace SeatedBackend.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly EmailService _emailService;
+        private readonly ITokenService _tokenService;
 
-        public UserController(ApplicationDbContext context, EmailService emailService)
+        public UserController(ApplicationDbContext context, EmailService emailService,
+                ITokenService tokenService)
         {
             _context = context;
             _emailService = emailService;
+            _tokenService = tokenService;
         }
 
         [HttpPost("send-otp")]
@@ -83,6 +86,24 @@ namespace SeatedBackend.Controllers
                 role = role.ToString()
             });
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email &&
+                    u.IsVerified == true);
+            if (user == null)
+                return Unauthorized(new { message = "Invalid Email." });
+
+            var token = _tokenService.GenerateToken(user);
+
+            return Ok(new
+            {
+                token,
+                user = new { id = user.UserId, email = user.Email, role = user.Role }
+            });
+        }
+
 
         private static UserRole DetectUserRole(string email)
         {

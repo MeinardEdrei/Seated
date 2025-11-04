@@ -36,4 +36,10 @@ namespace SeatedBackend.DTOs
         public string? Email { get; set; }
         public UserRole? Role { get; set; }
     }
+
+    public class LoginDto
+    {
+        [Required, EmailAddress, MaxLength(100)]
+        public string Email { get; set; } = string.Empty;
+    }
 }
