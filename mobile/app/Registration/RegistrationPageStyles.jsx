@@ -37,6 +37,12 @@ export default StyleSheet.create({
     height: 330,
   },
 
+  redContainer:{
+    backgroundColor: "#941418",
+    borderTopLeftRadius: 30,
+    borderRightLeftRadius: 30,
+  },
+
   // ===== Sign Up Section =====
   signUpSection: {
     backgroundColor: "#941418",
