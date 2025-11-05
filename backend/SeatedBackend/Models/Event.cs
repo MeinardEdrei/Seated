@@ -61,7 +61,7 @@ namespace SeatedBackend.Models
         public string QrCode { get; set; }
 
         [Column("status")]
-        public string Status { get; set; } = EventStatus.Pending;
+        public EventStatus Status { get; set; } = EventStatus.Pending;
 
         [Column("approval_date")]
         public DateTime? ApprovalDate { get; set; }
