@@ -14,9 +14,9 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { setDefaultTextFont } from "@/utils/setDefaultTextFont";
 
 
-export const unstable_settings = {
-  anchor: "(tabs)",
-};
+// export const unstable_settings = {
+//   anchor: "(tabs)",
+// };
 
 SplashScreen.preventAutoHideAsync();
 
@@ -48,13 +48,14 @@ if (fontsLoaded) {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="index"
-          options={{ headerShown: false }}
-        />
-      </Stack>
+    <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="Login/login" />
+        <Stack.Screen name="Registration/registration" />
+        <Stack.Screen name="Registration/emailRegistration" />
+        <Stack.Screen name="Registration/otpVerification" />
+         <Stack.Screen name="(tabs)" />
+       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
   );

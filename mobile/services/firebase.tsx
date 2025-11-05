@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { initializeAuth, getAuth, browserLocalPersistence } from "firebase/auth";
+import { initializeAuth, getAuth, browserLocalPersistence, Auth } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
@@ -12,18 +12,18 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-let auth;
+let auth: Auth;
 
 if (Platform.OS === "web") {
   // Web environment
   auth = getAuth(app);
   auth.setPersistence(browserLocalPersistence);
 } else {
-  // React Native environment (iOS/Android)
-  // For Expo, use AsyncStorage directly as persistence
+  // native?
   auth = initializeAuth(app, {
-    persistence: AsyncStorage,
+    persistence: AsyncStorage as any,
   });
 }
 
 export { auth };
+

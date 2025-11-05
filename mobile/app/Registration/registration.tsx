@@ -3,31 +3,37 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import styles from "../Styles/RegistrationPageStyles";
-import {useGoogleAuth} from "../../auth/googleAuth";
-import {useEffect} from "react";
-import {auth} from "../../services/firebase";
+import { useEffect, useState } from "react";
+import { auth } from "../../services/firebase";
+import { User } from "firebase/auth";
+import { signInWithGoogle } from "../../auth/authService";
 
 export default function Registration() {
   const router = useRouter();
-  const {request, promptAsync} = useGoogleAuth();
+  const [isSigningUp, setIsSigningUp] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      if (user) {
-        router.push("/(tabs)/Homepage/home");
+    const unsubscribe = auth.onAuthStateChanged((user: User | null) => {
+      if (user && !isSigningUp) {
+        router.push("/(tabs)/home");
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [isSigningUp]);
 
   const handleGoogleSignUp = async () => {
+    console.log("Google sign-up button pressed!");
     try {
-      await promptAsync();
+      setIsSigningUp(true);
+      await signInWithGoogle();
+      // Navigation will be handled by onAuthStateChanged
+      setIsSigningUp(false);
     } catch (error) {
       console.error("Google Sign-Up Error:", error);
+      setIsSigningUp(false);
     }
- };
+  };
 
 
   const handleEmailSignUp = () => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Image,
@@ -13,55 +13,54 @@ import {
 import { Mail } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
+import { auth } from "../../services/firebase";
+import { User } from "firebase/auth";
+import { signInWithGoogle } from "../../auth/authService";
 
 import styles from "../Styles/loginStyles";
 import InvalidEmailModal from "./InvalidEmailModal";
-// import InvalidEmailModal from "./InvalidEmailModal"; // Adjust path as needed
 
 export default function login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showInvalidEmailModal, setShowInvalidEmailModal] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const router = useRouter();
 
-  const handleGoogleSignIn = () => {
-    console.log("Continue with Google");
-    // Implement Google Sign-In logic here
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user: User | null) => {
+      if (user && !isSigningIn) {
+        router.replace("/(tabs)/home");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [isSigningIn]);
+
+  const handleGoogleSignIn = async () => {
+    console.log("Google sign-in button pressed!");
+    try {
+      setIsSigningIn(true);
+      await signInWithGoogle();
+      // Navigation will be handled by onAuthStateChanged
+      setIsSigningIn(false);
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      setIsSigningIn(false);
+    }
   };
 
 const handleEmailSignIn = () => {
-  console.log("Sign in with email:", email);
-
-  // If the email input is empty, show the invalid modal
   if (!email.trim()) {
     setShowInvalidEmailModal(true);
     return;
   }
 
-  // Otherwise, redirect to Home page
-  router.push("/(tabs)/Homepage/home");
+  router.push("/(tabs)/home");
 };
 
-  // Mock function - replace with your actual API call
   const checkEmailExists = async (email: string): Promise<boolean> => {
-    // This is where you'd call your backend API
-    // For demo purposes, returning false to show the modal
-
-    // Example API call:
-    // try {
-    //   const response = await fetch('YOUR_API_ENDPOINT/check-email', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ email })
-    //   });
-    //   const data = await response.json();
-    //   return data.exists;
-    // } catch (error) {
-    //   console.error('Error checking email:', error);
-    //   return false;
-    // }
-
-    return false; // Simulating email not found
+    return false; 
   };
 
   const handleSignUp = () => {
