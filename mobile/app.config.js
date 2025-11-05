@@ -8,6 +8,8 @@ export default {
     scheme: "mobile",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
+    owner: "samjoshuadud",
+    originalFullName: "@samjoshuadud/mobile",
     ios: {
       supportsTablet: true
     },

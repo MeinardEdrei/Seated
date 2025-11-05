@@ -1,65 +1,67 @@
+import { useEffect } from "react";
 import * as WebBrowser from "expo-web-browser";
+import {
+  makeRedirectUri,
+  useAuthRequest,
+  ResponseType,
+} from "expo-auth-session";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import { auth } from "../services/firebase";
-import { useState } from "react";
 import Constants from "expo-constants";
 
 WebBrowser.maybeCompleteAuthSession();
 
+const discovery = {
+  authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+  tokenEndpoint: "https://oauth2.googleapis.com/token",
+};
+
 export function useGoogleAuth() {
-  const [loading, setLoading] = useState(false);
+  const redirectUri = `https://auth.expo.io/@${Constants.expoConfig?.owner}/${Constants.expoConfig?.slug}`;
 
-  const promptAsync = async () => {
-    setLoading(true);
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.addScope("profile");
-      provider.addScope("email");
+  const [request, response, promptAsync] = useAuthRequest(
+    {
+      clientId: Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID,
+      scopes: ["openid", "profile", "email"],
+      redirectUri: redirectUri,
+    },
+    discovery,
+  );
 
-      const clientId = Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID;
-      const username = Constants.expoConfig?.extra?.EXPO_USERNAME;
+  useEffect(() => {
+    console.log("==================");
+    console.log(
+      "Client ID:",
+      Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID,
+    );
+    console.log("Redirect URI:", redirectUri);
+    console.log("==================");
+  }, [response]);
 
-      const redirectUri = `https://auth.expo.io/@${username}/mobile`;
-      const scope = encodeURIComponent("openid profile email");
-      const responseType = "id_token token";
-      const nonce = Math.random().toString(36).substring(7);
-      
+  useEffect(() => {
+    if (response?.type === "success") {
+      const { id_token } = response.params;
 
-      const authUrl =
-        `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${clientId}&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `response_type=${responseType}&` +
-        `scope=${scope}&` +
-        `nonce=${nonce}`;
+      console.log("✅ Got ID token, signing in to Firebase...");
 
-      const result = await WebBrowser.openAuthSessionAsync(
-        authUrl,
-        redirectUri,
-      );
-      console.log("==================");
-      console.log("Client ID:", clientId);
-      console.log("Redirect URI:", redirectUri);
-      console.log("==================");
-      if (result.type === "success" && result.url) {
-        const params = new URLSearchParams(result.url.split("#")[1]);
-        const idToken = params.get("id_token");
-
-        if (idToken) {
-          const credential = GoogleAuthProvider.credential(idToken);
-          const userCredential = await signInWithCredential(auth, credential);
-          console.log("Signed in:", userCredential.user);
-        }
-      }
-    } catch (error) {
-      console.error("Google Sign-In Error:", error);
-    } finally {
-      setLoading(false);
+      const credential = GoogleAuthProvider.credential(id_token);
+      signInWithCredential(auth, credential)
+        .then((userCredential) => {
+          console.log("✅ Signed in:", userCredential.user.email);
+        })
+        .catch((error) => {
+          console.error("❌ Firebase sign-in error:", error);
+        });
+    } else if (response?.type === "error") {
+      console.error("❌ Auth error:", response.error);
+      console.error("Error params:", response.params);
+    } else if (response?.type === "cancel") {
+      console.log("❌ User cancelled authentication");
     }
-  };
+  }, [response]);
 
   return {
-    request: { loading },
+    request,
     promptAsync,
   };
 }
