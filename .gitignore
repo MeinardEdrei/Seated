@@ -26,7 +26,12 @@ dist/
 .env.*.local
 package-lock.json
 yarn.lock
+mobile/.vscode/
+mobile/apk/*
+mobile/apk/
 
+mobile/GoogleService-Info.plist
+mobile/goole-services.json
 # ------------------------
 # React Native specific
 # ------------------------
@@ -36,6 +41,7 @@ yarn.lock
 .vscode/
 *.keystore
 *.jks
+*.apk
 
 # ------------------------
 # .NET / ASP.NET Backend
