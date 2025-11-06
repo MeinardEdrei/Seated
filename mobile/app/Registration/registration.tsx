@@ -8,6 +8,7 @@ import { auth } from "../../services/firebase";
 import { User } from "firebase/auth";
 import { signInWithGoogle } from "../../auth/authService";
 
+
 export default function Registration() {
   const router = useRouter();
   const [isSigningUp, setIsSigningUp] = useState(false);
@@ -26,15 +27,17 @@ export default function Registration() {
     console.log("Google sign-up button pressed!");
     try {
       setIsSigningUp(true);
-      await signInWithGoogle();
-      // Navigation will be handled by onAuthStateChanged
+      const result = await signInWithGoogle();
+      const user = result.user;
+
+      const idToken = await user.getIdToken();
+      console.log("Google Sign-Up Successful. ID Token:", idToken);
       setIsSigningUp(false);
     } catch (error) {
       console.error("Google Sign-Up Error:", error);
       setIsSigningUp(false);
     }
   };
-
 
   const handleEmailSignUp = () => {
     router.push("/Registration/emailRegistration");
@@ -44,7 +47,6 @@ export default function Registration() {
     router.push("/Login/login");
     console.log("Navigate to Sign In");
   };
-
 
   return (
     <>
@@ -72,10 +74,7 @@ export default function Registration() {
           </View>
 
           {/* Sign-up Section */}
-          <SafeAreaView
-            edges={["bottom"]}
-            style={styles.redContainer}
-          >
+          <SafeAreaView edges={["bottom"]} style={styles.redContainer}>
             <View style={styles.signUpSection}>
               <View style={styles.textContainer}>
                 <Text style={styles.title}>Get started with us</Text>
