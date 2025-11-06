@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using SeatedBackend.Data;
 using SeatedBackend.Services;
 
-var builder = WebApplication.CreateBuilder(args);
-
 Env.Load();
+
+var builder = WebApplication.CreateBuilder(args);
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? new JwtSettings();
 builder.Services.AddSingleton(jwtSettings);
