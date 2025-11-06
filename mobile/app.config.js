@@ -2,7 +2,7 @@ export default ({ config }) => ({
   ...config,
   name: "Seated",
   slug: "mobile",
-  owner: "samjoshuadud",
+  owner: "softendseated",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon-logo.png",
@@ -11,6 +11,8 @@ export default ({ config }) => ({
   newArchEnabled: true,
   ios: {
     supportsTablet: true,
+    bundleIdentifier: "com.softendseated.mobile",
+    googleServicesFile: "./GoogleService-Info.plist",
   },
   android: {
     adaptiveIcon: {
@@ -21,6 +23,9 @@ export default ({ config }) => ({
     },
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
+    package: "com.softendseated.seated",
+    googleServicesFile: "./google-services.json",
+
   },
   web: {
     output: "static",
