@@ -37,12 +37,12 @@ namespace SeatedBackend.Models
         [Required]
         [MaxLength(100)]
         [Column("name")]
-        public string Name { get; set; } = string.Empty;
+        public required string Name { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(100)]
         [Column("email")]
-        public string Email { get; set; } = string.Empty;
+        public required string Email { get; set; } = string.Empty;
 
         [MaxLength(255)]
         [Column("google_id")]
@@ -50,9 +50,8 @@ namespace SeatedBackend.Models
 
         [Required]
         [Column("role")]
-        public UserRole Role { get; set; } = UserRole.Guest;
+        public required UserRole Role { get; set; } = UserRole.Guest;
 
-        [Required]
         [Column("is_verified")]
         public bool IsVerified { get; set; } = false;
 
@@ -78,8 +77,9 @@ namespace SeatedBackend.Models
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        public ICollection<Event> Events { get; set; }
-        public ICollection<Reservation> Reservations { get; set; }
-        public ICollection<SeatRequest> SeatRequests { get; set; }
+        // Navigation Properties
+        public ICollection<Event> Events { get; set; } = new List<Event>();
+        public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+        public ICollection<SeatRequest> SeatRequests { get; set; } = new List<SeatRequest>();
     }
 }

@@ -30,7 +30,7 @@ namespace SeatedBackend.Models
         public Venue Venue { get; set; }
 
         [Column("seat_row")]
-        public int? SeatRow { get; set; }
+        public string? SeatRow { get; set; }
 
         [Column("seat_column")]
         public int? SeatColumn { get; set; }
@@ -38,28 +38,30 @@ namespace SeatedBackend.Models
         [Required]
         [Column("floor_type")]
         [MaxLength(50)]
-        public string FloorType { get; set; }
+        public required string FloorType { get; set; }
 
         [Required]
         [Column("seat_code")]
         [MaxLength(50)]
-        public string SeatCode { get; set; }
+        public required string SeatCode { get; set; }
 
         [Column("is_special")]
         public bool IsSpecial { get; set; } = false;
 
         [Required]
         [Column("status")]
-        public SeatStatus Status { get; set; } = SeatStatus.Available;
+        public required SeatStatus Status { get; set; } = SeatStatus.Available;
 
+        [Required]
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [Required]
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation Properties
-        public ICollection<Reservation> Reservations { get; set; }
-        public ICollection<SeatRequest> SeatRequests { get; set; }
+        public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+        public ICollection<SeatRequest> SeatRequests { get; set; } = new List<SeatRequest>();
     }
 }

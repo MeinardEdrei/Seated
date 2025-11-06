@@ -17,17 +17,20 @@ namespace SeatedBackend.Models
         [MaxLength(100)]
         public string VenueName { get; set; }
 
+        [Required]
         [Column("capacity")]
-        public int Capacity { get; set; }
+        public required int Capacity { get; set; }
 
+        [Required]
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [Required]
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation Properties
-        public ICollection<Event> Events { get; set; }
-        public ICollection<Seat> Seats { get; set; }
+        public ICollection<Event> Events { get; set; } = new List<Event>();
+        public ICollection<Seat> Seats { get; set; } = new List<Seat>();
     }
 }

@@ -40,40 +40,48 @@ namespace SeatedBackend.Models
         [Required]
         [Column("event_name")]
         [MaxLength(150)]
-        public string EventName { get; set; }
+        public required string EventName { get; set; }
 
+        [Required]
         [Column("description")]
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
+        [Required]
         [Column("event_date")]
-        public DateTime EventDate { get; set; }
+        public required DateTime EventDate { get; set; }
 
+        [Required]
         [Column("start_time")]
-        public TimeSpan StartTime { get; set; }
+        public required TimeSpan StartTime { get; set; }
 
+        [Required]
         [Column("end_time")]
-        public TimeSpan EndTime { get; set; }
+        public required TimeSpan EndTime { get; set; }
 
+        [Required]
         [Column("image_url")]
-        public string ImageUrl { get; set; }
+        public required string ImageUrl { get; set; }
 
         [Column("qr_code")]
-        public string QrCode { get; set; }
+        public string? QrCode { get; set; }
 
+        [Required]
         [Column("status")]
-        public EventStatus Status { get; set; } = EventStatus.Pending;
+        public required EventStatus Status { get; set; } = EventStatus.Pending;
 
         [Column("approval_date")]
         public DateTime? ApprovalDate { get; set; }
 
+        [Required]
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [Required]
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation Properties
-        public ICollection<Reservation> Reservations { get; set; }
-        public ICollection<SeatRequest> SeatRequests { get; set; }
+        public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+        public ICollection<SeatRequest> SeatRequests { get; set; } = new List<SeatRequest>();
     }
 }

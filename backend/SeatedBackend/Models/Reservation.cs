@@ -44,11 +44,13 @@ namespace SeatedBackend.Models
 
         [Required]
         [Column("status")]
-        public ReservationStatus Status { get; set; } = ReservationStatus.Reserved;
+        public required ReservationStatus Status { get; set; } = ReservationStatus.Reserved;
 
+        [Required]
         [Column("qr_code")]
-        public string QrCode { get; set; }
+        public required string QrCode { get; set; }
 
+        [Required]
         [Column("reserved_at")]
         public DateTime ReservedAt { get; set; } = DateTime.UtcNow;
 
