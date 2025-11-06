@@ -26,7 +26,9 @@ dist/
 .env.*.local
 package-lock.json
 yarn.lock
-
+mobile/.vscode/
+mobile/apk/*
+mobile/apk/
 # ------------------------
 # React Native specific
 # ------------------------
