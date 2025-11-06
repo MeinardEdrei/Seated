@@ -42,6 +42,8 @@ mobile/goole-services.json
 *.keystore
 *.jks
 *.apk
+*.aab
+*.plist
 
 # ------------------------
 # .NET / ASP.NET Backend
