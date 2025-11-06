@@ -15,7 +15,7 @@ namespace SeatedBackend.Models
         [Required]
         [Column("venue_name")]
         [MaxLength(100)]
-        public string VenueName { get; set; }
+        public required string VenueName { get; set; }
 
         [Required]
         [Column("capacity")]

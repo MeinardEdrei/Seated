@@ -36,11 +36,6 @@ namespace SeatedBackend.Models
 
         [Required]
         [MaxLength(100)]
-        [Column("name")]
-        public required string Name { get; set; } = string.Empty;
-
-        [Required]
-        [MaxLength(100)]
         [Column("email")]
         public required string Email { get; set; } = string.Empty;
 

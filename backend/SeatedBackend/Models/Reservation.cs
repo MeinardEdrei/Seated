@@ -27,20 +27,23 @@ namespace SeatedBackend.Models
         [Column("reservation_id")]
         public int ReservationId { get; set; }
 
+        [Required]
         [ForeignKey("User")]
         [Column("user_id")]
-        public int UserId { get; set; }
-        public User User { get; set; }
+        public required int UserId { get; set; }
+        public User? User { get; set; }
 
+        [Required]
         [ForeignKey("Event")]
         [Column("event_id")]
-        public int EventId { get; set; }
-        public Event Event { get; set; }
+        public required int EventId { get; set; }
+        public Event? Event { get; set; }
 
+        [Required]
         [ForeignKey("Seat")]
         [Column("seat_id")]
-        public int SeatId { get; set; }
-        public Seat Seat { get; set; }
+        public required int SeatId { get; set; }
+        public Seat? Seat { get; set; }
 
         [Required]
         [Column("status")]

@@ -24,10 +24,11 @@ namespace SeatedBackend.Models
         [Column("seat_id")]
         public int SeatId { get; set; }
 
+        [Required]
         [ForeignKey("Venue")]
         [Column("venue_id")]
-        public int VenueId { get; set; }
-        public Venue Venue { get; set; }
+        public required int VenueId { get; set; }
+        public Venue? Venue { get; set; }
 
         [Column("seat_row")]
         public string? SeatRow { get; set; }

@@ -27,15 +27,17 @@ namespace SeatedBackend.Models
         [Column("event_id")]
         public int EventId { get; set; }
 
+        [Required]
         [ForeignKey("User")]
         [Column("organizer_id")]
-        public int OrganizerId { get; set; }
-        public User User { get; set; }
+        public required int OrganizerId { get; set; }
+        public User? User { get; set; }
 
+        [Required]
         [ForeignKey("Venue")]
         [Column("venue_id")]
-        public int VenueId { get; set; }
-        public Venue Venue { get; set; }
+        public required int VenueId { get; set; }
+        public Venue? Venue { get; set; }
 
         [Required]
         [Column("event_name")]
