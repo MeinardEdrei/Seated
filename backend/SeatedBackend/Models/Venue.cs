@@ -26,7 +26,7 @@ namespace SeatedBackend.Models
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        // Relationships
+        // Navigation Properties
         public ICollection<Event> Events { get; set; }
         public ICollection<Seat> Seats { get; set; }
     }

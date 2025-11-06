@@ -77,5 +77,9 @@ namespace SeatedBackend.Models
         [Required]
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        public ICollection<Event> Events { get; set; }
+        public ICollection<Reservation> Reservations { get; set; }
+        public ICollection<SeatRequest> SeatRequests { get; set; }
     }
 }
