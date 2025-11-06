@@ -25,7 +25,6 @@ export const signInWithGoogle = async () => {
   if (Platform.OS === "web") {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
-    console.log("Signed in on web:", result.user.email);
     return result;
     // for native
   } else {
