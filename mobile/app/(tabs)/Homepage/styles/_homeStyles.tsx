@@ -198,7 +198,7 @@ export default StyleSheet.create({
     justifyContent: "center",
     borderRadius: 10,
     width: 270,
-    height: 45,
+    height: 50,
     gap: 5,
   },
   downloadButtonText: {
@@ -214,7 +214,7 @@ export default StyleSheet.create({
     justifyContent: "center",
     borderRadius: 10,
     width: 270,
-    height: 45,
+    height: 50,
     borderWidth: 1,
     opacity: 0.7,
     gap: 5,
