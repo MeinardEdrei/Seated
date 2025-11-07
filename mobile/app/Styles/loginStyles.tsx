@@ -12,7 +12,8 @@ export default StyleSheet.create({
 
   // ===== Header =====
   header: {
-    marginLeft: 16,
+    marginHorizontal: 16,
+    marginBottom: 8,
   },
   logoContainer: {
     flexDirection: "row",
