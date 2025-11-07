@@ -27,6 +27,7 @@ namespace SeatedBackend.Controllers
             _tokenService = tokenService;
         }
 
+        [AllowAnonymous]
         [HttpPost("send-otp")]
         public async Task<IActionResult> SendOtp([FromBody] SendOtpDto dto)
         {
@@ -60,6 +61,7 @@ namespace SeatedBackend.Controllers
             return Ok(new { message = "OTP sent to email" });
         }
 
+        [AllowAnonymous]
         [HttpPost("sign-up")]
         public async Task<IActionResult> Register([FromBody] VerifyOtpDto dto)
         {
@@ -90,6 +92,7 @@ namespace SeatedBackend.Controllers
             });
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
@@ -113,6 +116,7 @@ namespace SeatedBackend.Controllers
             });
         }
 
+        [AllowAnonymous]
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequestDto dto)
         {
@@ -145,6 +149,21 @@ namespace SeatedBackend.Controllers
                 refreshToken = newRefreshToken
             });
         }
+
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+          var user = HttpContext.Items["User"] as dynamic;
+          if (user == null)
+            return Unauthorized();
+
+          return Ok(new
+          {
+            id = user.Uid,
+            email = user.Email
+          });
+        }
+
 
         [HttpPost("logout")]
         [Authorize]

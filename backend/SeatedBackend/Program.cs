@@ -6,6 +6,8 @@ using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using SeatedBackend.Data;
 using SeatedBackend.Services;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 Env.Load();
 
@@ -50,6 +52,11 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile("serviceAccountKey.json")
+
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -68,7 +75,7 @@ app.MapControllers();
 
 // Custom Middleware Here:
 app.UseMiddleware<SeatedBackend.Middleware.RequestLoggingMiddleware>();
-
+app.UseMiddleware<SeatedBackend.Middleware.FirebaseAuthMiddleware>();
 
 
 // Test Server
