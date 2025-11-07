@@ -65,6 +65,8 @@ obj/
 *.sqlite
 *.pdb
 
+serviceAccountKey.json
+backend/SeatedBackend/serviceAccountKey.json
 # ------------------------
 # Logs and cache
 # ------------------------

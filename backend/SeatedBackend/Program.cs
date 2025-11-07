@@ -2,18 +2,19 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using SeatedBackend.Settings;
-using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using SeatedBackend.Data;
 using SeatedBackend.Services;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
-Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? new JwtSettings();
 builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserService, UserService>(); 
 
 builder.Services.AddAuthorization();
 builder.Services.AddOpenApi();
@@ -50,6 +51,11 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile("serviceAccountKey.json")
+
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -61,13 +67,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+// Custom Middleware Here:
+app.UseMiddleware<SeatedBackend.Middleware.RequestLoggingMiddleware>();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();
 app.MapControllers();
-
-// Custom Middleware Here:
-app.UseMiddleware<SeatedBackend.Middleware.RequestLoggingMiddleware>();
 
 
 

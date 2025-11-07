@@ -7,11 +7,12 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { useEffect } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { setDefaultTextFont } from "@/utils/setDefaultTextFont";
+import { AuthProvider } from "../context/AuthContext";
 
 
 // export const unstable_settings = {
@@ -48,14 +49,16 @@ if (fontsLoaded) {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-    <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="Login/login" />
-        <Stack.Screen name="Registration/registration" />
-        <Stack.Screen name="Registration/emailRegistration" />
-        <Stack.Screen name="Registration/otpVerification" />
-         <Stack.Screen name="(tabs)" />
-       </Stack>
+      <AuthProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="Login/login" />
+          <Stack.Screen name="Registration/registration" />
+          <Stack.Screen name="Registration/emailRegistration" />
+          <Stack.Screen name="Registration/otpVerification" />
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </AuthProvider>
       <StatusBar style="auto" />
     </ThemeProvider>
   );

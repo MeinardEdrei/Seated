@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SeatedBackend.Services;
@@ -18,15 +17,18 @@ namespace SeatedBackend.Controllers
         private readonly ApplicationDbContext _context;
         private readonly EmailService _emailService;
         private readonly ITokenService _tokenService;
+        private readonly IUserService _userService;
 
         public UserController(ApplicationDbContext context, EmailService emailService,
-                ITokenService tokenService)
+                ITokenService tokenService, IUserService userService)
         {
             _context = context;
             _emailService = emailService;
             _tokenService = tokenService;
+            _userService = userService;
         }
 
+        [AllowAnonymous]
         [HttpPost("send-otp")]
         public async Task<IActionResult> SendOtp([FromBody] SendOtpDto dto)
         {
@@ -53,13 +55,14 @@ namespace SeatedBackend.Controllers
             await _context.SaveChangesAsync();
 
             Console.WriteLine($"OTP for {dto.Email}: {otp}");
-            Console.WriteLine($"User Role for {dto.Email}: " + DetectUserRole(dto.Email));
+            Console.WriteLine($"User Role for {dto.Email}: " + _userService.DetectUserRole(dto.Email));
 
             await _emailService.SendEmailAsync(dto.Email, otp);
 
             return Ok(new { message = "OTP sent to email" });
         }
 
+        [AllowAnonymous]
         [HttpPost("sign-up")]
         public async Task<IActionResult> Register([FromBody] VerifyOtpDto dto)
         {
@@ -73,7 +76,7 @@ namespace SeatedBackend.Controllers
             if (user.OtpExpiresAt < DateTime.UtcNow)
                 return BadRequest(new { message = "OTP expired." });
 
-            var role = DetectUserRole(dto.Email);
+            var role = _userService.DetectUserRole(dto.Email);
             user.Role = role;
 
             user.IsVerified = true;
@@ -90,6 +93,7 @@ namespace SeatedBackend.Controllers
             });
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
@@ -113,6 +117,7 @@ namespace SeatedBackend.Controllers
             });
         }
 
+        [AllowAnonymous]
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequestDto dto)
         {
@@ -145,9 +150,89 @@ namespace SeatedBackend.Controllers
                 refreshToken = newRefreshToken
             });
         }
+        
 
-        [HttpPost("logout")]
+        [AllowAnonymous] 
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.IdToken))
+                return BadRequest(new { message = "IdToken is required." });
+
+            // Validate with Firebase
+            FirebaseAdmin.Auth.FirebaseToken decodedToken;
+            try 
+            {
+                decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance
+                    .VerifyIdTokenAsync(dto.IdToken);
+            }
+            catch (Exception)
+            {
+                return Unauthorized(new { message = "Invalid ID token." });
+            }
+
+            var googleUid = decodedToken.Uid;
+            var email = decodedToken.Claims.TryGetValue("email", out var emailClaim) 
+    ? emailClaim as string 
+    : null;
+
+            if (string.IsNullOrWhiteSpace(email))
+    return BadRequest(new { message = "Email not found in Firebase token." });
+
+            // Find or create user
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleUid);
+            if (user == null)
+            {
+                var role = _userService.DetectUserRole(email);
+                user = await _userService.CreateGoogleUserAsync(email, googleUid, role);
+            }
+
+            // Issue YOUR tokens
+            var accessToken = _tokenService.GenerateToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(60);
+            user.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                accessToken,
+                refreshToken,
+                user = new { id = user.UserId, email = user.Email, role = user.Role.ToString() }
+            });
+        }
+          
+          
+          
         [Authorize]
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            // Get user ID from JWT claims
+            var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
+            if (sub == null || !int.TryParse(sub, out var userId))
+                return Unauthorized();
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            return Ok(new
+            {
+                id = user.UserId,
+                email = user.Email,
+                role = user.Role.ToString(),
+                isVerified = user.IsVerified
+            });
+        }
+
+
+        [Authorize]
+        [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
             // Find user ID in claims
@@ -170,20 +255,7 @@ namespace SeatedBackend.Controllers
         }
 
 
-        private static UserRole DetectUserRole(string email)
-        {
-            var localPart = email.Split('@')[0];
 
-            // If contains digits after the dot = student
-            if (Regex.IsMatch(localPart, @"\.\w*\d"))
-                return UserRole.Student;
-
-            // If contains a dot but no numbers = faculty
-            if (localPart.Contains('.') && !Regex.IsMatch(localPart, @"\d"))
-                return UserRole.Faculty;
-
-            return UserRole.Guest;
-        }
     }
 }
 
