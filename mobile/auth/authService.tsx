@@ -21,12 +21,19 @@ export const configureGoogleSignIn = () => {
 
 export const signInWithGoogle = async () => {
   configureGoogleSignIn();
-    // for web 
+  
+  // for web 
   if (Platform.OS === "web") {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
+    console.log("Web user signed in:", {
+      displayName: result.user.displayName,
+      email: result.user.email,
+      photoURL: result.user.photoURL,
+    });
     return result;
-    // for native
+    
+  // for native
   } else {
     await GoogleSignin.hasPlayServices();
     const userInfo = await GoogleSignin.signIn();
@@ -40,7 +47,12 @@ export const signInWithGoogle = async () => {
 
     const credential = GoogleAuthProvider.credential(idToken);
     const result = await signInWithCredential(auth, credential);
-    console.log("Signed in on native:", result.user.email);
+    console.log("Native user signed in:", {
+      displayName: result.user.displayName,
+      email: result.user.email,
+      photoURL: result.user.photoURL,
+      uid: result.user.uid,
+    });
     return result;
   }
 };
@@ -61,4 +73,12 @@ export const signOutUser = async () => {
   }
   
   console.log("Sign out completed");
+};
+
+// Helper to get ID token for backend authentication
+export const getFirebaseIdToken = async (): Promise<string | null> => {
+  const currentUser = auth.currentUser;
+  if (!currentUser) return null;
+  
+  return await currentUser.getIdToken();
 };

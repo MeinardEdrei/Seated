@@ -6,7 +6,7 @@ import styles from "../Styles/RegistrationPageStyles";
 import { useEffect, useState } from "react";
 import { auth } from "../../services/firebase";
 import { User } from "firebase/auth";
-import { signInWithGoogle } from "../../auth/authService";
+import { getFirebaseIdToken, signInWithGoogle } from "../../auth/authService";
 
 import {googleLogin} from "../../api/auth";
 
@@ -29,9 +29,11 @@ export default function Registration() {
     try {
       setIsSigningUp(true);
       const result = await signInWithGoogle();
-      const user = result.user;
 
-      const idToken = await user.getIdToken();
+      const idToken = await getFirebaseIdToken();
+      if (!idToken) {
+        throw new Error("Failed to get Firebase ID token");
+      } 
       const backendResponse = await googleLogin(idToken);
       console.log("Backend response:", backendResponse);
 

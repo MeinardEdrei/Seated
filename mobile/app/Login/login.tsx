@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import { auth } from "../../services/firebase";
 import { User } from "firebase/auth";
-import { signInWithGoogle } from "../../auth/authService";
+import { getFirebaseIdToken, signInWithGoogle } from "../../auth/authService";
 
 import styles from "../Styles/loginStyles";
 import InvalidEmailModal from "./InvalidEmailModal";
@@ -44,8 +44,10 @@ export default function login() {
     try {
       setIsSigningIn(true);
       const result = await signInWithGoogle();
-      const user = result.user;
-      const idToken = await user.getIdToken(); 
+      const idToken = await getFirebaseIdToken();
+      if (!idToken) {
+        throw new Error("Failed to get Firebase ID token");
+      } 
 
       const backendResponse = await googleLogin(idToken);
       console.log("Backend response:", backendResponse);
