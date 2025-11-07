@@ -6,9 +6,8 @@ import styles from "../Styles/RegistrationPageStyles";
 import { useEffect, useState } from "react";
 import { auth } from "../../services/firebase";
 import { User } from "firebase/auth";
-import { getFirebaseIdToken, signInWithGoogle } from "../../auth/authService";
+import { signInWithGoogle } from "../../auth/authService";
 
-import {googleLogin} from "../../api/auth";
 
 export default function Registration() {
   const router = useRouter();
@@ -17,7 +16,7 @@ export default function Registration() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user: User | null) => {
       if (user && !isSigningUp) {
-        router.push("/(tabs)/home");
+        router.push("/(tabs)/Homepage/home");
       }
     });
 
@@ -29,14 +28,10 @@ export default function Registration() {
     try {
       setIsSigningUp(true);
       const result = await signInWithGoogle();
+      const user = result.user;
 
-      const idToken = await getFirebaseIdToken();
-      if (!idToken) {
-        throw new Error("Failed to get Firebase ID token");
-      } 
-      const backendResponse = await googleLogin(idToken);
-      console.log("Backend response:", backendResponse);
-
+      const idToken = await user.getIdToken();
+      console.log("Google Sign-Up Successful. ID Token:", idToken);
       setIsSigningUp(false);
     } catch (error) {
       console.error("Google Sign-Up Error:", error);

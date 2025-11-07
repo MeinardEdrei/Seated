@@ -1,6 +1,7 @@
 import axios from "axios";
+import Constants from "expo-constants";
 
-const API_BASE_URL = "http://192.168.1.48:5165";
+const API_BASE_URL = Constants.expoConfig?.extra?.API_URL;
 
 export const googleLogin = async (token: string) => {
   try {
