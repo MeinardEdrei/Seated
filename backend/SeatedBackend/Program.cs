@@ -14,7 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? new JwtSettings();
 builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IUserService, UserService>(); 
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<CloudinaryService>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddOpenApi();
