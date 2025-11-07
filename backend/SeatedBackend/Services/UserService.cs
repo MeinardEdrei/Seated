@@ -1,6 +1,7 @@
 using SeatedBackend.Models;
 using SeatedBackend.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace SeatedBackend.Services
 {
@@ -46,6 +47,30 @@ namespace SeatedBackend.Services
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user;
+        }
+        
+        public  UserRole DetectUserRole(string email)
+        {
+            var parts = email.Split('@');
+            if (parts.Length != 2)
+                return UserRole.Guest; 
+
+            var localPart = parts[0];
+            var domain = parts[1].ToLower();
+
+            // Check if not umak.edu.ph domain  Guest
+            if (!Regex.IsMatch(domain, @"^umak\.edu\.ph$", RegexOptions.IgnoreCase))
+                return UserRole.Guest;
+
+            // Student: contains digits after a dot
+            if (Regex.IsMatch(localPart, @"\.\w*\d"))
+                return UserRole.Student;
+
+            // Faculty: has dot but no digits
+            if (localPart.Contains('.') && !Regex.IsMatch(localPart, @"\d"))
+                return UserRole.Faculty;
+
+            return UserRole.Guest;
         }
     }
 }

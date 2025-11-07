@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SeatedBackend.Services;
@@ -56,7 +55,7 @@ namespace SeatedBackend.Controllers
             await _context.SaveChangesAsync();
 
             Console.WriteLine($"OTP for {dto.Email}: {otp}");
-            Console.WriteLine($"User Role for {dto.Email}: " + DetectUserRole(dto.Email));
+            Console.WriteLine($"User Role for {dto.Email}: " + _userService.DetectUserRole(dto.Email));
 
             await _emailService.SendEmailAsync(dto.Email, otp);
 
@@ -77,7 +76,7 @@ namespace SeatedBackend.Controllers
             if (user.OtpExpiresAt < DateTime.UtcNow)
                 return BadRequest(new { message = "OTP expired." });
 
-            var role = DetectUserRole(dto.Email);
+            var role = _userService.DetectUserRole(dto.Email);
             user.Role = role;
 
             user.IsVerified = true;
@@ -184,7 +183,7 @@ namespace SeatedBackend.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleUid);
             if (user == null)
             {
-                var role = DetectUserRole(email);
+                var role = _userService.DetectUserRole(email);
                 user = await _userService.CreateGoogleUserAsync(email, googleUid, role);
             }
 
@@ -256,20 +255,7 @@ namespace SeatedBackend.Controllers
         }
 
 
-        private static UserRole DetectUserRole(string email)
-        {
-            var localPart = email.Split('@')[0];
 
-            // If contains digits after the dot = student
-            if (Regex.IsMatch(localPart, @"\.\w*\d"))
-                return UserRole.Student;
-
-            // If contains a dot but no numbers = faculty
-            if (localPart.Contains('.') && !Regex.IsMatch(localPart, @"\d"))
-                return UserRole.Faculty;
-
-            return UserRole.Guest;
-        }
     }
 }
 
