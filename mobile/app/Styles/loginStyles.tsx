@@ -9,8 +9,11 @@ export default StyleSheet.create({
     flexGrow: 1,
     justifyContent: "flex-start",
   },
+
+  // ===== Header =====
   header: {
-    marginLeft: 16,
+    marginHorizontal: 16,
+    marginBottom: 8,
   },
   logoContainer: {
     flexDirection: "row",

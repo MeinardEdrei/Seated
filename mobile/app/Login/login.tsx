@@ -32,7 +32,7 @@ export default function login() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user: User | null) => {
       if (user && !isSigningIn) {
-        router.replace("/(tabs)/home");
+        router.replace("/(tabs)/Homepage/home");
       }
     });
 

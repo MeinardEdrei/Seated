@@ -21,6 +21,7 @@ export default function InvalidEmailModal({
       visible={visible}
       onRequestClose={onClose}
     >
+      {/* can exit even by tapping the background */}
       <Pressable style={{ flex: 1 }} onPress={onClose}>
         {/* ✅ Blur background */}
         <BlurView intensity={5} tint="dark" style={styles.blurOverlay}>
