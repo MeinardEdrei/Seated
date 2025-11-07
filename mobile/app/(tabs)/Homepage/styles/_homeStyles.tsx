@@ -28,7 +28,7 @@ export default StyleSheet.create({
     alignItems: "center",
     marginHorizontal: 16,
     marginBottom: 8,
-    backgroundColor: "#47fc00ff",
+    // backgroundColor: "#47fc00ff",
   },
   logoContainer: {
     flexDirection: "row",
