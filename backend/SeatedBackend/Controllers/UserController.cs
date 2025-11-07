@@ -18,13 +18,15 @@ namespace SeatedBackend.Controllers
         private readonly ApplicationDbContext _context;
         private readonly EmailService _emailService;
         private readonly ITokenService _tokenService;
+        private readonly IUserService _userService;
 
         public UserController(ApplicationDbContext context, EmailService emailService,
-                ITokenService tokenService)
+                ITokenService tokenService, IUserService userService)
         {
             _context = context;
             _emailService = emailService;
             _tokenService = tokenService;
+            _userService = userService;
         }
 
         [AllowAnonymous]
@@ -149,24 +151,89 @@ namespace SeatedBackend.Controllers
                 refreshToken = newRefreshToken
             });
         }
+        
 
+        [AllowAnonymous] 
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.IdToken))
+                return BadRequest(new { message = "IdToken is required." });
+
+            // Validate with Firebase
+            FirebaseAdmin.Auth.FirebaseToken decodedToken;
+            try 
+            {
+                decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance
+                    .VerifyIdTokenAsync(dto.IdToken);
+            }
+            catch (Exception)
+            {
+                return Unauthorized(new { message = "Invalid ID token." });
+            }
+
+            var googleUid = decodedToken.Uid;
+            var email = decodedToken.Claims.TryGetValue("email", out var emailClaim) 
+    ? emailClaim as string 
+    : null;
+
+            if (string.IsNullOrWhiteSpace(email))
+    return BadRequest(new { message = "Email not found in Firebase token." });
+
+            // Find or create user
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleUid);
+            if (user == null)
+            {
+                var role = DetectUserRole(email);
+                user = await _userService.CreateGoogleUserAsync(email, googleUid, role);
+            }
+
+            // Issue YOUR tokens
+            var accessToken = _tokenService.GenerateToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(60);
+            user.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                accessToken,
+                refreshToken,
+                user = new { id = user.UserId, email = user.Email, role = user.Role.ToString() }
+            });
+        }
+          
+          
+          
+        [Authorize]
         [HttpGet("profile")]
         public async Task<IActionResult> GetProfile()
         {
-          var user = HttpContext.Items["User"] as dynamic;
-          if (user == null)
-            return Unauthorized();
+            // Get user ID from JWT claims
+            var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
-          return Ok(new
-          {
-            id = user.Uid,
-            email = user.Email
-          });
+            if (sub == null || !int.TryParse(sub, out var userId))
+                return Unauthorized();
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            return Ok(new
+            {
+                id = user.UserId,
+                email = user.Email,
+                role = user.Role.ToString(),
+                isVerified = user.IsVerified
+            });
         }
 
 
-        [HttpPost("logout")]
         [Authorize]
+        [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
             // Find user ID in claims

@@ -8,6 +8,7 @@ import { auth } from "../../services/firebase";
 import { User } from "firebase/auth";
 import { signInWithGoogle } from "../../auth/authService";
 
+import {googleLogin} from "../../api/auth";
 
 export default function Registration() {
   const router = useRouter();
@@ -31,7 +32,9 @@ export default function Registration() {
       const user = result.user;
 
       const idToken = await user.getIdToken();
-      console.log("Google Sign-Up Successful. ID Token:", idToken);
+      const backendResponse = await googleLogin(idToken);
+      console.log("Backend response:", backendResponse);
+
       setIsSigningUp(false);
     } catch (error) {
       console.error("Google Sign-Up Error:", error);

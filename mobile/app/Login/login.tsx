@@ -20,6 +20,8 @@ import { signInWithGoogle } from "../../auth/authService";
 import styles from "../Styles/loginStyles";
 import InvalidEmailModal from "./InvalidEmailModal";
 
+import { googleLogin } from "../../api/auth";
+
 export default function login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,7 +43,12 @@ export default function login() {
     console.log("Google sign-in button pressed!");
     try {
       setIsSigningIn(true);
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+      const user = result.user;
+      const idToken = await user.getIdToken(); 
+
+      const backendResponse = await googleLogin(idToken);
+      console.log("Backend response:", backendResponse);
       // Navigation will be handled by onAuthStateChanged
       setIsSigningIn(false);
     } catch (error) {
