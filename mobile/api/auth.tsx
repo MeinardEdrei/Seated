@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
 
-const API_URL = Constants.expoConfig?.extra?.API_URL; 
+const API_URL = Constants.expoConfig?.extra?.API_URL + "/api"; 
 
 // Define the types for your backend response
 type User = {
@@ -22,13 +22,14 @@ type BackendLoginResponse = {
  */
 export const loginWithGoogleBackend = async (idToken: string): Promise<BackendLoginResponse> => {
   try {
-    const { data } = await axios.post<BackendLoginResponse>(`${API_URL}/google-login`, {
+    const { data } = await axios.post<BackendLoginResponse>(`${API_URL}/User/google-login`, {
       idToken: idToken,
     });
     console.log("Backend login successful:", data);
     return data;
   } catch (error) {
     console.error('Error during backend Google login:', error);
+    console.log('API_URL used:', API_URL);
     throw new Error('Backend login failed.');
   }
 };

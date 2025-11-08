@@ -23,7 +23,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [showInvalidEmailModal, setShowInvalidEmailModal] = useState(false);
   const router = useRouter();
-  const { promptGoogleSignIn, isSigningIn, isDisabled } = useGoogleSignIn(); 
+  const { promptGoogleSignIn, isSigningIn, isDisabled  } = useGoogleSignIn(); 
 
 
   const handleEmailSignIn = () => {
@@ -104,7 +104,7 @@ export default function Login() {
                       style={styles.googleIcon}
                     />
                     <Text style={styles.googleButtonText}>
-                      {isLoading ? "Signing in..." : "Sign up with Google"}
+                      {isSigningIn ? "Signing in..." : "Sign up with Google"}
                     </Text>
                   </TouchableOpacity>
                 </View>
