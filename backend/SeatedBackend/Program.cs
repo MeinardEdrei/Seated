@@ -52,6 +52,18 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+                      policy =>
+                      {
+                          policy.AllowAnyOrigin()
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
+                      });
+});
+
 FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.FromFile("serviceAccountKey.json")
@@ -67,13 +79,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 app.UseRouting();
 // Custom Middleware Here:
 app.UseMiddleware<SeatedBackend.Middleware.RequestLoggingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseHttpsRedirection();
 app.MapControllers();
 
 

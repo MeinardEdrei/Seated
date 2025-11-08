@@ -7,7 +7,7 @@ using SeatedBackend.Services;
 using SeatedBackend.DTOs;
 using SeatedBackend.Models;
 using SeatedBackend.Data;
-
+using FirebaseAdmin.Auth;
 namespace SeatedBackend.Controllers
 {
     [ApiController]
@@ -152,56 +152,88 @@ namespace SeatedBackend.Controllers
         }
         
 
-        [AllowAnonymous] 
         [HttpPost("google-login")]
-        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO dto)
+        [AllowAnonymous] 
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.IdToken))
                 return BadRequest(new { message = "IdToken is required." });
 
-            // Validate with Firebase
-            FirebaseAdmin.Auth.FirebaseToken decodedToken;
+            Console.WriteLine($"[GoogleLogin] Received IdToken (first 50 chars): {dto.IdToken.Substring(0, Math.Min(50, dto.IdToken.Length))}...");
+
             try 
             {
-                decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance
-                    .VerifyIdTokenAsync(dto.IdToken);
+                // Verify Firebase token
+                Console.WriteLine("[GoogleLogin] Starting token verification...");
+                FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(dto.IdToken);
+                Console.WriteLine("[GoogleLogin] Token verified successfully");
+                
+                string email = decodedToken.Claims.ContainsKey("email") 
+                    ? decodedToken.Claims["email"].ToString() ?? string.Empty 
+                    : string.Empty;
+                
+                Console.WriteLine($"[GoogleLogin] Email from token: {email}");
+
+                if (string.IsNullOrWhiteSpace(email))
+                    return BadRequest(new { message = "Email not found in token." });
+
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                
+                if (user == null)
+                {
+                    Console.WriteLine($"[GoogleLogin] Creating new user for: {email}");
+                    // Create new user
+                    var role = _userService.DetectUserRole(email);
+                    user = new User
+                    {
+                        Email = email,
+                        GoogleId = decodedToken.Uid,
+                        Role = role,
+                        IsVerified = true
+                    };
+                    _context.Users.Add(user);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    Console.WriteLine($"[GoogleLogin] Existing user found: {email}");
+                }
+
+                // Generate JWT tokens
+                var accessToken = _tokenService.GenerateToken(user);
+                var refreshToken = _tokenService.GenerateRefreshToken();
+
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(7);
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"[GoogleLogin] Login successful for: {email}");
+
+                return Ok(new 
+                { 
+                    message = "Login successful",
+                    accessToken,
+                    refreshToken,
+                    user = new 
+                    {
+                        userId = user.UserId,
+                        email = user.Email,
+                        role = user.Role.ToString()
+                    }
+                });
             }
-            catch (Exception)
+            catch (FirebaseAuthException ex)
             {
-                return Unauthorized(new { message = "Invalid ID token." });
+                Console.WriteLine($"[GoogleLogin] Firebase auth error: {ex.Message}");
+                Console.WriteLine($"[GoogleLogin] Error code: {ex.ErrorCode}");
+                return Unauthorized(new { message = "Invalid Firebase token", error = ex.Message, errorCode = ex.ErrorCode });
             }
-
-            var googleUid = decodedToken.Uid;
-            var email = decodedToken.Claims.TryGetValue("email", out var emailClaim) 
-    ? emailClaim as string 
-    : null;
-
-            if (string.IsNullOrWhiteSpace(email))
-    return BadRequest(new { message = "Email not found in Firebase token." });
-
-            // Find or create user
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleUid);
-            if (user == null)
+            catch (Exception ex)
             {
-                var role = _userService.DetectUserRole(email);
-                user = await _userService.CreateGoogleUserAsync(email, googleUid, role);
+                Console.WriteLine($"[GoogleLogin] Unexpected error: {ex.Message}");
+                Console.WriteLine($"[GoogleLogin] Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
             }
-
-            // Issue YOUR tokens
-            var accessToken = _tokenService.GenerateToken(user);
-            var refreshToken = _tokenService.GenerateRefreshToken();
-
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(60);
-            user.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                accessToken,
-                refreshToken,
-                user = new { id = user.UserId, email = user.Email, role = user.Role.ToString() }
-            });
         }
           
           
