@@ -7,24 +7,20 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { useEffect } from "react";
-import { View, Text } from "react-native";
-// import * as SplashScreen from "expo-splash-screen";
+import { View, ActivityIndicator } from "react-native";
 import { useFonts } from "expo-font";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { setDefaultTextFont } from "@/utils/setDefaultTextFont";
-import { AuthProvider } from "../context/AuthContext";
+import { AuthProvider, useAuth } from "../context/AuthContext";
+import * as SplashScreen from "expo-splash-screen";
+import { useProtectedRoute } from "../context/AuthContext";
 
-
-// export const unstable_settings = {
-//   anchor: "(tabs)",
-// };
-
-// SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
     "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
@@ -32,34 +28,59 @@ export default function RootLayout() {
     "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
   });
 
-  useEffect(() => {
-    if (fontsLoaded) {
-      // SplashScreen.hideAsync();
+  const AppLayout = () => {
+    const { isLoading, user } = useAuth();
+
+    useProtectedRoute(user, isLoading);
+
+    useEffect(() => {
+      if (fontsLoaded || fontError) {
+        if (!isLoading) {
+          SplashScreen.hideAsync();
+        }
+      }
+    }, [isLoading, fontsLoaded, fontError]);
+
+    if (!fontsLoaded || isLoading) {
+      return (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" />
+        </View>
+      );
     }
-  }, [fontsLoaded]);
+    if (fontError) {
+      console.error("Font loading error:", fontError);
+      return null;
+    }
 
-  if (!fontsLoaded) {
-    return <View />;
-  }
-
-  // 👇 Make Poppins the global font
-if (fontsLoaded) {
-  setDefaultTextFont("Poppins-Regular");
-}
-
-  return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <AuthProvider>
+    return (
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="Login/login" />
-          <Stack.Screen name="Registration/registration" />
-          <Stack.Screen name="Registration/emailRegistration" />
-          <Stack.Screen name="Registration/otpVerification" />
-          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="Login/login" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="Registration/registration"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="Registration/emailRegistration"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Registration/otpVerification"
+            options={{ headerShown: false }}
+          />
         </Stack>
-      </AuthProvider>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    );
+  };
+  return (
+    <AuthProvider>
+      <AppLayout />
+    </AuthProvider>
   );
 }

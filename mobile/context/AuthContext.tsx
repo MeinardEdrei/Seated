@@ -1,47 +1,119 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User } from 'firebase/auth';
-import { auth } from '../services/firebase';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import * as SecureStore from 'expo-secure-store';
+import { loginWithGoogleBackend } from '../api/auth'; 
+import { useRouter, useSegments } from 'expo-router';
 
-interface AuthContextType {
+const TOKEN_KEY = 'accessToken';
+const REFRESH_TOKEN_KEY = 'refreshToken';
+const USER_KEY = 'user';
+
+type User = {
+  id: string;
+  email: string;
+  role: string;
+};
+
+type AuthContextData = {
+  accessToken: string | null;
   user: User | null;
-  loading: boolean;
-}
+  isLoading: boolean; 
+  signIn: (idToken: string) => Promise<void>;
+  signOut: () => Promise<void>;
+};
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true });
+const AuthContext = createContext<AuthContextData | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+// This hook will protect routes
+export function useProtectedRoute(user: User | null, isLoading: boolean) {
+  const segments = useSegments();
+  const router = useRouter();
 
   useEffect(() => {
-    console.log("AuthProvider: Setting up auth listener");
-    
-    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
-      console.log("AuthProvider: Auth state changed", {
-        hasUser: !!firebaseUser,
-        email: firebaseUser?.email,
-      });
-      setUser(firebaseUser);
-      setLoading(false);
-    });
+    if (isLoading) {
+      return; 
+    }
 
-    return () => {
-      console.log("AuthProvider: Cleaning up");
-      unsubscribe();
+    const currentRoute = segments.join('/');
+    const inAuthGroup = currentRoute === 'Login/login' || currentRoute === 'Registration/registration';
+      
+    const isRootIndex = segments.length === 0;
+
+    if (!user && !inAuthGroup && !isRootIndex) {
+      router.replace('/Login/login');
+    } else if (user && (inAuthGroup || isRootIndex)) {
+      router.replace('/(tabs)/Homepage/home');
+    }
+  }, [user, segments, router, isLoading]);
+}
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true); 
+  // Load auth state from SecureStore on app start
+  useEffect(() => {
+    const loadAuthState = async () => {
+      try {
+        const storedAccessToken = await SecureStore.getItemAsync(TOKEN_KEY);
+        const storedUserJson = await SecureStore.getItemAsync(USER_KEY);
+
+        if (storedAccessToken && storedUserJson) {
+          setAccessToken(storedAccessToken);
+          setUser(JSON.parse(storedUserJson));
+        }
+      } catch (e) {
+        console.error('Failed to load auth state', e);
+      } finally {
+        setIsLoading(false);
+      }
     };
+
+    loadAuthState();
   }, []);
 
-  console.log("AuthProvider rendering:", { hasUser: !!user, loading });
+
+  const signIn = async (idToken: string) => {
+    try {
+      const { accessToken, refreshToken, user } = await loginWithGoogleBackend(idToken);
+
+      await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+      await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
+      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
+
+      setAccessToken(accessToken);
+      setUser(user);
+
+    } catch (e) {
+      console.error('Sign in failed', e);
+      throw e; 
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await SecureStore.deleteItemAsync(TOKEN_KEY);
+      await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+      await SecureStore.deleteItemAsync(USER_KEY);
+
+      setAccessToken(null);
+      setUser(null);
+    } catch (e) {
+      console.error('Sign out failed', e);
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ accessToken, user, isLoading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
+// Custom hook to easily access the auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  console.log("useAuth called:", context);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
 };

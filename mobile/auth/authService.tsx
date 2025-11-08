@@ -1,84 +1,82 @@
+import { useState, useEffect } from "react";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
 import { Platform } from "react-native";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { GoogleAuthProvider, signInWithCredential, signInWithPopup } from "firebase/auth";
-import { auth } from "../services/firebase";
 import Constants from "expo-constants";
+import { useAuth } from "../context/AuthContext";
+
+WebBrowser.maybeCompleteAuthSession();
 
 let isGoogleConfigured = false;
-
 export const configureGoogleSignIn = () => {
   if (isGoogleConfigured) return;
-  
+
   if (Platform.OS !== "web") {
     GoogleSignin.configure({
-      webClientId: Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID,
+      webClientId: Constants.expoConfig?.extra?.GOOGLE_IOS_CLIENT_ID,
       offlineAccess: false,
     });
   }
-  
   isGoogleConfigured = true;
 };
 
-export const signInWithGoogle = async () => {
-  configureGoogleSignIn();
-  
-  // for web 
-  if (Platform.OS === "web") {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    console.log("Web user signed in:", {
-      displayName: result.user.displayName,
-      email: result.user.email,
-      photoURL: result.user.photoURL,
-    });
-    return result;
-    
-  // for native
-  } else {
-    await GoogleSignin.hasPlayServices();
-    const userInfo = await GoogleSignin.signIn();
-    console.log("Got user info from native:", userInfo);
+export function useGoogleSignIn() {
+  const { signIn } = useAuth();
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
-    const tokens = await GoogleSignin.getTokens();
-    const idToken = tokens.idToken;
-    if (!idToken) {
-      throw new Error("No ID token returned");
+  // For web only
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID,
+  });
+
+  useEffect(() => {
+    if (Platform.OS === "web") {
+      const handleWebResponse = async () => {
+        if (response?.type === "success") {
+          const { id_token } = response.params;
+          if (id_token) {
+            setIsSigningIn(true);
+            try {
+              await signIn(id_token);
+            } finally {
+              setIsSigningIn(false);
+            }
+          }
+        }
+      };
+      handleWebResponse();
     }
+  }, [response, signIn]);
 
-    const credential = GoogleAuthProvider.credential(idToken);
-    const result = await signInWithCredential(auth, credential);
-    console.log("Native user signed in:", {
-      displayName: result.user.displayName,
-      email: result.user.email,
-      photoURL: result.user.photoURL,
-      uid: result.user.uid,
-    });
-    return result;
-  }
-};
+  const promptGoogleSignIn = async () => {
+    if (Platform.OS === "web") {
+      if (request) promptAsync();
+    } else {
+      try {
+        setIsSigningIn(true);
+        await GoogleSignin.hasPlayServices();
+        const userInfo = await GoogleSignin.signIn();
+        console.log("Native Google Sign-In User Info:", userInfo);
 
-export const signOutUser = async () => {
-  console.log("Signing out...");
-  
-  await auth.signOut();
-  console.log("Firebase sign out successful");
-  
-  if (Platform.OS !== "web") {
-    try {
-      await GoogleSignin.signOut();
-      console.log("Google sign out successful");
-    } catch (googleError) {
-      console.log("Google sign out failed:", googleError);
+        const idToken = await GoogleSignin.getTokens().then(tokens => tokens.idToken);
+
+        console.log("Native Google Sign-In ID Token:", idToken);
+        if (!idToken) {
+          throw new Error('Failed to obtain ID token from Google Sign-In');
+        }
+        await signIn(idToken);
+      } catch (error) {
+        console.error("Native Google Sign-In Error:", error);
+      } finally {
+        setIsSigningIn(false);
+      }
     }
-  }
-  
-  console.log("Sign out completed");
-};
+  };
 
-// Helper to get ID token for backend authentication
-export const getFirebaseIdToken = async (): Promise<string | null> => {
-  const currentUser = auth.currentUser;
-  if (!currentUser) return null;
-  
-  return await currentUser.getIdToken();
-};
+  return {
+    promptGoogleSignIn,
+    isSigningIn,
+    isDisabled: Platform.OS === "web" && !request,
+  };
+}
