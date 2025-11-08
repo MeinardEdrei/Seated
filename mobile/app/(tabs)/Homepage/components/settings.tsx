@@ -1,14 +1,39 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View, Button } from 'react-native';
+import React from 'react';
+import { useAuth } from '../../../../context/AuthContext';
 
-const settings = () => {
+const Settings = () => {
+  const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      console.log('User signed out');
+    } catch (error) {
+      console.error('Sign out failed:', error);
+    }
+  };
+
   return (
-    <View>
-      <Text>settings</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Settings</Text>
+      <Button title="Sign Out" onPress={handleSignOut} color="#d9534f" />
     </View>
-  )
-}
+  );
+};
 
-export default settings
+export default Settings;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+});
+

@@ -31,6 +31,8 @@ export default function Login() {
       setShowInvalidEmailModal(true);
       return;
     }
+
+    
     // TODO: Implement email/password sign in
     // This will also need to call a backend endpoint
     // and use the `signIn` function from AuthContext
