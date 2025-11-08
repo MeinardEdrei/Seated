@@ -21,15 +21,16 @@ namespace SeatedBackend.Controllers
         }
 
         [HttpPost("upload-image")]
-        public async Task<IActionResult> UploadImage([FromForm] IFormFile imageFile, [FromForm] string eventName)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadImage([FromForm] ImageUploadDto dto)
         {
-            if (imageFile == null || imageFile.Length == 0)
+            if (dto.ImageFile == null || dto.ImageFile.Length == 0)
                 return BadRequest(new { message = "Image file is required" });
 
-            if (string.IsNullOrEmpty(eventName))
+            if (string.IsNullOrEmpty(dto.EventName))
                 return BadRequest(new { message = "Event name is required" });
 
-            var imageUrl = await _cloudinaryService.UploadImageAsync(imageFile, eventName);
+            var imageUrl = await _cloudinaryService.UploadImageAsync(dto.ImageFile, dto.EventName);
             return Ok(new { imageUrl });
         }
 
