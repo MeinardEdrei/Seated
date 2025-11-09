@@ -69,7 +69,7 @@ namespace SeatedBackend.Controllers
 
             await _emailService.SendEmailAsync(dto.Email, otp);
 
-            return Ok(new { message = "OTP sent to email" });
+            return Ok(new {success = true, message = "OTP sent to email" });
         }
 
         [AllowAnonymous]
@@ -101,6 +101,7 @@ namespace SeatedBackend.Controllers
             await _cache.RemoveAsync($"OTP_{dto.Email}");
             return Ok(new
             {
+                success = true,
                 message = "Account created successfully!",
                 role = user.Role.ToString()
             });
