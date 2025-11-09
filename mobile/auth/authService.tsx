@@ -5,7 +5,7 @@ import { GoogleAuthProvider, signInWithCredential, signInWithPopup } from "fireb
 import { auth } from "../services/firebase";
 import Constants from "expo-constants";
 import { useAuth } from "../context/AuthContext";
-
+import { signUpOtp, sendOtpToEmail, verifyLoginOtp, sendLoginOtp  } from "../api/auth"
 let isGoogleConfigured = false;
 
 export const configureGoogleSignIn = () => {
@@ -39,7 +39,7 @@ export function useGoogleSignIn() {
         // Get Firebase ID token
         const firebaseToken = await result.user.getIdToken();
         console.log("Firebase ID Token (web):", firebaseToken);
-        await signIn(firebaseToken);
+        await signIn(firebaseToken, true);
         
       // For native
       } else {
@@ -60,7 +60,7 @@ export function useGoogleSignIn() {
         // Get Firebase ID token
         const firebaseToken = await result.user.getIdToken();
         console.log("Firebase ID Token (native):", firebaseToken);
-        await signIn(firebaseToken);
+        await signIn(firebaseToken, true);
       }
     } catch (error) {
       console.error("Google Sign-In Error:", error);
@@ -73,5 +73,90 @@ export function useGoogleSignIn() {
     promptGoogleSignIn,
     isSigningIn,
     isDisabled: false,
+  };
+}
+
+// handle email sign up here 
+
+export function useEmailSignUp() {
+  const { signIn } = useAuth(); 
+  const [isSigningUp, setIsSigningUp] = useState(false);
+
+  const sendOtp = async (email: string) => {
+    try {
+      setIsSigningUp(true);
+      const response = await sendOtpToEmail(email);
+      console.log("OTP sent response:", response);
+      return response.success;
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      return false;
+    } finally {
+      setIsSigningUp(false);
+    }
+  };
+
+
+  const verifyOtpAndSignUp = async (email: string, otp: string) => {
+    try {
+      setIsSigningUp(true);
+      const response = await signUpOtp(email, otp); 
+      console.log("Sign up OTP verification response:", response);
+      await signIn(email, false);
+      return response.success;
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      return false;
+    } finally {
+      setIsSigningUp(false);
+    }
+  }
+
+  return {
+    sendOtp,
+    verifyOtpAndSignUp,
+    isSigningUp,
+  };
+}
+
+export function useEmailLogin() {
+  const { signIn } = useAuth();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const sendLoginOtpCode = async (email: string) => {
+    try {
+      setIsLoggingIn(true);
+      const response = await sendLoginOtp(email);
+      return response.success;
+    } catch (error) {
+      console.error("Error sending login OTP:", error);
+      return false;
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const verifyAndLogin = async (email: string, otp: string) => {
+    try {
+      setIsLoggingIn(true);
+      const response = await verifyLoginOtp(email, otp);
+      
+      // ✅ Store tokens using the centralized signIn function
+      // Pass the email with false flag (not Google sign-in)
+      const result = await signIn(email, false);
+      
+      return result; // Returns { success: true/false }
+    } catch (error) {
+      console.error("Error verifying login OTP:", error);
+      return { success: false };
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  return {
+    sendLoginOtpCode,
+    verifyAndLogin,
+    isLoggingIn,
   };
 }

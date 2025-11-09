@@ -58,7 +58,7 @@ export const sendOtpToEmail = async (
 ): Promise<sendOtpResponse> => {
   try {
     const { data } = await axios.post<sendOtpResponse>(
-      `${API_URL}/User/send-otp`,
+      `${API_URL}/User/send-signup-otp`,
       {
         email: email,
       },
@@ -82,7 +82,7 @@ export const signUpOtp = async (
       `${API_URL}/User/sign-up`,
       {
         email: email,
-        otp: otp,
+        OtpCode: otp,
       },
     );
     console.log("Sign Up OTP verified successfully:", data);
@@ -103,9 +103,15 @@ export const signOutBackend = async () => {
       throw new Error("No access token found for sign out.");
     }
 
-    const { data } = await axios.post(`${API_URL}/User/logout`, {}, {headers: {
-      Authorization: `Bearer ${accessToken}`,
-    }});
+    const { data } = await axios.post(
+      `${API_URL}/User/logout`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
 
     console.log("Signed out from backend successfully");
     return data;
@@ -113,5 +119,55 @@ export const signOutBackend = async () => {
     console.error("Error signing out from backend:", error);
     console.log("API_URL used:", API_URL);
     throw new Error("Sign out from backend failed.");
+  }
+};
+
+export const loginWithEmailBackend = async (
+  email: string,
+): Promise<BackendLoginResponse> => {
+  try {
+    const { data } = await axios.post<BackendLoginResponse>(
+      `${API_URL}/User/email-login`,
+      {
+        email: email,
+      },
+    );
+    console.log("Backend email login successful:", data);
+    return data;
+  } catch (error) {
+    console.error("Error during backend email login:", error);
+    console.log("API_URL used:", API_URL);
+    throw new Error("Backend email login failed.");
+  }
+};
+
+export const sendLoginOtp = async (email: string): Promise<sendOtpResponse> => {
+  try {
+    const { data } = await axios.post<sendOtpResponse>(
+      `${API_URL}/User/send-login-otp`,
+      { email }
+    );
+    console.log("Login OTP sent successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("Error sending login OTP:", error);
+    throw new Error("Failed to send login OTP.");
+  }
+};
+
+export const verifyLoginOtp = async (
+  email: string,
+  otp: string
+): Promise<BackendLoginResponse> => {
+  try {
+    const { data } = await axios.post<BackendLoginResponse>(
+      `${API_URL}/User/verify-login-otp`,
+      { email, otpCode: otp }
+    );
+    console.log("Login OTP verified successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("Error verifying login OTP:", error);
+    throw new Error("Login OTP verification failed.");
   }
 };
