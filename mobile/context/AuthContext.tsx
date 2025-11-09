@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { loginWithGoogleBackend } from '../api/auth'; 
+import { loginWithGoogleBackend, signOutBackend } from '../api/auth'; 
 import { useRouter, useSegments } from 'expo-router';
+import {Storage} from "../utils/storage";
 
 const TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -54,8 +55,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const loadAuthState = async () => {
       try {
-        const storedAccessToken = await SecureStore.getItemAsync(TOKEN_KEY);
-        const storedUserJson = await SecureStore.getItemAsync(USER_KEY);
+        const storedAccessToken = await Storage.getItem(TOKEN_KEY);
+        const storedUserJson = await Storage.getItem(USER_KEY);
 
         if (storedAccessToken && storedUserJson) {
           setAccessToken(storedAccessToken);
@@ -76,9 +77,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { accessToken, refreshToken, user } = await loginWithGoogleBackend(idToken);
 
-      await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
-      await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
-      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
+      await Storage.setItem(TOKEN_KEY, accessToken);
+      await Storage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+      await Storage.setItem(USER_KEY, JSON.stringify(user));
 
       setAccessToken(accessToken);
       setUser(user);
@@ -91,9 +92,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
-      await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-      await SecureStore.deleteItemAsync(USER_KEY);
+      const response = await signOutBackend();
+      if (!response.success) {
+        throw new Error('Backend sign out failed');
+      } 
+      console.log("Response from backend sign out:", response);
+
+      await Storage.removeItem(TOKEN_KEY);
+      await Storage.removeItem(REFRESH_TOKEN_KEY);
+      await Storage.removeItem(USER_KEY);
 
       setAccessToken(null);
       setUser(null);
