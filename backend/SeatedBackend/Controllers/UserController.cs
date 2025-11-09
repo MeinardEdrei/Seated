@@ -8,6 +8,8 @@ using SeatedBackend.DTOs;
 using SeatedBackend.Models;
 using SeatedBackend.Data;
 using FirebaseAdmin.Auth;
+using Microsoft.Extensions.Caching.Distributed;
+
 namespace SeatedBackend.Controllers
 {
     [ApiController]
@@ -18,14 +20,17 @@ namespace SeatedBackend.Controllers
         private readonly EmailService _emailService;
         private readonly ITokenService _tokenService;
         private readonly IUserService _userService;
+        private readonly IDistributedCache _cache; 
 
         public UserController(ApplicationDbContext context, EmailService emailService,
-                ITokenService tokenService, IUserService userService)
+                ITokenService tokenService, IUserService userService, IDistributedCache cache)
         {
             _context = context;
             _emailService = emailService;
             _tokenService = tokenService;
             _userService = userService;
+            _cache = cache;
+
         }
 
         [AllowAnonymous]
@@ -43,16 +48,21 @@ namespace SeatedBackend.Controllers
             // Otp
             var otp = new Random().Next(100000, 999999).ToString();
 
-            var user = new User
+            // var user = new User
+            // {
+            //     Email = dto.Email,
+            //     Role = UserRole.Guest,
+            //     IsVerified = false,
+            //     OtpCode = otp,
+            //     OtpExpiresAt = System.DateTime.UtcNow.AddMinutes(5)
+            // };
+            // _context.Users.Add(user);
+            // await _context.SaveChangesAsync();
+
+            await _cache.SetStringAsync($"OTP_{dto.Email}", otp, new DistributedCacheEntryOptions
             {
-                Email = dto.Email,
-                Role = UserRole.Guest,
-                IsVerified = false,
-                OtpCode = otp,
-                OtpExpiresAt = System.DateTime.UtcNow.AddMinutes(5)
-            };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
 
             Console.WriteLine($"OTP for {dto.Email}: {otp}");
             Console.WriteLine($"User Role for {dto.Email}: " + _userService.DetectUserRole(dto.Email));
@@ -66,30 +76,33 @@ namespace SeatedBackend.Controllers
         [HttpPost("sign-up")]
         public async Task<IActionResult> Register([FromBody] VerifyOtpDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-            if (user == null)
-                return NotFound(new { message = "User not found." });
+            var cachedOtp = await _cache.GetStringAsync($"OTP_{dto.Email}");
 
-            if (user.OtpCode != dto.OtpCode)
+            // Check if OTP exists first
+            if (cachedOtp == null)
+                return BadRequest(new { message = "OTP code expired or not found. Please request a new one." });
+
+            // Then check if it matches
+            if (cachedOtp != dto.OtpCode)
                 return BadRequest(new { message = "Invalid OTP code." });
 
-            if (user.OtpExpiresAt < DateTime.UtcNow)
-                return BadRequest(new { message = "OTP expired." });
+            var user = new User
+            {
+                Email = dto.Email,
+                Role = _userService.DetectUserRole(dto.Email),
+                IsVerified = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
 
-            var role = _userService.DetectUserRole(dto.Email);
-            user.Role = role;
-
-            user.IsVerified = true;
-            user.OtpCode = null;
-            user.OtpExpiresAt = null;
-            user.UpdatedAt = System.DateTime.UtcNow;
-
+            };
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            await _cache.RemoveAsync($"OTP_{dto.Email}");
             return Ok(new
             {
                 message = "Account created successfully!",
-                role = role.ToString()
+                role = user.Role.ToString()
             });
         }
 
