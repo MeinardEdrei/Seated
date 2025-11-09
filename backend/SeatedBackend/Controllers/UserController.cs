@@ -48,17 +48,6 @@ namespace SeatedBackend.Controllers
             // Otp
             var otp = new Random().Next(100000, 999999).ToString();
 
-            // var user = new User
-            // {
-            //     Email = dto.Email,
-            //     Role = UserRole.Guest,
-            //     IsVerified = false,
-            //     OtpCode = otp,
-            //     OtpExpiresAt = System.DateTime.UtcNow.AddMinutes(5)
-            // };
-            // _context.Users.Add(user);
-            // await _context.SaveChangesAsync();
-
             await _cache.SetStringAsync($"OTP_{dto.Email}", otp, new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
@@ -108,7 +97,7 @@ namespace SeatedBackend.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("login")]
+        [HttpPost("email-login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email &&
