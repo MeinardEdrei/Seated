@@ -26,7 +26,7 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
   const { promptGoogleSignIn, isSigningIn, isDisabled } = useGoogleSignIn();
-  const { sendLoginOtpCode } = useEmailLogin(); // ✅ Use login function
+  const { sendLoginOtpCode } = useEmailLogin(); 
 
   const handleEmailSignIn = async () => {
     setErrorMessage("");

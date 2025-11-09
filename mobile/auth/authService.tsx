@@ -141,11 +141,9 @@ export function useEmailLogin() {
       setIsLoggingIn(true);
       const response = await verifyLoginOtp(email, otp);
       
-      // ✅ Store tokens using the centralized signIn function
-      // Pass the email with false flag (not Google sign-in)
       const result = await signIn(email, false);
       
-      return result; // Returns { success: true/false }
+      return result; 
     } catch (error) {
       console.error("Error verifying login OTP:", error);
       return { success: false };
