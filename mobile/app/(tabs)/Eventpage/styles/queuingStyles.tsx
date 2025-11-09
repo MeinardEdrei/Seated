@@ -47,19 +47,20 @@ export default StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  eventCard: {
+  queueCard: {
     width: "100%",
     justifyContent: "flex-end",
     alignItems: "center",
-    // marginHorizontal: 28,
   },
-  eventContents: {
+  queueContents: {
     width: 340,
     // justifyContent: "flex-end",
     // alignItems: "center",
     borderWidth: 1,
     borderColor: "rgba(82, 82, 82, 0.3)",
     borderRadius: 20,
+    padding: 35,
+    // backgroundColor: "#000",
 
     shadowColor: "#1C1C1C",
     shadowOffset: { width: 1, height: 1 },
@@ -68,72 +69,89 @@ export default StyleSheet.create({
     elevation: 2, // Android shadow
   },
 
-  eventImage: {
+  illustration7: {
     width: "100%",
-    height: 200,
-    backgroundColor: "#1a1a2e",
+    height: 255,
+    // backgroundColor: "#1a1a2e",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    marginBottom: 16,
   },
-  detailsContainer: {
-    backgroundColor: "#EFEFEF",
-    padding: 30,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+  textContainer: {
+    width: "100%",
+    alignItems: "center",
+    // alignContent: "center",
+    marginBottom: 32,
+    // backgroundColor: "#1a1a2e",
   },
-  eventTitle: {
-    fontFamily: "Poppins-Semibold",
-    fontSize: 18,
+  text: {
+    fontFamily: "Poppins-Regular",
+    fontSize: 14,
+    color: "#1C1C1C",
+  },
+  textNumber: {
+    fontFamily: "Poppins-Black",
+    fontSize: 60,
     color: "#941418",
   },
-  infoSection: {
+  timerContainer: {
+    width: "100%",
     flexDirection: "row",
-    // marginBottom: 8,
-  },
-  infoLabel: {
-    fontFamily: "Poppins-Regular",
-    fontSize: 14,
-    // fontWeight: "600",
-    color: "rgba(28, 28, 28, 0.8)",
-  },
-  infoText: {
-    fontFamily: "Poppins-Regular",
-    fontSize: 14,
-    color: "rgba(28, 28, 28, 0.8)",
-    flex: 1,
-  },
-  description: {
-    fontFamily: "Poppins-Regular",
-    fontSize: 14,
-    color: "rgba(28, 28, 28, 0.8)",
-    lineHeight: 20,
-    marginTop: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    // alignContent: "center",
     marginBottom: 32,
+    // backgroundColor: "#1a1a2e",
   },
-  descriptionLabel: {
-    fontFamily: "Poppins-Bold",
-    fontSize: 14,
-    // fontWeight: "600",
-    color: "rgba(28, 28, 28, 0.8)",
-  },
-  descriptionText: {
+  textCaption: {
     fontFamily: "Poppins-Regular",
-    fontSize: 12,
-    color: "rgba(28, 28, 28, 0.8)",
+    fontSize: 14,
+    color: "#525252",
+  },
+  timer: {
+    fontFamily: "Poppins-Regular",
+    fontSize: 14,
+    color: "#525252",
   },
 
-  queueButton: {
-    backgroundColor: "#941418",
+  //   Button Part
+
+  buttonContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  reserveSeat: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    backgroundColor: "rgba(82, 82, 82, 0.5)",
+    borderRadius: 10,
     width: "100%",
     height: 50,
-    // paddingVertical: 14,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
   },
-  queueButtonText: {
+  reserveSeatText: {
     fontFamily: "Poppins-Bold",
     fontSize: 14,
-    color: "#FFE2A3",
+    color: "#ffffffff",
+  },
+  cancelQueue: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: "rgba(82, 82, 82, 0.3)",
+    width: "100%",
+    height: 50,
+  },
+  cancelQueueText: {
+    fontFamily: "Poppins-Bold",
+    fontSize: 14,
+    color: "#rgba(28, 28, 28, 0.7)",
   },
 });

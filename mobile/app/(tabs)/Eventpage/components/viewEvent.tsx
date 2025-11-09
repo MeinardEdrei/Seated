@@ -8,13 +8,7 @@ import {
   StyleSheet,
   StatusBar,
 } from "react-native";
-import {
-  Home,
-  Calendar,
-  MessageSquare,
-  Bell,
-  ChevronLeft,
-} from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 import viewEventstyles from "../styles/viewEventStyles";
 
 import { Stack, useRouter } from "expo-router";
@@ -34,7 +28,8 @@ const ViewEvent: React.FC = () => {
   };
 
   const handleEnterQueue = () => {
-    console.log("Entering queue...");
+    router.push("/Eventpage/components/queuing");
+    // console.log("Entering queue...");
   };
 
   const handleBack = () => {
@@ -72,11 +67,11 @@ const ViewEvent: React.FC = () => {
           <View style={viewEventstyles.eventCard}>
             <View style={viewEventstyles.eventContents}>
               {/* Event Image */}
-                <Image
-                  source={require("../../../../assets/images/eventImage1.jpg")}
-                  style={viewEventstyles.eventImage}
-                  resizeMode="cover"
-                />
+              <Image
+                source={require("../../../../assets/images/eventImage1.jpg")}
+                style={viewEventstyles.eventImage}
+                resizeMode="cover"
+              />
 
               {/* Event Details Section */}
               <View style={viewEventstyles.detailsContainer}>

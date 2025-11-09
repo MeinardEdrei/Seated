@@ -137,7 +137,19 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="Eventpage/components/queuing"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
         name="Eventpage/styles/viewEventStyles"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="Eventpage/styles/queuingStyles"
         options={{
           href: null,
         }}
