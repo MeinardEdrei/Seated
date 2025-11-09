@@ -123,6 +123,25 @@ export default function TabsLayout() {
           ),
         }}
       />
+      {/* Hidden Files in Homepage */}
+      <Tabs.Screen
+        name="Eventpage/styles/eventStyles"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="Eventpage/components/viewEvent"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="Eventpage/styles/viewEventStyles"
+        options={{
+          href: null,
+        }}
+      />
 
       {/* Feedback */}
       <Tabs.Screen

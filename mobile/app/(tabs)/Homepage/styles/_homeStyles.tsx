@@ -96,7 +96,7 @@ export default StyleSheet.create({
     paddingHorizontal: 35,
 
     // Drop shadow from Figma settings
-    shadowColor: "#000",
+    shadowColor: "#1C1C1C",
     shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.2, // 20% opacity
     shadowRadius: 4, // corresponds to blur 4
