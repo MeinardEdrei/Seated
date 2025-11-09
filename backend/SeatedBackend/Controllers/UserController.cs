@@ -297,7 +297,7 @@ namespace SeatedBackend.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            return Ok(new { message = "Logged out successfully." });
+            return Ok(new {success = true, message = "Logged out successfully." });
         }
 
 

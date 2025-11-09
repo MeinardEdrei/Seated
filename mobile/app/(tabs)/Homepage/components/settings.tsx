@@ -8,7 +8,6 @@ const Settings = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      console.log('User signed out');
     } catch (error) {
       console.error('Sign out failed:', error);
     }

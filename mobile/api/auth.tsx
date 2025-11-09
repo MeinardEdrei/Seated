@@ -1,5 +1,6 @@
 import axios from "axios";
 import Constants from "expo-constants";
+import { Storage } from "../utils/storage";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL + "/api";
 
@@ -97,7 +98,15 @@ export const signUpOtp = async (
 
 export const signOutBackend = async () => {
   try {
-    const { data } = await axios.post(`${API_URL}/User/sign-out`);
+    const accessToken = await Storage.getItem("accessToken");
+    if (!accessToken) {
+      throw new Error("No access token found for sign out.");
+    }
+
+    const { data } = await axios.post(`${API_URL}/User/logout`, {}, {headers: {
+      Authorization: `Bearer ${accessToken}`,
+    }});
+
     console.log("Signed out from backend successfully");
     return data;
   } catch (error) {
