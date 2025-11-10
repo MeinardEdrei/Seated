@@ -6,7 +6,7 @@ export default function TabsLayout() {
   return (
     // <View
     //   style={{
-    //     backgroundColor: '#000000',
+    //     backgroundColor: '#ffffffff',
     //     display: "flex",
     //     justifyContent: "center",
     //     alignItems: "center",
@@ -21,7 +21,7 @@ export default function TabsLayout() {
         tabBarStyle: {
           position: "absolute",
           bottom: 20,
-          alignSelf: "center",
+          // alignSelf: "center",
           width: "90%",
           backgroundColor: "#ffffffff",
           borderRadius: 30,
@@ -143,6 +143,12 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="Eventpage/components/CancelQueueModal"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
         name="Eventpage/styles/viewEventStyles"
         options={{
           href: null,
@@ -150,6 +156,12 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="Eventpage/styles/queuingStyles"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="Eventpage/styles/CancelQueueModalStyles"
         options={{
           href: null,
         }}
@@ -185,6 +197,7 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    // </View>
   );
 }
 

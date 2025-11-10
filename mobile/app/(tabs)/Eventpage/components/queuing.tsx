@@ -13,6 +13,7 @@ import { ChevronLeft, X } from "lucide-react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { Stack, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import CancelQueueModal from "../components/CancelQueueModal"; // Import the modal
 
 const Queuing = () => {
   const router = useRouter();
@@ -20,6 +21,9 @@ const Queuing = () => {
   // ⏱️ Timer states
   const [timeLeft, setTimeLeft] = useState(120); // 2 minutes = 120 seconds
   const [isRunning, setIsRunning] = useState(true);
+
+  // Modal state
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   useEffect(() => {
     let timer: ReturnType<typeof setInterval>;
@@ -53,7 +57,17 @@ const Queuing = () => {
   };
 
   const handleCancelQueue = () => {
-    alert("Queue canceled!");
+    setShowCancelModal(true); // Show the modal instead of alert
+  };
+
+  const handleModalCancel = () => {
+    setShowCancelModal(false); // Just close the modal
+  };
+
+  const handleModalConfirm = () => {
+    setShowCancelModal(false);
+    // Add your queue cancellation logic here
+    router.back(); // or navigate to another screen
   };
 
   // Determine icon/text color based on timer
@@ -157,6 +171,13 @@ const Queuing = () => {
             </View>
           </View>
         </ScrollView>
+
+        {/* Cancel Queue Modal */}
+        <CancelQueueModal
+          visible={showCancelModal}
+          onCancel={handleModalCancel}
+          onConfirm={handleModalConfirm}
+        />
       </SafeAreaView>
     </>
   );

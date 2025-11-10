@@ -13,39 +13,50 @@ const Tab = createBottomTabNavigator();
 
 export default function AppNavigator() {
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => {
-            let iconName: any;
+    <>
+      {/* <View
+        style={{
+          backgroundColor: "#ffffffff",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      > */}
+        <NavigationContainer>
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              headerShown: false,
+              tabBarIcon: ({ color, size }) => {
+                let iconName: any;
 
-            if (route.name === "Home") {
-              iconName = "home";
-            } else if (route.name === "Event") {
-              iconName = "calendar";
-            } else if (route.name === "Feedback") {
-              iconName = "chatbubbles";
-            } else if (route.name === "Notification") {
-              iconName = "notifications";
-            }
+                if (route.name === "Home") {
+                  iconName = "home";
+                // } else if (route.name === "Event") {
+                //   iconName = "calendar";
+                } else if (route.name === "Feedback") {
+                  iconName = "chatbubbles";
+                } else if (route.name === "Notification") {
+                  iconName = "notifications";
+                }
 
-            return <Ionicons name={iconName} size={size} color={color} />;
-          },
-          tabBarActiveTintColor: "#8B2E2E",
-          tabBarInactiveTintColor: "gray",
-          tabBarStyle: {
-            backgroundColor: "#fff",
-            paddingBottom: 5,
-            height: 60,
-          },
-        })}
-      >
-        <Tab.Screen name="Home" component={Home} />
-        {/* <Tab.Screen name="Event" component={Eventpage} />
+                return <Ionicons name={iconName} size={size} color={color} />;
+              },
+              tabBarActiveTintColor: "#8B2E2E",
+              tabBarInactiveTintColor: "gray",
+              tabBarStyle: {
+                backgroundColor: "#fff",
+                paddingBottom: 5,
+                height: 60,
+              },
+            })}
+          >
+            <Tab.Screen name="Home" component={Home} />
+            {/* <Tab.Screen name="Event" component={Eventpage} />
         <Tab.Screen name="Feedback" component={Feedback} />
         <Tab.Screen name="Notification" component={Notification} /> */}
-      </Tab.Navigator>
-    </NavigationContainer>
+          </Tab.Navigator>
+        </NavigationContainer>
+      {/* </View> */}
+    </>
   );
 }
