@@ -29,6 +29,11 @@ export default StyleSheet.create({
     backgroundColor: "#941418",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    
   },
 
   // ===== Illustration Section =====
@@ -36,7 +41,6 @@ export default StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    marginBottom: 24, // ✅ removes the white gap
   },
   illustration4: {
     width: 280,

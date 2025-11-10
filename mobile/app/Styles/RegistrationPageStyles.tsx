@@ -26,7 +26,6 @@ export default StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    marginBottom: 24,
   },
   illustration: {
     flex: 1,

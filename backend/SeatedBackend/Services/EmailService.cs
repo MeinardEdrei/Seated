@@ -20,6 +20,12 @@ namespace SeatedBackend.Services
             _apiKey = config["BREVO_API_KEY"] ?? throw new ArgumentNullException("BREVO_API_KEY");
             _fromEmail = config["BREVO_FROM_EMAIL"] ?? throw new ArgumentNullException("BREVO_FROM_EMAIL");
             _fromName = config["BREVO_FROM_NAME"] ?? "University of Makati";
+            
+            // Configure Brevo client once in constructor
+            if (!Configuration.Default.ApiKey.ContainsKey("api-key"))
+            {
+                Configuration.Default.ApiKey.Add("api-key", _apiKey);
+            }
         }
 
         public async System.Threading.Tasks.Task SendEmailAsync(string toEmail, string otp)
@@ -31,8 +37,7 @@ namespace SeatedBackend.Services
             string htmlBody = await File.ReadAllTextAsync("Templates/otp-email.html");
             htmlBody = htmlBody.Replace("{{OTP}}", otp);
 
-            // Configure Brevo client
-            Configuration.Default.ApiKey.Add("api-key", _apiKey);
+            // Create API instance
             var apiInstance = new TransactionalEmailsApi();
 
             // Prepare email

@@ -1,23 +1,23 @@
 import { useState, useEffect } from "react";
-import * as Google from "expo-auth-session/providers/google";
-import * as WebBrowser from "expo-web-browser";
 import { Platform } from "react-native";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { GoogleAuthProvider, signInWithCredential, signInWithPopup } from "firebase/auth";
+import { auth } from "../services/firebase";
 import Constants from "expo-constants";
 import { useAuth } from "../context/AuthContext";
-
-WebBrowser.maybeCompleteAuthSession();
-
+import { signUpOtp, sendOtpToEmail, verifyLoginOtp, sendLoginOtp  } from "../api/auth"
 let isGoogleConfigured = false;
+
 export const configureGoogleSignIn = () => {
   if (isGoogleConfigured) return;
-
+  
   if (Platform.OS !== "web") {
     GoogleSignin.configure({
-      webClientId: Constants.expoConfig?.extra?.GOOGLE_IOS_CLIENT_ID,
+      webClientId: Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID,
       offlineAccess: false,
     });
   }
+  
   isGoogleConfigured = true;
 };
 
@@ -25,58 +25,136 @@ export function useGoogleSignIn() {
   const { signIn } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // For web only
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: Constants.expoConfig?.extra?.GOOGLE_WEB_CLIENT_ID,
-  });
-
-  useEffect(() => {
-    if (Platform.OS === "web") {
-      const handleWebResponse = async () => {
-        if (response?.type === "success") {
-          const { id_token } = response.params;
-          if (id_token) {
-            setIsSigningIn(true);
-            try {
-              await signIn(id_token);
-            } finally {
-              setIsSigningIn(false);
-            }
-          }
-        }
-      };
-      handleWebResponse();
-    }
-  }, [response, signIn]);
-
   const promptGoogleSignIn = async () => {
-    if (Platform.OS === "web") {
-      if (request) promptAsync();
-    } else {
-      try {
-        setIsSigningIn(true);
+    try {
+      setIsSigningIn(true);
+      configureGoogleSignIn();
+      
+      // For web 
+      if (Platform.OS === "web") {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        console.log("Web user signed in:", result.user.email);
+        
+        // Get Firebase ID token
+        const firebaseToken = await result.user.getIdToken();
+        console.log("Firebase ID Token (web):", firebaseToken);
+        await signIn(firebaseToken, true);
+        
+      // For native
+      } else {
         await GoogleSignin.hasPlayServices();
         const userInfo = await GoogleSignin.signIn();
-        console.log("Native Google Sign-In User Info:", userInfo);
+        console.log("Got user info from native:", userInfo);
 
-        const idToken = await GoogleSignin.getTokens().then(tokens => tokens.idToken);
-
-        console.log("Native Google Sign-In ID Token:", idToken);
+        const tokens = await GoogleSignin.getTokens();
+        const idToken = tokens.idToken;
         if (!idToken) {
-          throw new Error('Failed to obtain ID token from Google Sign-In');
+          throw new Error("No ID token returned");
         }
-        await signIn(idToken);
-      } catch (error) {
-        console.error("Native Google Sign-In Error:", error);
-      } finally {
-        setIsSigningIn(false);
+
+        const credential = GoogleAuthProvider.credential(idToken);
+        const result = await signInWithCredential(auth, credential);
+        console.log("Native user signed in:", result.user.email);
+        
+        // Get Firebase ID token
+        const firebaseToken = await result.user.getIdToken();
+        console.log("Firebase ID Token (native):", firebaseToken);
+        await signIn(firebaseToken, true);
       }
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+    } finally {
+      setIsSigningIn(false);
     }
   };
 
   return {
     promptGoogleSignIn,
     isSigningIn,
-    isDisabled: Platform.OS === "web" && !request,
+    isDisabled: false,
+  };
+}
+
+// handle email sign up here 
+
+export function useEmailSignUp() {
+  const { signIn } = useAuth(); 
+  const [isSigningUp, setIsSigningUp] = useState(false);
+
+  const sendOtp = async (email: string) => {
+    try {
+      setIsSigningUp(true);
+      const response = await sendOtpToEmail(email);
+      console.log("OTP sent response:", response);
+      return response.success;
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      return false;
+    } finally {
+      setIsSigningUp(false);
+    }
+  };
+
+
+  const verifyOtpAndSignUp = async (email: string, otp: string) => {
+    try {
+      setIsSigningUp(true);
+      const response = await signUpOtp(email, otp); 
+      console.log("Sign up OTP verification response:", response);
+      await signIn(email, false);
+      return response.success;
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      return false;
+    } finally {
+      setIsSigningUp(false);
+    }
+  }
+
+  return {
+    sendOtp,
+    verifyOtpAndSignUp,
+    isSigningUp,
+  };
+}
+
+export function useEmailLogin() {
+  const { signIn } = useAuth();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const sendLoginOtpCode = async (email: string) => {
+    try {
+      setIsLoggingIn(true);
+      const response = await sendLoginOtp(email);
+      return response.success;
+    } catch (error) {
+      console.error("Error sending login OTP:", error);
+      return false;
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const verifyAndLogin = async (email: string, otp: string) => {
+    try {
+      setIsLoggingIn(true);
+      const response = await verifyLoginOtp(email, otp);
+      
+      const result = await signIn(email, false);
+      
+      return result; 
+    } catch (error) {
+      console.error("Error verifying login OTP:", error);
+      return { success: false };
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  return {
+    sendLoginOtpCode,
+    verifyAndLogin,
+    isLoggingIn,
   };
 }

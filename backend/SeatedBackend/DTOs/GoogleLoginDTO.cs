@@ -2,7 +2,7 @@
 
 namespace SeatedBackend.DTOs
 {
-    public class GoogleLoginDTO
+    public class GoogleLoginDto
     {
         public string IdToken { get; set; } = string.Empty;
     }

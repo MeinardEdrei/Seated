@@ -12,7 +12,7 @@ export default ({ config }) => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: "com.softendseated.mobile",
-    googleServicesFile: "./GoogleService-Info.plist",
+    googleServicesFile: process.env.GOOGLE_SERVICE_INFO_PLIST,
   },
   android: {
     adaptiveIcon: {
@@ -24,8 +24,7 @@ export default ({ config }) => ({
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: "com.softendseated.seated",
-    googleServicesFile: "./google-services.json",
-
+    googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
   },
   web: {
     output: "static",

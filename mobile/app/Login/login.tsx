@@ -12,29 +12,46 @@ import {
 import { Mail } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
-import * as WebBrowser from 'expo-web-browser';
+import * as WebBrowser from "expo-web-browser";
 import styles from "../Styles/loginStyles";
 import InvalidEmailModal from "./InvalidEmailModal";
-import {useGoogleSignIn} from "../../auth/authService"
+import { useGoogleSignIn, useEmailLogin } from "../../auth/authService";
+import { useAuth } from "../../context/AuthContext";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [showInvalidEmailModal, setShowInvalidEmailModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
-  const { promptGoogleSignIn, isSigningIn, isDisabled } = useGoogleSignIn(); 
+  const { promptGoogleSignIn, isSigningIn, isDisabled } = useGoogleSignIn();
+  const { sendLoginOtpCode } = useEmailLogin(); 
 
+  const handleEmailSignIn = async () => {
+    setErrorMessage("");
 
-  const handleEmailSignIn = () => {
     if (!email.trim()) {
       setShowInvalidEmailModal(true);
       return;
     }
-    // TODO: Implement email/password sign in
-    // This will also need to call a backend endpoint
-    // and use the `signIn` function from AuthContext
-    console.warn("Email sign in not implemented");
+
+    try {
+      const result = await sendLoginOtpCode(email.trim());
+
+      if (!result) {
+        setErrorMessage("Email not registered. Please sign up first.");
+        return;
+      }
+      router.push({
+        pathname: "/Registration/otpVerification",
+        params: { email: email.trim(), isSignUp: "false" },
+      });
+
+    } catch (error) {
+      console.error("Email Sign-In Error:", error);
+      setErrorMessage("Email not registered. Please sign up first.");
+    }
   };
 
   const handleSignUp = () => {
@@ -78,10 +95,7 @@ export default function Login() {
             </View>
 
             {/* Main Content Card */}
-            <SafeAreaView
-              edges={["bottom"]}
-              style={styles.redContainer}
-            >
+            <SafeAreaView edges={["bottom"]} style={styles.redContainer}>
               <View style={styles.signInSection}>
                 <View style={styles.textContainer}>
                   <Text style={styles.title}>Get started with us</Text>
@@ -104,7 +118,7 @@ export default function Login() {
                       style={styles.googleIcon}
                     />
                     <Text style={styles.googleButtonText}>
-                      {isLoading ? "Signing in..." : "Sign up with Google"}
+                      {isSigningIn ? "Signing in..." : "Continue with Google"}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -126,7 +140,10 @@ export default function Login() {
                       placeholder="Enter your email address"
                       placeholderTextColor="rgba(82, 82, 82, 0.7)"
                       value={email}
-                      onChangeText={setEmail}
+                      onChangeText={(text) => {
+                        setEmail(text);
+                        setErrorMessage(""); // Clear error when typing
+                      }}
                       keyboardType="email-address"
                       autoCapitalize="none"
                       autoCorrect={false}
