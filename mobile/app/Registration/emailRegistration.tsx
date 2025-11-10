@@ -14,17 +14,20 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import { ChevronLeft, Mail } from "lucide-react-native";
 import styles from "../Styles/emailRegistrationStyles";
+import { useEmailSignUp } from "@/auth/authService";
 
 export default function EmailRegistration() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-
+  const { sendOtp, isSigningUp } = useEmailSignUp();
   const validateEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleSendOTP = async () => {
+
+
     setError("");
 
     if (!email.trim()) {
@@ -40,22 +43,16 @@ export default function EmailRegistration() {
     setLoading(true);
 
     try {
-      // Simulate API check (replace with real API call later)
-      setTimeout(() => {
-        setLoading(false);
-
-        // ✅ Example of detecting an existing account (replace with real check)
-        if (email.toLowerCase() === "accountexisting@gmail.com") {
-          setError(
-            "*An account with this email already exists. Please sign in instead."
-          );
-          return;
-        }
-
-        // Otherwise, success
-        console.log("OTP sent to:", email);
-        router.push("/Registration/otpVerification");
-      }, 1500);
+      const success = await sendOtp(email.trim());
+      setLoading(false);
+      if (success) {
+        router.push({
+          pathname: "/Registration/otpVerification",
+          params: { email: email.trim(), isSignUp: "true" },
+        });
+      } else {
+        setError("Failed to send OTP. Please try again.");
+      }
     } catch (error) {
       setLoading(false);
       setError("Failed to send OTP. Please try again.");

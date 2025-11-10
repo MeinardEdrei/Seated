@@ -3,41 +3,12 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import styles from "../Styles/RegistrationPageStyles";
-import { useEffect, useState } from "react";
-import { auth } from "../../services/firebase";
-import { User } from "firebase/auth";
-import { signInWithGoogle } from "../../auth/authService";
-
+import { useGoogleSignIn } from "../../auth/authService";
 
 export default function Registration() {
   const router = useRouter();
-  const [isSigningUp, setIsSigningUp] = useState(false);
+  const { promptGoogleSignIn, isSigningIn, isDisabled } = useGoogleSignIn();
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user: User | null) => {
-      if (user && !isSigningUp) {
-        router.push("/(tabs)/Homepage/home");
-      }
-    });
-
-    return () => unsubscribe();
-  }, [isSigningUp]);
-
-  const handleGoogleSignUp = async () => {
-    console.log("Google sign-up button pressed!");
-    try {
-      setIsSigningUp(true);
-      const result = await signInWithGoogle();
-      const user = result.user;
-
-      const idToken = await user.getIdToken();
-      console.log("Google Sign-Up Successful. ID Token:", idToken);
-      setIsSigningUp(false);
-    } catch (error) {
-      console.error("Google Sign-Up Error:", error);
-      setIsSigningUp(false);
-    }
-  };
 
   const handleEmailSignUp = () => {
     router.push("/Registration/emailRegistration");
@@ -90,7 +61,8 @@ export default function Registration() {
                   <View style={styles.googleButtonContainer}>
                     <TouchableOpacity
                       style={styles.googleButton}
-                      onPress={handleGoogleSignUp}
+                      onPress={promptGoogleSignIn}
+                      disabled={isDisabled || isSigningIn}
                     >
                       <Image
                         source={require("../../assets/images/google.png")}

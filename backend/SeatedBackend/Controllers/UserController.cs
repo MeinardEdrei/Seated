@@ -7,6 +7,8 @@ using SeatedBackend.Services;
 using SeatedBackend.DTOs;
 using SeatedBackend.Models;
 using SeatedBackend.Data;
+using FirebaseAdmin.Auth;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace SeatedBackend.Controllers
 {
@@ -18,18 +20,21 @@ namespace SeatedBackend.Controllers
         private readonly EmailService _emailService;
         private readonly ITokenService _tokenService;
         private readonly IUserService _userService;
+        private readonly IDistributedCache _cache; 
 
         public UserController(ApplicationDbContext context, EmailService emailService,
-                ITokenService tokenService, IUserService userService)
+                ITokenService tokenService, IUserService userService, IDistributedCache cache)
         {
             _context = context;
             _emailService = emailService;
             _tokenService = tokenService;
             _userService = userService;
+            _cache = cache;
+
         }
 
         [AllowAnonymous]
-        [HttpPost("send-otp")]
+        [HttpPost("send-signup-otp")]
         public async Task<IActionResult> SendOtp([FromBody] SendOtpDto dto)
         {
             // Restriction
@@ -43,58 +48,56 @@ namespace SeatedBackend.Controllers
             // Otp
             var otp = new Random().Next(100000, 999999).ToString();
 
-            var user = new User
+            await _cache.SetStringAsync($"OTP_{dto.Email}", otp, new DistributedCacheEntryOptions
             {
-                Email = dto.Email,
-                Role = UserRole.Guest,
-                IsVerified = false,
-                OtpCode = otp,
-                OtpExpiresAt = System.DateTime.UtcNow.AddMinutes(5)
-            };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
 
             Console.WriteLine($"OTP for {dto.Email}: {otp}");
             Console.WriteLine($"User Role for {dto.Email}: " + _userService.DetectUserRole(dto.Email));
 
             await _emailService.SendEmailAsync(dto.Email, otp);
 
-            return Ok(new { message = "OTP sent to email" });
+            return Ok(new {success = true, message = "OTP sent to email" });
         }
 
         [AllowAnonymous]
         [HttpPost("sign-up")]
         public async Task<IActionResult> Register([FromBody] VerifyOtpDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-            if (user == null)
-                return NotFound(new { message = "User not found." });
+            var cachedOtp = await _cache.GetStringAsync($"OTP_{dto.Email}");
 
-            if (user.OtpCode != dto.OtpCode)
+            // Check if OTP exists first
+            if (cachedOtp == null)
+                return BadRequest(new { message = "OTP code expired or not found. Please request a new one." });
+
+            // Then check if it matches
+            if (cachedOtp != dto.OtpCode)
                 return BadRequest(new { message = "Invalid OTP code." });
 
-            if (user.OtpExpiresAt < DateTime.UtcNow)
-                return BadRequest(new { message = "OTP expired." });
+            var user = new User
+            {
+                Email = dto.Email,
+                Role = _userService.DetectUserRole(dto.Email),
+                IsVerified = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
 
-            var role = _userService.DetectUserRole(dto.Email);
-            user.Role = role;
-
-            user.IsVerified = true;
-            user.OtpCode = null;
-            user.OtpExpiresAt = null;
-            user.UpdatedAt = System.DateTime.UtcNow;
-
+            };
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            await _cache.RemoveAsync($"OTP_{dto.Email}");
             return Ok(new
             {
+                success = true,
                 message = "Account created successfully!",
-                role = role.ToString()
+                role = user.Role.ToString()
             });
         }
 
         [AllowAnonymous]
-        [HttpPost("login")]
+        [HttpPost("email-login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email &&
@@ -152,56 +155,106 @@ namespace SeatedBackend.Controllers
         }
         
 
-        [AllowAnonymous] 
         [HttpPost("google-login")]
-        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO dto)
+        [AllowAnonymous] 
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.IdToken))
                 return BadRequest(new { message = "IdToken is required." });
 
-            // Validate with Firebase
-            FirebaseAdmin.Auth.FirebaseToken decodedToken;
+            Console.WriteLine($"[GoogleLogin] Received IdToken (first 50 chars): {dto.IdToken.Substring(0, Math.Min(50, dto.IdToken.Length))}...");
+
             try 
             {
-                decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance
-                    .VerifyIdTokenAsync(dto.IdToken);
+                // Verify Firebase token
+                Console.WriteLine("[GoogleLogin] Starting token verification...");
+                FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(dto.IdToken);
+                Console.WriteLine("[GoogleLogin] Token verified successfully");
+                
+                string email = decodedToken.Claims.ContainsKey("email") 
+                    ? decodedToken.Claims["email"].ToString() ?? string.Empty 
+                    : string.Empty;
+                
+                Console.WriteLine($"[GoogleLogin] Email from token: {email}");
+
+                if (string.IsNullOrWhiteSpace(email))
+                    return BadRequest(new { message = "Email not found in token." });
+
+                // Find user by email 
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                
+                if (user == null)
+                {
+                    Console.WriteLine($"[GoogleLogin] Creating new user for: {email}");
+                    // Create new user with Google
+                    var role = _userService.DetectUserRole(email);
+                    user = new User
+                    {
+                        Email = email,
+                        GoogleId = decodedToken.Uid,
+                        Role = role,
+                        IsVerified = true,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+                    _context.Users.Add(user);
+                }
+                else
+                {
+                    Console.WriteLine($"[GoogleLogin] Existing user found: {email}");
+                    
+                    // If user exists but has no GoogleId, link it
+                    if (string.IsNullOrWhiteSpace(user.GoogleId))
+                    {
+                        Console.WriteLine($"[GoogleLogin] Linking Google account to existing email user: {email}");
+                        user.GoogleId = decodedToken.Uid;
+                        user.IsVerified = true; 
+                        user.UpdatedAt = DateTime.UtcNow;
+                        // Send notification email here if needed.... to be implemented
+                    }
+                    else if (user.GoogleId != decodedToken.Uid)
+                    {
+                        // Google ID mismatch 
+                        Console.WriteLine($"[GoogleLogin] WARNING: Google ID mismatch for {email}");
+                        return BadRequest(new { message = "This email is associated with a different Google account." });
+                    }
+                }
+
+                // Generate JWT tokens
+                var accessToken = _tokenService.GenerateToken(user);
+                var refreshToken = _tokenService.GenerateRefreshToken();
+
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(7);
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"[GoogleLogin] Login successful for: {email}");
+
+                return Ok(new 
+                { 
+                    message = "Login successful",
+                    accessToken,
+                    refreshToken,
+                    user = new 
+                    {
+                        id = user.UserId,
+                        email = user.Email,
+                        role = user.Role.ToString()
+                    }
+                });
             }
-            catch (Exception)
+            catch (FirebaseAuthException ex)
             {
-                return Unauthorized(new { message = "Invalid ID token." });
+                Console.WriteLine($"[GoogleLogin] Firebase auth error: {ex.Message}");
+                Console.WriteLine($"[GoogleLogin] Error code: {ex.ErrorCode}");
+                return Unauthorized(new { message = "Invalid Firebase token", error = ex.Message, errorCode = ex.ErrorCode });
             }
-
-            var googleUid = decodedToken.Uid;
-            var email = decodedToken.Claims.TryGetValue("email", out var emailClaim) 
-    ? emailClaim as string 
-    : null;
-
-            if (string.IsNullOrWhiteSpace(email))
-    return BadRequest(new { message = "Email not found in Firebase token." });
-
-            // Find or create user
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleUid);
-            if (user == null)
+            catch (Exception ex)
             {
-                var role = _userService.DetectUserRole(email);
-                user = await _userService.CreateGoogleUserAsync(email, googleUid, role);
+                Console.WriteLine($"[GoogleLogin] Unexpected error: {ex.Message}");
+                Console.WriteLine($"[GoogleLogin] Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
             }
-
-            // Issue YOUR tokens
-            var accessToken = _tokenService.GenerateToken(user);
-            var refreshToken = _tokenService.GenerateRefreshToken();
-
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(60);
-            user.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                accessToken,
-                refreshToken,
-                user = new { id = user.UserId, email = user.Email, role = user.Role.ToString() }
-            });
         }
           
           
@@ -251,11 +304,79 @@ namespace SeatedBackend.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            return Ok(new { message = "Logged out successfully." });
+            return Ok(new {success = true, message = "Logged out successfully." });
         }
 
+        [AllowAnonymous]
+        [HttpPost("send-login-otp")]
+        public async Task<IActionResult> SendLoginOtp([FromBody] SendOtpDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                return BadRequest(new { message = "Email is required." });
 
+            // Check if user EXISTS 
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            if (existingUser == null)
+                return Unauthorized(new { message = "Email not registered" });
 
+            // Generate OTP
+            var otp = new Random().Next(100000, 999999).ToString();
+
+            await _cache.SetStringAsync($"LOGIN_OTP_{dto.Email}", otp, new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+
+            Console.WriteLine($"Login OTP for {dto.Email}: {otp}");
+
+            await _emailService.SendEmailAsync(dto.Email, otp);
+
+            return Ok(new { success = true, message = "Login OTP sent to email" });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("verify-login-otp")]
+        public async Task<IActionResult> VerifyLoginOtp([FromBody] VerifyOtpDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.OtpCode))
+                return BadRequest(new { message = "Email and OTP are required." });
+
+            // Verify OTP
+            var cachedOtp = await _cache.GetStringAsync($"LOGIN_OTP_{dto.Email}");
+            if (cachedOtp == null)
+                return BadRequest(new { message = "OTP expired or not found." });
+
+            if (cachedOtp != dto.OtpCode)
+                return BadRequest(new { message = "Invalid OTP." });
+
+            // Get existing user
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            if (user == null)
+                return Unauthorized(new { message = "User not found" });
+
+            // Generate tokens
+            var accessToken = _tokenService.GenerateToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(7);
+            await _context.SaveChangesAsync();
+
+            // Delete OTP after successful login
+            await _cache.RemoveAsync($"LOGIN_OTP_{dto.Email}");
+
+            return Ok(new
+            {
+                accessToken,
+                refreshToken,
+                user = new
+                {
+                    id = user.UserId,
+                    email = user.Email,
+                    role = user.Role
+                }
+            });
+        }
     }
 }
 

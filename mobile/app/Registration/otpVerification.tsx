@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Image,
   KeyboardAvoidingView,
   ScrollView,
@@ -15,6 +14,8 @@ import {
 import { ChevronLeft } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
+import { useEmailSignUp, useEmailLogin } from "@/auth/authService"; 
+import { useGlobalSearchParams } from "expo-router";
 
 export default function OTPVerification() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -22,6 +23,13 @@ export default function OTPVerification() {
   const [canResend, setCanResend] = useState(false);
   const inputRefs = useRef<Array<TextInput | null>>([]);
   const router = useRouter();
+
+  const params = useGlobalSearchParams();
+  const email = params.email as string;
+  const isSignUp = params.isSignUp === "true"; 
+
+  const { verifyOtpAndSignUp, sendOtp: sendSignUpOtp } = useEmailSignUp();
+  const { verifyAndLogin, sendLoginOtpCode } = useEmailLogin();
 
   const handleBack = () => router.back();
 
@@ -43,7 +51,6 @@ export default function OTPVerification() {
     newOtp[index] = text;
     setOtp(newOtp);
 
-    // Auto-focus next input
     if (text && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -51,34 +58,70 @@ export default function OTPVerification() {
 
   const handleKeyPress = (
     e: { nativeEvent: { key: string } },
-    index: number
+    index: number,
   ) => {
     if (e.nativeEvent.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (canResend) {
       setTimer(60);
       setCanResend(false);
       setOtp(["", "", "", "", "", ""]);
-      Alert.alert("Success", "OTP has been resent to your email address");
-      inputRefs.current[0]?.focus();
+      
+      try {
+        if (isSignUp) {
+          await sendSignUpOtp(email);
+        } else {
+          await sendLoginOtpCode(email);
+        }
+        Alert.alert("Success", "OTP has been resent to your email.");
+        inputRefs.current[0]?.focus();
+      } catch (error) {
+        console.error("Resend OTP Error:", error);
+        Alert.alert("Error", "Failed to resend OTP. Please try again.");
+      }
     }
   };
 
-  const handleSignUp = () => {
+  const handleVerify = async () => {
     const otpCode = otp.join("");
     if (otpCode.length !== 6) {
       Alert.alert("Error", "Please enter the complete OTP code");
       return;
     }
-    Alert.alert("Success", `OTP Verified: ${otpCode}`);
-    // Add your verification logic here
+
+    console.log(
+      `Verifying OTP for ${isSignUp ? "signup" : "login"}:`,
+      email,
+      "OTP Code:",
+      otpCode
+    );
+
+    try {
+      if (isSignUp) {
+        const success = await verifyOtpAndSignUp(email, otpCode);
+        if (success) {
+          Alert.alert("Success", "Account created successfully!");
+        } else {
+          Alert.alert("Error", "OTP verification failed. Please try again.");
+        }
+      } else {
+        const result = await verifyAndLogin(email, otpCode);
+        if (result.success) {
+          Alert.alert("Success", "Logged in successfully!");
+        } else {
+          Alert.alert("Error", "Invalid OTP. Please try again.");
+        }
+      }
+    } catch (error) {
+      console.error("OTP Verification Error:", error);
+      Alert.alert("Error", "Verification failed. Please try again.");
+    }
   };
 
-  // Disable button if input is blank or loading
   const isButtonDisabled = otp.some((digit) => digit === "");
 
   return (
@@ -166,17 +209,18 @@ export default function OTPVerification() {
                 </View>
               </View>
 
-              {/* Sign Up Button */}
               <View style={styles.bottomButtonContainer}>
                 <TouchableOpacity
                   style={[
                     styles.signUpButton,
                     isButtonDisabled && styles.buttonDisabled,
                   ]}
-                  onPress={handleSignUp}
+                  onPress={handleVerify}
                   disabled={isButtonDisabled}
                 >
-                  <Text style={styles.signUpButtonText}>Sign Up</Text>
+                  <Text style={styles.signUpButtonText}>
+                    {isSignUp ? "Sign Up" : "Sign In"}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>

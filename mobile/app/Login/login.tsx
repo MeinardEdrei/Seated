@@ -5,78 +5,59 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
+  Platform,
   ScrollView,
   KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { Mail } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
-import { auth } from "../../services/firebase";
-import { User } from "firebase/auth";
-import { getFirebaseIdToken, signInWithGoogle } from "../../auth/authService";
-
+import * as WebBrowser from "expo-web-browser";
 import styles from "../Styles/loginStyles";
 import InvalidEmailModal from "./InvalidEmailModal";
+import { useGoogleSignIn, useEmailLogin } from "../../auth/authService";
+import { useAuth } from "../../context/AuthContext";
 
-import { googleLogin } from "../../api/auth";
+WebBrowser.maybeCompleteAuthSession();
 
-export default function login() {
+export default function Login() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showInvalidEmailModal, setShowInvalidEmailModal] = useState(false);
-  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
+  const { promptGoogleSignIn, isSigningIn, isDisabled } = useGoogleSignIn();
+  const { sendLoginOtpCode } = useEmailLogin(); 
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user: User | null) => {
-      if (user && !isSigningIn) {
-        router.replace("/(tabs)/Homepage/home");
-      }
-    });
+  const handleEmailSignIn = async () => {
+    setErrorMessage("");
 
-    return () => unsubscribe();
-  }, [isSigningIn]);
-
-  const handleGoogleSignIn = async () => {
-    console.log("Google sign-in button pressed!");
-    try {
-      setIsSigningIn(true);
-      const result = await signInWithGoogle();
-      const idToken = await getFirebaseIdToken();
-      if (!idToken) {
-        throw new Error("Failed to get Firebase ID token");
-      } 
-
-      const backendResponse = await googleLogin(idToken);
-      console.log("Backend response:", backendResponse);
-      // Navigation will be handled by onAuthStateChanged
-      setIsSigningIn(false);
-    } catch (error) {
-      console.error("Google sign-in error:", error);
-      setIsSigningIn(false);
+    if (!email.trim()) {
+      setShowInvalidEmailModal(true);
+      return;
     }
-  };
 
-const handleEmailSignIn = () => {
-  if (!email.trim()) {
-    setShowInvalidEmailModal(true);
-    return;
-  }
+    try {
+      const result = await sendLoginOtpCode(email.trim());
 
-  router.push("/(tabs)/home");
-};
+      if (!result) {
+        setErrorMessage("Email not registered. Please sign up first.");
+        return;
+      }
+      router.push({
+        pathname: "/Registration/otpVerification",
+        params: { email: email.trim(), isSignUp: "false" },
+      });
 
-  const checkEmailExists = async (email: string): Promise<boolean> => {
-    return false; 
+    } catch (error) {
+      console.error("Email Sign-In Error:", error);
+      setErrorMessage("Email not registered. Please sign up first.");
+    }
   };
 
   const handleSignUp = () => {
     router.push("/Registration/registration");
     console.log("Navigate to sign up");
   };
-
 
   const closeModal = () => {
     setShowInvalidEmailModal(false);
@@ -114,10 +95,7 @@ const handleEmailSignIn = () => {
             </View>
 
             {/* Main Content Card */}
-            <SafeAreaView
-              edges={["bottom"]}
-              style={styles.redContainer}
-            >
+            <SafeAreaView edges={["bottom"]} style={styles.redContainer}>
               <View style={styles.signInSection}>
                 <View style={styles.textContainer}>
                   <Text style={styles.title}>Get started with us</Text>
@@ -131,15 +109,16 @@ const handleEmailSignIn = () => {
                 <View style={styles.googleButtonContainer}>
                   <TouchableOpacity
                     style={styles.googleButton}
-                    onPress={handleGoogleSignIn}
+                    onPress={promptGoogleSignIn}
                     activeOpacity={0.8}
+                    disabled={isSigningIn || isDisabled} // Disable while loading
                   >
                     <Image
                       source={require("../../assets/images/google.png")}
                       style={styles.googleIcon}
                     />
                     <Text style={styles.googleButtonText}>
-                      Sign up with Google
+                      {isSigningIn ? "Signing in..." : "Continue with Google"}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -161,7 +140,10 @@ const handleEmailSignIn = () => {
                       placeholder="Enter your email address"
                       placeholderTextColor="rgba(82, 82, 82, 0.7)"
                       value={email}
-                      onChangeText={setEmail}
+                      onChangeText={(text) => {
+                        setEmail(text);
+                        setErrorMessage(""); // Clear error when typing
+                      }}
                       keyboardType="email-address"
                       autoCapitalize="none"
                       autoCorrect={false}
