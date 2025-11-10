@@ -334,10 +334,11 @@ const confirmCancelReservation = () => {
             />
           </View>
           <TouchableOpacity onPress={handleSettings}>
-            <Settings size={32} strokeWidth={2} color="#941418" />
+            <Settings size={24} strokeWidth={2} color="#941418" />
             {/* <Menu color="#941418" /> */}
           </TouchableOpacity>
         </View>
+
         {/* Conditional Content Rendering */}
         {hasEvent ? <EventState /> : <EmptyState />}
         {/* Event Details Modal */}
