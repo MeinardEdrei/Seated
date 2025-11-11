@@ -99,3 +99,6 @@ appsettings.Development.json
 secrets.json
 .env
 .env.local
+mobile/package-lock.json
+mobile/package-lock.json
+mobile/package-lock.json
