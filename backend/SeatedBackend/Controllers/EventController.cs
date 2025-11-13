@@ -4,6 +4,7 @@ using SeatedBackend.Services;
 using SeatedBackend.DTOs;
 using SeatedBackend.Models;
 using SeatedBackend.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SeatedBackend.Controllers
 {
@@ -20,6 +21,7 @@ namespace SeatedBackend.Controllers
             _cloudinaryService = cloudinaryService;
         }
 
+        [Authorize]
         [HttpPost("upload-image")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadImage([FromForm] ImageUploadDto dto)
@@ -34,6 +36,7 @@ namespace SeatedBackend.Controllers
             return Ok(new { imageUrl });
         }
 
+        [Authorize]
         [HttpPost("create-event")]
         public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto dto)
         {
@@ -61,16 +64,39 @@ namespace SeatedBackend.Controllers
             _context.Events.Add(newEvent);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Event created successfully" });
+            return Ok(new { message = "Event created successfully", data = newEvent });
+        }
+        
+        [Authorize]
+        [HttpPatch("update-event/{eventId}")]
+        public async Task<IActionResult> UpdateEvent(int eventId, [FromBody] UpdateEventDto dto)
+        {
+            var existingEvent = await _context.Events.FindAsync(eventId);
+            if (existingEvent == null)
+                return NotFound(new { message = "Event not found." });
+
+            if (dto.OrganizerId.HasValue)
+                existingEvent.OrganizerId = dto.OrganizerId.Value;
+            if (dto.VenueId.HasValue)
+                existingEvent.VenueId = dto.VenueId.Value;
+            if (!string.IsNullOrEmpty(dto.EventName))
+                existingEvent.EventName = dto.EventName;
+            if (!string.IsNullOrEmpty(dto.Description))
+                existingEvent.Description = dto.Description;
+            if (dto.EventDate.HasValue)
+                existingEvent.EventDate = dto.EventDate.Value;
+            if (dto.StartTime.HasValue)
+                existingEvent.StartTime = dto.StartTime.Value;
+            if (dto.EndTime.HasValue)
+                existingEvent.EndTime = dto.EndTime.Value;
+            if (!string.IsNullOrEmpty(dto.ImageUrl))
+                existingEvent.ImageUrl = dto.ImageUrl;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Event updated successfully.", data = existingEvent });
+
         }
 
-        // public async Task<IActionResult> ModifyEvent()
-        // { }
-        //
-        // public async Task<IActionResult> DeleteEvent()
-        // { }
-        //
-        // public async Task<IActionResult> ArchiveEvent()
-        // { }
     }
 }
