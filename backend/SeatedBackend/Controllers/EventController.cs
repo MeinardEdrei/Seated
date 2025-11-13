@@ -5,6 +5,7 @@ using SeatedBackend.DTOs;
 using SeatedBackend.Models;
 using SeatedBackend.Data;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace SeatedBackend.Controllers
 {
@@ -130,6 +131,17 @@ namespace SeatedBackend.Controllers
         }
 
 
+        [Authorize(Roles="organizer")]
+        [HttpGet("get-events-by-organizer")]
+        public async Task<IActionResult> GetEventsByOrganizer()
+        {
+          var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+          var events = await _context.Events.Where(e => e.OrganizerId == userId).ToListAsync();
+          return Ok(new { data = events });
+        }
+
+        // Add Archive Event Endpoint
+        
 
     }
 }
