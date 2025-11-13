@@ -110,7 +110,26 @@ namespace SeatedBackend.Controllers
             return Ok(new { message = "Event deleted successfully." });
         }
 
-        // Additional endpoints like GetEvents, GetEventById can be added here
+
+        [Authorize(Roles = "staff;office_head")]
+        [HttpGet("get-all-events")]
+        public async Task<IActionResult> GetAllEvents() 
+        {
+            var events = await _context.Events.ToListAsync();
+            return Ok(new { data = events });
+        }
+
+        [Authorize]
+        [HttpGet("get-event/{eventId}")]
+        public async Task<IActionResult> GetEventById(int eventId)
+        {
+            var existingEvent = await _context.Events.FindAsync(eventId);
+            if (existingEvent == null)
+                return NotFound(new { message = "Event not found." });
+            return Ok(new {message = "Success!", data = existingEvent });
+        }
+
+
 
     }
 }

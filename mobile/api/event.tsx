@@ -91,3 +91,48 @@ export const deleteEvent = async (eventId: string): Promise<{ message: string }>
     throw new Error("Event deletion failed.");
   }
 };
+
+
+export const getEventDetails = async (eventId: string): Promise<EventResponse> => {
+  const token = await Storage.getItem("accessToken");
+  if (!token) {
+    throw new Error("No access token found. User might not be authenticated.");
+  }
+  try {
+    const { data } = await axios.get<EventResponse>(
+      `${API_URL}/Event/event-details/${eventId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    console.log("Fetched event details successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("Error fetching event details:", error);
+    throw new Error("Fetching event details failed.");
+  }
+};
+
+export const listEvents = async (): Promise<EventResponse[]> => {
+  const token = await Storage.getItem("accessToken");
+  if (!token) {
+    throw new Error("No access token found. User might not be authenticated.");
+  }
+  try {
+    const { data } = await axios.get<EventResponse[]>(
+      `${API_URL}/Event/list-events`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    console.log("Fetched event list successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("Error fetching event list:", error);
+    throw new Error("Fetching event list failed.");
+  }
+};
