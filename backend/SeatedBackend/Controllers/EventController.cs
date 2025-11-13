@@ -98,5 +98,17 @@ namespace SeatedBackend.Controllers
 
         }
 
+        [Authorize]
+        [HttpDelete("delete-event/{eventId}")]
+        public async Task<IActionResult> DeleteEvent(int eventId)
+        {
+            var existingEvent = await _context.Events.FindAsync(eventId);
+            if (existingEvent == null)
+                return NotFound(new { message = "Event not found." });
+            _context.Events.Remove(existingEvent);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Event deleted successfully." });
+        }
+
     }
 }
