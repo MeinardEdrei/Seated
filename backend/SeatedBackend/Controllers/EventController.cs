@@ -36,7 +36,7 @@ namespace SeatedBackend.Controllers
             return Ok(new { imageUrl });
         }
 
-        [Authorize]
+        [Authorize(Roles = "organizer")]
         [HttpPost("create-event")]
         public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto dto)
         {
@@ -67,7 +67,7 @@ namespace SeatedBackend.Controllers
             return Ok(new { message = "Event created successfully", data = newEvent });
         }
         
-        [Authorize]
+        [Authorize(Roles = "organizer")]
         [HttpPatch("update-event/{eventId}")]
         public async Task<IActionResult> UpdateEvent(int eventId, [FromBody] UpdateEventDto dto)
         {
@@ -98,7 +98,7 @@ namespace SeatedBackend.Controllers
 
         }
 
-        [Authorize]
+        [Authorize(Roles = "organizer")]
         [HttpDelete("delete-event/{eventId}")]
         public async Task<IActionResult> DeleteEvent(int eventId)
         {
@@ -109,6 +109,8 @@ namespace SeatedBackend.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { message = "Event deleted successfully." });
         }
+
+        // Additional endpoints like GetEvents, GetEventById can be added here
 
     }
 }
