@@ -137,7 +137,15 @@ namespace SeatedBackend.Controllers
         [HttpGet("get-events-by-organizer")]
         public async Task<IActionResult> GetEventsByOrganizer()
         {
-          var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+          var nameIdentifiedClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+          if (nameIdentifiedClaim == null)
+          {
+              return Unauthorized(new { message = "User identifier not found." });
+          }
+
+          var userId = int.Parse(nameIdentifiedClaim.Value);
+
           var events = await _context.Events.Where(e => e.OrganizerId == userId).ToListAsync();
           return Ok(new { data = events });
         }
