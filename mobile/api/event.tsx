@@ -100,7 +100,7 @@ export const getEventDetails = async (eventId: string): Promise<EventResponse> =
   }
   try {
     const { data } = await axios.get<EventResponse>(
-      `${API_URL}/Event/event-details/${eventId}`,
+      `${API_URL}/Event/get-event/${eventId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

@@ -80,8 +80,6 @@ namespace SeatedBackend.Controllers
             if (existingEvent == null)
                 return NotFound(new { message = "Event not found." });
 
-            if (dto.OrganizerId.HasValue)
-                existingEvent.OrganizerId = dto.OrganizerId.Value;
             if (dto.VenueId.HasValue)
                 existingEvent.VenueId = dto.VenueId.Value;
             if (!string.IsNullOrEmpty(dto.EventName))
