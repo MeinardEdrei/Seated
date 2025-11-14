@@ -4,9 +4,6 @@ using System.ComponentModel.DataAnnotations;
 public class CreateEventDto
 {
     [Required]
-    public required int OrganizerId { get; set; }
-
-    [Required]
     public required int VenueId { get; set; }
 
     [Required]
@@ -27,4 +24,14 @@ public class CreateEventDto
 
     [Required]
     public required string ImageUrl { get; set; }
+}
+
+public class UpdateEventDto {
+    public int? VenueId { get; set; }
+    public string? EventName { get; set; }
+    public string? Description { get; set; }
+    public DateTime? EventDate { get; set; }
+    public TimeSpan? StartTime { get; set; }
+    public TimeSpan? EndTime { get; set; }
+    public string? ImageUrl { get; set; }
 }

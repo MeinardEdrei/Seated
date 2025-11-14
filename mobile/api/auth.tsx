@@ -97,12 +97,13 @@ export const signUpOtp = async (
 // Sign Out from backend
 
 export const signOutBackend = async () => {
-  try {
-    const accessToken = await Storage.getItem("accessToken");
-    if (!accessToken) {
-      throw new Error("No access token found for sign out.");
-    }
+  const accessToken = await Storage.getItem("accessToken");
+  if (!accessToken) {
+    console.log("No access token found, user is already signed out.");
+    return;
+  }
 
+  try {
     const { data } = await axios.post(
       `${API_URL}/User/logout`,
       {},
@@ -145,7 +146,7 @@ export const sendLoginOtp = async (email: string): Promise<sendOtpResponse> => {
   try {
     const { data } = await axios.post<sendOtpResponse>(
       `${API_URL}/User/send-login-otp`,
-      { email }
+      { email },
     );
     console.log("Login OTP sent successfully:", data);
     return data;
@@ -157,12 +158,12 @@ export const sendLoginOtp = async (email: string): Promise<sendOtpResponse> => {
 
 export const verifyLoginOtp = async (
   email: string,
-  otp: string
+  otp: string,
 ): Promise<BackendLoginResponse> => {
   try {
     const { data } = await axios.post<BackendLoginResponse>(
       `${API_URL}/User/verify-login-otp`,
-      { email, otpCode: otp }
+      { email, otpCode: otp },
     );
     console.log("Login OTP verified successfully:", data);
     return data;
