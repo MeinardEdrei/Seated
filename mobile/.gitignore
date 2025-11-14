@@ -1,43 +1,102 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
-node_modules/
-
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
-
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
+# ------------------------
+# OS & Editor junk files
+# ------------------------
 .DS_Store
-*.pem
+Thumbs.db
+*.swp
+*.swo
+*.log
+*.tmp
 
-# local env files
-.env*.local
+# ------------------------
+# Node / React Native
+# ------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+expo-debug.log
+.expo/
+.expo-shared/
+android/
+ios/
+build/
+dist/
+.env
+.env.*.local
+expo-env.d.ts
+package-lock.json
+yarn.lock
+mobile/google-services.json
+mobile/GoogleService-Info.plist
+google-services.json
+GoogleService-Info.plist
+*.apk
+*.aab
+*.plist
 
-# typescript
-*.tsbuildinfo
+# ------------------------
+# React Native specific
+# ------------------------
+*.iml
+.gradle/
+.idea/
+.vscode/
+*.keystore
+*.jks
 
-app-example
+# ------------------------
+# .NET / ASP.NET Backend
+# ------------------------
+**/bin/
+**/obj/
+*.dll
+*.exe
+*.pdb
+*.cache+
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+*.dbmdl
+*.bak
+*.sqlite
+*.pdb
 
-# generated native folders
-/ios
-/android
+serviceAccountKey.json
+backend/SeatedBackend/serviceAccountKey.json
+# ------------------------
+# Logs and cache
+# ------------------------
+logs/
+*.log
+*.tlog
+*.vspscc
+*.vscode/
+__pycache__/
+.cache/
+
+# ------------------------
+# Build results
+# ------------------------
+/[Bb]uild/
+*.msi
+*.exe
+*.dll
+*.nupkg
+
+# ------------------------
+# EF Core Migrations
+# ------------------------
+# Migrations/
+
+# ------------------------
+# Environment config
+# ------------------------
+appsettings.Development.json
+secrets.json
+.env
+.env.local

@@ -181,6 +181,24 @@ export default function TabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="Feedback/styles/feedbackStyles"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="Feedback/styles/feedbackFormStyles"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="Feedback/components/feedbackForm"
+        options={{
+          href: null,
+        }}
+      />
 
       {/* Notification */}
       <Tabs.Screen
