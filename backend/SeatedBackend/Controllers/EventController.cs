@@ -51,7 +51,11 @@ namespace SeatedBackend.Controllers
             if (string.IsNullOrEmpty(dto.ImageUrl))
                 return BadRequest(new { message = "Event imageUrl is required." });
 
-            var organizerId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var organizerId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                                   ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(organizerId))
+                return Unauthorized(new { message = "Organizer identifier not found." });
 
             var newEvent = new Event
             {
@@ -80,11 +84,13 @@ namespace SeatedBackend.Controllers
             if (existingEvent == null)
                 return NotFound(new { message = "Event not found." });
 
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+                       ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             if (userIdClaim == null)
                 return Unauthorized(new { message = "User identifier not found." });
 
-            var userId = int.Parse(userIdClaim.Value);
+            var userId = int.Parse(userIdClaim);
 
             if (existingEvent.OrganizerId != userId)
                 return StatusCode(403, new { message = "You are not authorized to update this event." });
@@ -118,10 +124,12 @@ namespace SeatedBackend.Controllers
             if (existingEvent == null)
                 return NotFound(new { message = "Event not found." });
 
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+                       ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             if (userIdClaim == null)
                 return Unauthorized(new { message = "User identifier not found." });
-            var userId = int.Parse(userIdClaim.Value);
+            var userId = int.Parse(userIdClaim);
             if (existingEvent.OrganizerId != userId)
                 return StatusCode(403, new { message = "You are not authorized to delete this event." });
 
@@ -154,14 +162,15 @@ namespace SeatedBackend.Controllers
         [HttpGet("get-events-by-organizer")]
         public async Task<IActionResult> GetEventsByOrganizer()
         {
-            var nameIdentifiedClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var nameIdentifiedClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+                       ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (nameIdentifiedClaim == null)
             {
                 return Unauthorized(new { message = "User identifier not found." });
             }
 
-            var userId = int.Parse(nameIdentifiedClaim.Value);
+            var userId = int.Parse(nameIdentifiedClaim);
 
             var events = await _context.Events.Where(e => e.OrganizerId == userId).ToListAsync();
             return Ok(new { data = events });
