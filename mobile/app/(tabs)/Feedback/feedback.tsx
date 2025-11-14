@@ -12,6 +12,7 @@ import styles from "./styles/feedbackStyles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Settings } from "lucide-react-native";
+import FeedbackForm from "./components/feedbackForm"; // Import the modal
 
 const Feedback = () => {
   const router = useRouter();
@@ -20,6 +21,8 @@ const Feedback = () => {
   };
 
   const [activeTab, setActiveTab] = useState("pending");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const events = [
     {
@@ -69,6 +72,11 @@ const Feedback = () => {
     image: string;
   };
 
+  const handleFeedbackPress = (event: Event) => {
+    setSelectedEvent(event);
+    setModalVisible(true);
+  };
+
   const EventCard = ({ event }: { event: Event }) => {
     const isSubmitted = event.status === "Submitted";
 
@@ -93,7 +101,10 @@ const Feedback = () => {
 
           {/* Show button only if NOT submitted */}
           {!isSubmitted && (
-            <TouchableOpacity style={styles.feedbackButton}>
+            <TouchableOpacity
+              style={styles.feedbackButton}
+              onPress={() => handleFeedbackPress(event)}
+            >
               <Text style={styles.feedbackButtonText}>
                 {event.status === "Pending" ? "Send Feedback" : "View Feedback"}
               </Text>
@@ -121,7 +132,6 @@ const Feedback = () => {
         </View>
         <TouchableOpacity onPress={handleSettings}>
           <Settings size={24} strokeWidth={2} color="#941418" />
-          {/* <Menu color="#941418" /> */}
         </TouchableOpacity>
       </View>
 
@@ -170,6 +180,13 @@ const Feedback = () => {
           <EventCard key={event.id} event={event} />
         ))}
       </ScrollView>
+
+      {/* Feedback Modal */}
+      <FeedbackForm
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        eventTitle={selectedEvent?.title}
+      />
     </SafeAreaView>
   );
 };
