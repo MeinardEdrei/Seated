@@ -6,6 +6,7 @@ using SeatedBackend.Models;
 using SeatedBackend.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace SeatedBackend.Controllers
 {
@@ -50,9 +51,11 @@ namespace SeatedBackend.Controllers
             if (string.IsNullOrEmpty(dto.ImageUrl))
                 return BadRequest(new { message = "Event imageUrl is required." });
 
+            var organizerId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
             var newEvent = new Event
             {
-                OrganizerId = dto.OrganizerId,
+                OrganizerId = int.Parse(organizerId), 
                 VenueId = dto.VenueId,
                 EventName = dto.EventName,
                 Description = dto.Description,
@@ -72,6 +75,7 @@ namespace SeatedBackend.Controllers
         [HttpPatch("update-event/{eventId}")]
         public async Task<IActionResult> UpdateEvent(int eventId, [FromBody] UpdateEventDto dto)
         {
+
             var existingEvent = await _context.Events.FindAsync(eventId);
             if (existingEvent == null)
                 return NotFound(new { message = "Event not found." });
@@ -112,7 +116,7 @@ namespace SeatedBackend.Controllers
         }
 
 
-        [Authorize(Roles = "staff;office_head")]
+        [Authorize(Roles = "staff,loffice_head")]
         [HttpGet("get-all-events")]
         public async Task<IActionResult> GetAllEvents() 
         {
@@ -131,7 +135,7 @@ namespace SeatedBackend.Controllers
         }
 
 
-        [Authorize(Roles="organizer")]
+        [Authorize(Roles = "organizer")]
         [HttpGet("get-events-by-organizer")]
         public async Task<IActionResult> GetEventsByOrganizer()
         {

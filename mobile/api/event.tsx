@@ -5,8 +5,7 @@ import { Storage } from "../utils/storage";
 const API_URL = Constants.expoConfig?.extra?.API_URL + "/api";
 
 type Event = {
-  organizerId: string;
-  venueId: string;
+  venueId: number;
   eventName: string;
   description: string;
   eventDate: string;
