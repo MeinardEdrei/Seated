@@ -122,7 +122,7 @@ export const listEvents = async (): Promise<EventResponse[]> => {
   }
   try {
     const { data } = await axios.get<EventResponse[]>(
-      `${API_URL}/Event/list-events`,
+      `${API_URL}/Event/get-all-events`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

@@ -55,7 +55,7 @@ namespace SeatedBackend.Controllers
 
             var newEvent = new Event
             {
-                OrganizerId = int.Parse(organizerId), 
+                OrganizerId = int.Parse(organizerId),
                 VenueId = dto.VenueId,
                 EventName = dto.EventName,
                 Description = dto.Description,
@@ -70,7 +70,7 @@ namespace SeatedBackend.Controllers
 
             return Ok(new { message = "Event created successfully", data = newEvent });
         }
-        
+
         [Authorize(Roles = "organizer")]
         [HttpPatch("update-event/{eventId}")]
         public async Task<IActionResult> UpdateEvent(int eventId, [FromBody] UpdateEventDto dto)
@@ -79,6 +79,15 @@ namespace SeatedBackend.Controllers
             var existingEvent = await _context.Events.FindAsync(eventId);
             if (existingEvent == null)
                 return NotFound(new { message = "Event not found." });
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "User identifier not found." });
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            if (existingEvent.OrganizerId != userId)
+                return StatusCode(403, new { message = "You are not authorized to update this event." });
 
             if (dto.VenueId.HasValue)
                 existingEvent.VenueId = dto.VenueId.Value;
@@ -116,7 +125,7 @@ namespace SeatedBackend.Controllers
 
         [Authorize(Roles = "staff,loffice_head")]
         [HttpGet("get-all-events")]
-        public async Task<IActionResult> GetAllEvents() 
+        public async Task<IActionResult> GetAllEvents()
         {
             var events = await _context.Events.ToListAsync();
             return Ok(new { data = events });
@@ -129,7 +138,7 @@ namespace SeatedBackend.Controllers
             var existingEvent = await _context.Events.FindAsync(eventId);
             if (existingEvent == null)
                 return NotFound(new { message = "Event not found." });
-            return Ok(new {message = "Success!", data = existingEvent });
+            return Ok(new { message = "Success!", data = existingEvent });
         }
 
 
@@ -137,21 +146,21 @@ namespace SeatedBackend.Controllers
         [HttpGet("get-events-by-organizer")]
         public async Task<IActionResult> GetEventsByOrganizer()
         {
-          var nameIdentifiedClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var nameIdentifiedClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
-          if (nameIdentifiedClaim == null)
-          {
-              return Unauthorized(new { message = "User identifier not found." });
-          }
+            if (nameIdentifiedClaim == null)
+            {
+                return Unauthorized(new { message = "User identifier not found." });
+            }
 
-          var userId = int.Parse(nameIdentifiedClaim.Value);
+            var userId = int.Parse(nameIdentifiedClaim.Value);
 
-          var events = await _context.Events.Where(e => e.OrganizerId == userId).ToListAsync();
-          return Ok(new { data = events });
+            var events = await _context.Events.Where(e => e.OrganizerId == userId).ToListAsync();
+            return Ok(new { data = events });
         }
 
         // Add Archive Event Endpoint
-        
+
 
     }
 }
