@@ -33,7 +33,10 @@ const CancelReservationModal: React.FC<CancelReservationModalProps> = ({
     >
       <View style={styles.modalOverlay}>
         {/* Background blur and tap-to-close area */}
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose}>
+        <Pressable
+          style={[StyleSheet.absoluteFill, styles.overlayTouchable]}
+          onPress={onClose}
+        >
           <BlurView intensity={5} tint="dark" style={styles.blurOverlay} />
         </Pressable>
 
@@ -92,13 +95,13 @@ const CancelReservationModal: React.FC<CancelReservationModalProps> = ({
 export default CancelReservationModal;
 
 const styles = StyleSheet.create({
+  overlayTouchable: {
+    backgroundColor: "rgba(18, 18, 18, 0.75)", // 👈 ensures dark overlay is visible
+  },
   blurOverlay: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    // Add fallback semi-transparent color if blur isn't supported
-    backgroundColor: "rgba(28, 28, 28, 0.75)",
   },
+
   modalOverlay: {
     flex: 1,
     // backgroundColor: "rgba(0, 255, 85, 0.2)",
