@@ -39,9 +39,10 @@ export const createEvent = async (eventData: Event): Promise<EventResponse> => {
     );
     console.log("Event created successfully:", data);
     return data;
-  } catch (error) {
-    console.error("Error creating event:", error);
-    throw new Error("Event creation failed.");
+  } catch (error: any) {
+    const backendMessage = 
+    error.response?.data?.message || "Unknown error";
+    throw new Error(backendMessage);
   }
 };
 
@@ -63,9 +64,9 @@ export const updateEvent = async (
     );
     console.log("Event updated successfully:", data);
     return data;
-  } catch (error) {
-    console.error("Error updating event:", error);
-    throw new Error("Event update failed.");
+  } catch (error: any) {
+    const backendMessage = error.response?.data?.message || "Unknown error";
+    throw new Error(backendMessage);
   }
 };
 
@@ -86,9 +87,9 @@ export const deleteEvent = async (eventId: string): Promise<{ message: string }>
     );
     console.log("Event deleted successfully:", data);
     return data;
-  } catch (error) {
-    console.error("Error deleting event:", error);
-    throw new Error("Event deletion failed.");
+  } catch (error: any) {
+    const backendMessage = error.response?.data?.message || "Unknown error";
+    throw new Error(backendMessage);
   }
 };
 
@@ -109,9 +110,9 @@ export const getEventDetails = async (eventId: string): Promise<EventResponse> =
     );
     console.log("Fetched event details successfully:", data);
     return data;
-  } catch (error) {
-    console.error("Error fetching event details:", error);
-    throw new Error("Fetching event details failed.");
+  } catch (error: any) {
+    const backendMessage = error.response?.data?.message || "Unknown error";
+    throw new Error(backendMessage);
   }
 };
 
@@ -131,8 +132,8 @@ export const listEvents = async (): Promise<EventResponse[]> => {
     );
     console.log("Fetched event list successfully:", data);
     return data;
-  } catch (error) {
-    console.error("Error fetching event list:", error);
-    throw new Error("Fetching event list failed.");
+  } catch (error: any) {
+    const backendMessage = error.response?.data?.message || "Unknown error";
+    throw new Error(backendMessage);
   }
 };
