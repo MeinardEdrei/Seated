@@ -117,6 +117,14 @@ namespace SeatedBackend.Controllers
             var existingEvent = await _context.Events.FindAsync(eventId);
             if (existingEvent == null)
                 return NotFound(new { message = "Event not found." });
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "User identifier not found." });
+            var userId = int.Parse(userIdClaim.Value);
+            if (existingEvent.OrganizerId != userId)
+                return StatusCode(403, new { message = "You are not authorized to delete this event." });
+
             _context.Events.Remove(existingEvent);
             await _context.SaveChangesAsync();
             return Ok(new { message = "Event deleted successfully." });
