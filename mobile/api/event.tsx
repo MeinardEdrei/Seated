@@ -4,7 +4,7 @@ import { Storage } from "../utils/storage";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL + "/api";
 
-type Event = {
+export type EventPayload = {
   venueId: number;
   eventName: string;
   description: string;
@@ -14,14 +14,27 @@ type Event = {
   imageUrl: string;
 };
 
-type EventResponse = {
+export type Event = EventPayload & {
+  eventId: number;
+  organizerId: number;
+  status: "Pending" | "Approved" | "Rejected"; // Match your backend enum
+  qrCode?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  approvalDate?: string | null;
+};
+
+export type EventResponse = {
   message: string;
   data: Event;
 };
 
-export type UpdateEvent = Partial<Event> & { eventId: string };
+export type EventListResponse = {
+  data: Event[];
+};
 
-export const createEvent = async (eventData: Event): Promise<EventResponse> => {
+
+export const createEvent = async (eventData: EventPayload): Promise<EventResponse> => {
   const token = await Storage.getItem("accessToken");
   if (!token) {
     throw new Error("No access token found. User might not be authenticated.");
@@ -48,7 +61,7 @@ export const createEvent = async (eventData: Event): Promise<EventResponse> => {
 // For Event Patch
 
 export const updateEvent = async (
-  eventData: UpdateEvent,
+  eventData: Partial<EventPayload> & { eventId: number },
 ): Promise<EventResponse> => {
   const token = await Storage.getItem("accessToken");
   const { eventId, ...updateData } = eventData;
@@ -70,7 +83,7 @@ export const updateEvent = async (
 };
 
 
-export const deleteEvent = async (eventId: string): Promise<{ message: string }> => { 
+export const deleteEvent = async (eventId: number): Promise<{ message: string }> => { 
   const token = await Storage.getItem("accessToken");
   if (!token) {
     throw new Error("No access token found. User might not be authenticated.");
@@ -93,7 +106,7 @@ export const deleteEvent = async (eventId: string): Promise<{ message: string }>
 };
 
 
-export const getEventDetails = async (eventId: string): Promise<EventResponse> => {
+export const getEventDetails = async (eventId: number): Promise<EventResponse> => {
   const token = await Storage.getItem("accessToken");
   if (!token) {
     throw new Error("No access token found. User might not be authenticated.");
@@ -115,13 +128,13 @@ export const getEventDetails = async (eventId: string): Promise<EventResponse> =
   }
 };
 
-export const listEvents = async (): Promise<EventResponse[]> => {
+export const listEvents = async (): Promise<EventListResponse> => {
   const token = await Storage.getItem("accessToken");
   if (!token) {
     throw new Error("No access token found. User might not be authenticated.");
   }
   try {
-    const { data } = await axios.get<EventResponse[]>(
+    const { data } = await axios.get<EventListResponse>(
       `${API_URL}/Event/get-all-events`,
       {
         headers: {

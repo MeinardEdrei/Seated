@@ -4,9 +4,6 @@ using System.ComponentModel.DataAnnotations;
 public class CreateEventDto
 {
     [Required]
-    public required int OrganizerId { get; set; }
-
-    [Required]
     public required int VenueId { get; set; }
 
     [Required]
@@ -30,7 +27,6 @@ public class CreateEventDto
 }
 
 public class UpdateEventDto {
-    public int? OrganizerId { get; set; }
     public int? VenueId { get; set; }
     public string? EventName { get; set; }
     public string? Description { get; set; }
