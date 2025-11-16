@@ -67,6 +67,10 @@ obj/
 
 serviceAccountKey.json
 backend/SeatedBackend/serviceAccountKey.json
+
+## python
+
+venv/
 # ------------------------
 # Logs and cache
 # ------------------------

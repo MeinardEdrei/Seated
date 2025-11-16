@@ -41,6 +41,8 @@ services:
       - ../nlp-service:/app
     networks:
       - seated-network
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
 
   # backend
   backend:

@@ -125,6 +125,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
+
+      console.log("Key before sign out:", await Storage.getItem(TOKEN_KEY));
       const response = await signOutBackend();
       if (!response.success) {
         throw new Error("Backend sign out failed");
