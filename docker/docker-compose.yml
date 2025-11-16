@@ -28,6 +28,20 @@ services:
     networks:
       - seated-network
 
+  # python microservice
+  nlp-service:
+    build:
+      context: ../nlp-service
+      dockerfile: ../docker/Dockerfile.nlp
+    container_name: seated-nlp
+    restart: always
+    ports:
+      - "5001:5001"
+    volumes:
+      - ../nlp-service:/app
+    networks:
+      - seated-network
+
   # backend
   backend:
     build:
