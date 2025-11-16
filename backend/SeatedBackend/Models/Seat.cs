@@ -7,13 +7,11 @@ namespace SeatedBackend.Models
 {
     public enum SeatStatus
     {
-        [EnumMember(Value = "available")]
+        [EnumMember(Value = "Available")]
         Available,
-
-        [EnumMember(Value = "reserved")]
+        [EnumMember(Value = "Reserved")]
         Reserved,
-
-        [EnumMember(Value = "disabled")]
+        [EnumMember(Value = "Disabled")]
         Disabled,
     }
 
@@ -27,31 +25,41 @@ namespace SeatedBackend.Models
         [Required]
         [ForeignKey("Venue")]
         [Column("venue_id")]
-        public required int VenueId { get; set; }
+        public int VenueId { get; set; }
         public Venue? Venue { get; set; }
 
         [Column("seat_row")]
+        [MaxLength(10)]
         public string? SeatRow { get; set; }
 
         [Column("seat_column")]
         public int? SeatColumn { get; set; }
 
         [Required]
+        [Column("section")]
+        [MaxLength(100)]
+        public string Section { get; set; } = string.Empty;
+
+        [Required]
         [Column("floor_type")]
         [MaxLength(50)]
-        public required string FloorType { get; set; }
+        public string FloorType { get; set; } = string.Empty;
 
         [Required]
         [Column("seat_code")]
         [MaxLength(50)]
-        public required string SeatCode { get; set; }
+        public string SeatCode { get; set; } = string.Empty;
+
+        [Column("display_seat_code")]
+        [MaxLength(50)]
+        public string DisplaySeatCode { get; set; } = string.Empty;
 
         [Column("is_special")]
         public bool IsSpecial { get; set; } = false;
 
         [Required]
         [Column("status")]
-        public required SeatStatus Status { get; set; } = SeatStatus.Available;
+        public SeatStatus Status { get; set; } = SeatStatus.Available;
 
         [Required]
         [Column("created_at")]
