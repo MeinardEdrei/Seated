@@ -71,6 +71,7 @@ backend/SeatedBackend/serviceAccountKey.json
 ## python
 
 venv/
+train/
 # ------------------------
 # Logs and cache
 # ------------------------
