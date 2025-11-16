@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { Download, X } from "lucide-react-native";
-import modalStyles from "../styles/_eventDetailsModalStyles"; // adjust path if needed
+import modalStyles from "../styles/EventDetailsModalStyles"; // adjust path if needed
 
 interface EventDetailsModalProps {
   visible: boolean;

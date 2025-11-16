@@ -9,7 +9,7 @@ import {
   StatusBar,
 } from "react-native";
 import { ChevronLeft } from "lucide-react-native";
-import viewEventstyles from "../styles/viewEventStyles";
+import viewEventstyles from "../styles/ViewEventStyles";
 
 import { Stack, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,7 +28,7 @@ const ViewEvent: React.FC = () => {
   };
 
   const handleEnterQueue = () => {
-    router.push("/Eventpage/components/queuing");
+    router.push("/Eventpage/Queuing");
     // console.log("Entering queue...");
   };
 

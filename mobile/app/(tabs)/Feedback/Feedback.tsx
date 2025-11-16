@@ -8,16 +8,16 @@ import {
   Image,
   StatusBar,
 } from "react-native";
-import styles from "./styles/feedbackStyles";
+import styles from "./styles/FeedbackStyles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Settings } from "lucide-react-native";
-import FeedbackForm from "./components/feedbackForm"; // Import the modal
+import FeedbackForm from "./components/FeedbackForm"; // Import the modal
 
 const Feedback = () => {
   const router = useRouter();
   const handleSettings = () => {
-    router.push("/(tabs)/Homepage/components/settings");
+    router.push("/(tabs)/Homepage/components/Settings");
   };
 
   const [activeTab, setActiveTab] = useState("pending");

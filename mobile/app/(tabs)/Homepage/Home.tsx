@@ -17,8 +17,8 @@ import { BlurView } from "expo-blur";
 
 import EventDetailsModal from "./components/EventDetailsModal"; // Modal Component
 import CancelReservationModal from "./components/CancelReservationModal";
-import styles from "./styles/_homeStyles";
-import modalStyles from "./styles/_eventDetailsModalStyles";
+import styles from "./styles/HomeStyles";
+import modalStyles from "./styles/EventDetailsModalStyles";
 
 const { width, height } = Dimensions.get("window");
 
@@ -37,7 +37,7 @@ const EventData = {
     "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=CCIS-GM-2025-USER123",
 };
 
-export default function Home() {
+const Home = () => {
   const router = useRouter();
 
   // This should come from your state management (Redux, Context, etc.)
@@ -45,11 +45,11 @@ export default function Home() {
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleSettings = () => {
-    router.push("/(tabs)/Homepage/components/settings");
+    router.push("/(tabs)/Homepage/components/Settings");
   };
 
   const handleJoinEvent = () => {
-    router.push("/(tabs)/Eventpage/event");
+    router.push("/(tabs)/Eventpage/Event");
     // After successful event join, you would set hasEvent to true
     // setHasEvent(true);
   };
@@ -59,14 +59,13 @@ export default function Home() {
     console.log("Download ticket");
   };
 
-const confirmCancelReservation = () => {
-  setHasEvent(false);
-  setModalVisible(false);
-  setCancelModalVisible(false);
-};
+  const confirmCancelReservation = () => {
+    setHasEvent(false);
+    setModalVisible(false);
+    setCancelModalVisible(false);
+  };
 
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
-
 
   const handleMoreDetails = () => {
     setModalVisible(true);
@@ -363,3 +362,5 @@ const confirmCancelReservation = () => {
     </>
   );
 }
+
+export default Home;

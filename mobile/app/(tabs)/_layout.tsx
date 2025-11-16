@@ -46,7 +46,7 @@ export default function TabsLayout() {
       >
         {/* Home */}
         <Tabs.Screen
-          name="Homepage/home"
+          name="Homepage/Home"
           options={{
             title: "Home",
             tabBarIcon: ({ color, focused }) => (
@@ -77,19 +77,19 @@ export default function TabsLayout() {
         />
         {/* Hidden Files in Homepage */}
         <Tabs.Screen
-          name="Homepage/styles/_homeStyles"
+          name="Homepage/styles/HomeStyles"
           options={{
             href: null,
           }}
         />
         <Tabs.Screen
-          name="Homepage/components/settings"
+          name="Homepage/components/Settings"
           options={{
             href: null,
           }}
         />
         <Tabs.Screen
-          name="Homepage/styles/_eventDetailsModalStyles"
+          name="Homepage/styles/EventDetailsModalStyles"
           options={{
             href: null,
           }}
@@ -109,7 +109,7 @@ export default function TabsLayout() {
 
         {/* Event */}
         <Tabs.Screen
-          name="Eventpage/event"
+          name="Eventpage/Event"
           options={{
             title: "Event",
             tabBarIcon: ({ color, focused }) => (
@@ -123,13 +123,13 @@ export default function TabsLayout() {
         />
         {/* Hidden Files in Homepage */}
         <Tabs.Screen
-          name="Eventpage/styles/eventStyles"
+          name="Eventpage/styles/EventStyles"
           options={{
             href: null,
           }}
         />
         <Tabs.Screen
-          name="Eventpage/components/viewEvent"
+          name="Eventpage/components/ViewEvent"
           options={{
             href: null,
           }}
@@ -153,13 +153,13 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="Eventpage/styles/viewEventStyles"
+          name="Eventpage/styles/ViewEventStyles"
           options={{
             href: null,
           }}
         />
         <Tabs.Screen
-          name="Eventpage/styles/queuingStyles"
+          name="Eventpage/styles/QueuingStyles"
           options={{
             href: null,
           }}
@@ -173,7 +173,7 @@ export default function TabsLayout() {
 
         {/* Feedback */}
         <Tabs.Screen
-          name="Feedback/feedback"
+          name="Feedback/Feedback"
           options={{
             title: "Feedback",
             tabBarIcon: ({ color, focused }) => (
@@ -186,19 +186,19 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="Feedback/styles/feedbackStyles"
+          name="Feedback/styles/FeedbackStyles"
           options={{
             href: null,
           }}
         />
         <Tabs.Screen
-          name="Feedback/styles/feedbackFormStyles"
+          name="Feedback/styles/FeedbackFormStyles"
           options={{
             href: null,
           }}
         />
         <Tabs.Screen
-          name="Feedback/components/feedbackForm"
+          name="Feedback/components/FeedbackForm"
           options={{
             href: null,
           }}
@@ -206,7 +206,7 @@ export default function TabsLayout() {
 
         {/* Notification */}
         <Tabs.Screen
-          name="Notification/notification"
+          name="Notification/Notification"
           options={{
             title: "Notification",
             tabBarIcon: ({ color, focused }) => (

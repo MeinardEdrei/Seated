@@ -8,7 +8,7 @@ import {
   Pressable,
   StyleSheet,
 } from "react-native";
-import styles from "../styles/feedbackFormStyles";
+import styles from "../styles/FeedbackFormStyles";
 import { X } from "lucide-react-native";
 import { BlurView } from "expo-blur";
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import queueStyles from "../styles/queuingStyles";
+import queueStyles from "./styles/QueuingStyles";
 import {
   StyleSheet,
   Text,
@@ -13,13 +13,13 @@ import { ChevronLeft, X } from "lucide-react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { Stack, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import CancelQueueModal from "../components/CancelQueueModal"; // Import the modal
+import CancelQueueModal from "./components/CancelQueueModal"; // Import the modal
 
 const Queuing = () => {
   const router = useRouter();
 
   // ⏱️ Timer states
-  const [timeLeft, setTimeLeft] = useState(120); // 2 minutes = 120 seconds
+  const [timeLeft, setTimeLeft] = useState(0); // 2 minutes = 120 seconds
   const [isRunning, setIsRunning] = useState(true);
 
   // Modal state
@@ -52,7 +52,7 @@ const Queuing = () => {
 
   const handleReserveSeat = () => {
     if (!isRunning) {
-      alert("Seat reserved successfully!");
+      router.push("/Eventpage/SeatMapView");
     }
   };
 
@@ -105,7 +105,7 @@ const Queuing = () => {
             <View style={queueStyles.queueContents}>
               {/* Event Image */}
               <Image
-                source={require("../../../../assets/images/illustration7.png")}
+                source={require("@/assets/images/illustration7.png")}
                 style={queueStyles.illustration7}
                 resizeMode="cover"
               />

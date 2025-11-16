@@ -19,7 +19,7 @@ import {
   Bell,
   Upload,
 } from "lucide-react-native";
-import styles from "./styles/eventStyles";
+import styles from "./styles/EventStyles";
 
 interface ScanResult {
   success: boolean;
@@ -37,7 +37,7 @@ export default function EventPage() {
   };
 
   const handleViewEvent = () => {
-    router.push("/Eventpage/components/viewEvent");
+    router.push("/Eventpage/components/ViewEvent");
     // console.log("Navigate to sign up");
   };
 

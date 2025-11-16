@@ -28,7 +28,10 @@ type AuthContextData = {
   accessToken: string | null;
   user: User | null;
   isLoading: boolean;
-  signIn: (idTokenOrEmail: string, googleSignIn: boolean) => Promise<{ success: boolean }>;
+  signIn: (
+    idTokenOrEmail: string,
+    googleSignIn: boolean,
+  ) => Promise<{ success: boolean }>;
   signOut: () => Promise<void>;
 };
 
@@ -58,7 +61,7 @@ export function useProtectedRoute(user: User | null, isLoading: boolean) {
     if (!user && !inAuthGroup && !isRootIndex) {
       router.replace("/Login/login");
     } else if (user && (inAuthGroup || isRootIndex)) {
-      router.replace("/(tabs)/Homepage/home");
+      router.replace("/(tabs)/Homepage/Home");
     }
   }, [user, segments, router, isLoading]);
 }
