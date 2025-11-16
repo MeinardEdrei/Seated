@@ -225,7 +225,7 @@ namespace SeatedBackend.Controllers
                 var refreshToken = _tokenService.GenerateRefreshToken();
 
                 user.RefreshToken = refreshToken;
-                user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(7);
+                user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(60);
                 await _context.SaveChangesAsync();
 
                 Console.WriteLine($"[GoogleLogin] Login successful for: {email}");
@@ -359,7 +359,7 @@ namespace SeatedBackend.Controllers
             var refreshToken = _tokenService.GenerateRefreshToken();
 
             user.RefreshToken = refreshToken;
-            user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(7);
+            user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(60);
             await _context.SaveChangesAsync();
 
             // Delete OTP after successful login
