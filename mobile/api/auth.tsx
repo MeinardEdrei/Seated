@@ -1,8 +1,8 @@
 import axios from "axios";
-import Constants from "expo-constants";
 import { Storage } from "../utils/storage";
+import { jwtDecode } from "jwt-decode";
 
-const API_URL = Constants.expoConfig?.extra?.API_URL + "/api";
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 // Define the types for your backend response
 type User = {
@@ -104,17 +104,12 @@ export const signOutBackend = async () => {
   }
 
   try {
-    const { data } = await axios.post(
-      `${API_URL}/User/logout`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    );
+    const res = await authFetch("/user/logout", {
+      method: "POST",
+    });
 
-    console.log("Signed out from backend successfully");
+    const data = await res.json();
+    console.log("Signed out from backend successfully", data);
     return data;
   } catch (error) {
     console.error("Error signing out from backend:", error);
@@ -172,3 +167,58 @@ export const verifyLoginOtp = async (
     throw new Error("Login OTP verification failed.");
   }
 };
+
+// Token Refresh Handling Section
+function isTokenExpired(token: string) {
+  try {
+    const decoded: any = jwtDecode(token);
+    return decoded.exp * 1000 < Date.now();
+  } catch (e) {
+    return true;
+  }
+}
+
+export async function authFetch(endpoint: string, options: any = {}) {
+  let accessToken = await Storage.getItem("accessToken");
+  const refreshToken = await Storage.getItem("refreshToken");
+
+  // If token expired - refresh
+  if (accessToken && isTokenExpired(accessToken)) {
+    const refreshed = await refreshTokens(refreshToken);
+
+    if (!refreshed.success) {
+      throw new Error("Refresh failed — user must log in again");
+    }
+
+    accessToken = refreshed.accessToken;
+  }
+
+  // Perform request
+  return fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+async function refreshTokens(refreshToken: string | null) {
+  if (!refreshToken) return { success: false };
+
+  const res = await fetch(`${API_URL}/user/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  if (!res.ok) return { success: false };
+
+  const data = await res.json();
+
+  await Storage.setItem("accessToken", data.accessToken);
+  await Storage.setItem("refreshToken", data.refreshToken);
+
+  return { success: true, ...data };
+}
