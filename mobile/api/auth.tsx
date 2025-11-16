@@ -1,8 +1,9 @@
 import axios from "axios";
 import { Storage } from "../utils/storage";
 import { jwtDecode } from "jwt-decode";
+import Constants from "expo-constants";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const API_URL = Constants.expoConfig?.extra?.API_URL + "/api";
 
 // Define the types for your backend response
 type User = {
