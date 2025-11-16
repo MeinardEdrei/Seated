@@ -1,11 +1,38 @@
 // NAVBAR FOR USER ONLY
 
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import Octicons from "react-native-vector-icons/Octicons";
-import { View, Platform } from "react-native";
+import { View, ActivityIndicator } from "react-native";
+// import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext";
+import { useEffect } from "react";
 
 export default function TabsLayout() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  // Redirect organizers away from user tabs
+  useEffect(() => {
+    if (!isLoading && user?.role === "organizer") {
+        router.replace("/Organizer/Dashboard/Dashboard");
+    }
+  }, [user, isLoading]);
+
+  // Show loading while checking auth
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#941418" />
+      </View>
+    );
+  }
+
+  // Don't render if user is organizer
+  if (user?.role === "organizer") {
+    return null;
+  }
+
+  console.log("role:",user?.role);
   return (
     <View
       style={{
@@ -35,13 +62,12 @@ export default function TabsLayout() {
             borderWidth: 1,
             borderColor: "rgba(82, 82, 82, 0.2)",
 
-
             // Drop shadow from Figma settings
             shadowColor: "#1C1C1C",
             shadowOffset: { width: 1, height: 1 },
             shadowOpacity: 0.3, // 30% opacity
             shadowRadius: 4, // corresponds to blur 4
-            elevation: 15 , // Android shadow
+            elevation: 15, // Android shadow
             // borderTopWidth: 0,
           },
           tabBarItemStyle: {
@@ -91,19 +117,19 @@ export default function TabsLayout() {
         />
         {/* Hidden Files in Homepage */}
         <Tabs.Screen
-          name="Homepage/styles/HomeStyles"
+          name="Homepage/styles/_homeStyles"
           options={{
             href: null,
           }}
         />
         <Tabs.Screen
-          name="Homepage/components/Settings"
+          name="Homepage/components/settings"
           options={{
             href: null,
           }}
         />
         <Tabs.Screen
-          name="Homepage/styles/EventDetailsModalStyles"
+          name="Homepage/styles/_eventDetailsModalStyles"
           options={{
             href: null,
           }}
@@ -123,7 +149,7 @@ export default function TabsLayout() {
 
         {/* Event */}
         <Tabs.Screen
-          name="Eventpage/Event"
+          name="Eventpage/event"
           options={{
             title: "Event",
             tabBarItemStyle: { flex: 1, alignItems: "center" },
@@ -156,13 +182,13 @@ export default function TabsLayout() {
         />
         {/* Hidden Files in Eventpage */}
         <Tabs.Screen
-          name="Eventpage/styles/EventStyles"
+          name="Eventpage/styles/eventStyles"
           options={{
             href: null,
           }}
         />
         <Tabs.Screen
-          name="Eventpage/components/ViewEvent"
+          name="Eventpage/components/viewEvent"
           options={{
             href: null,
           }}
@@ -192,13 +218,13 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="Eventpage/styles/ViewEventStyles"
+          name="Eventpage/styles/viewEventStyles"
           options={{
             href: null,
           }}
         />
         <Tabs.Screen
-          name="Eventpage/styles/QueuingStyles"
+          name="Eventpage/styles/queuingStyles"
           options={{
             href: null,
           }}
@@ -212,7 +238,7 @@ export default function TabsLayout() {
 
         {/* Feedback */}
         <Tabs.Screen
-          name="Feedback/Feedback"
+          name="Feedback/feedback"
           options={{
             title: "Feedback",
             tabBarItemStyle: { flex: 1, alignItems: "center" },
@@ -245,19 +271,19 @@ export default function TabsLayout() {
         />
         {/* Hidden Files in Feedback */}
         <Tabs.Screen
-          name="Feedback/styles/FeedbackStyles"
+          name="Feedback/styles/feedbackStyles"
           options={{
             href: null,
           }}
         />
         <Tabs.Screen
-          name="Feedback/styles/FeedbackFormStyles"
+          name="Feedback/styles/feedbackFormStyles"
           options={{
             href: null,
           }}
         />
         <Tabs.Screen
-          name="Feedback/components/FeedbackForm"
+          name="Feedback/components/feedbackForm"
           options={{
             href: null,
           }}
@@ -265,7 +291,7 @@ export default function TabsLayout() {
 
         {/* Notification */}
         <Tabs.Screen
-          name="Notification/Notification"
+          name="Notification/notification"
           options={{
             title: "Notification",
             tabBarItemStyle: { flex: 1, alignItems: "center" },
@@ -298,7 +324,7 @@ export default function TabsLayout() {
         />
         {/* Hidden Files in Notification */}
         <Tabs.Screen
-          name="Notification/styles/NotificationStyles"
+          name="Notification/styles/notificationStyles"
           options={{
             href: null,
           }}

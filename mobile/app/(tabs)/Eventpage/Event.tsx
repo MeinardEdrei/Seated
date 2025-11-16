@@ -33,7 +33,7 @@ export default function EventPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("event");
   const handleSettings = () => {
-    router.push("/(tabs)/Homepage/components/settings");
+    router.push("/(tabs)/Homepage/components/Settings");
   };
 
   const handleViewEvent = () => {

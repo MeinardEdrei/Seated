@@ -78,7 +78,7 @@ export default StyleSheet.create({
   },
   scrollContent: {
     marginHorizontal: 40,
-    marginBottom: 100,
+    marginBottom: 20,
     // padding: 16,
     gap: 16,
   },

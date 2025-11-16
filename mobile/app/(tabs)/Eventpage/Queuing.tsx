@@ -51,9 +51,7 @@ const Queuing = () => {
   };
 
   const handleReserveSeat = () => {
-    if (!isRunning) {
-      router.push("/Eventpage/SeatMapView");
-    }
+
   };
 
   const handleCancelQueue = () => {
