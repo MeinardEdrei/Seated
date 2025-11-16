@@ -291,6 +291,7 @@ namespace SeatedBackend.Controllers
             // Find user ID in claims
             var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            
 
             if (sub == null || !int.TryParse(sub, out var userId))
                 return Unauthorized(new { message = "Invalid token." });

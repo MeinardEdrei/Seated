@@ -13,6 +13,13 @@ using Microsoft.Extensions.Caching.StackExchangeRedis;
 var builder = WebApplication.CreateBuilder(args);
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? new JwtSettings();
+
+
+builder.Services.Configure<HuggingFaceSettings>(
+    builder.Configuration.GetSection("HuggingFace"));
+builder.Services.AddHttpClient<IHuggingFaceService, HuggingFaceService>();
+
+
 builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();

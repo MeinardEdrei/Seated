@@ -44,6 +44,8 @@ services:
       - ASPNETCORE_URLS=http://+:5165
       - ConnectionStrings__DefaultConnection=server=mysql-db;port=3306;database=${MYSQL_DATABASE};user=${MYSQL_USER};password=${MYSQL_PASSWORD}
       - ConnectionStrings__RedisConnection=redis:6379
+      - HuggingFace__ApiToken=${HF_TOKEN}
+      - HuggingFace__ModelUrl=https://router.huggingface.co/hf-inference/models/tabularisai/multilingual-sentiment-analysis
     command: ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:5165"]
     ports:
       - "5165:5165"
