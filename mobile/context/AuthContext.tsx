@@ -5,7 +5,6 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import * as SecureStore from "expo-secure-store";
 import {
   loginWithGoogleBackend,
   signOutBackend,
@@ -13,6 +12,7 @@ import {
 } from "../api/auth";
 import { useRouter, useSegments } from "expo-router";
 import { Storage } from "../utils/storage";
+import { TokenService } from "../services/tokenService";
 
 const TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
@@ -75,44 +75,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load auth state from SecureStore on app start
+  // Load authentication state on mount
   useEffect(() => {
-    const loadAuthState = async () => {
-      try {
-        const storedAccessToken = await Storage.getItem(TOKEN_KEY);
-        const storedUserJson = await Storage.getItem(USER_KEY);
-
-        if (storedAccessToken && storedUserJson) {
-          setAccessToken(storedAccessToken);
-          setUser(JSON.parse(storedUserJson));
-        }
-      } catch (e) {
-        console.error("Failed to load auth state", e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadAuthState();
   }, []);
 
+  const loadAuthState = async () => {
+    try {
+      const storedAccessToken = await Storage.getItem(TOKEN_KEY);
+      const storedUserJson = await Storage.getItem(USER_KEY);
+
+      if (storedAccessToken && storedUserJson) {
+        // Just load the token - axios interceptor will handle validation
+        setAccessToken(storedAccessToken);
+        setUser(JSON.parse(storedUserJson));
+      }
+    } catch (e) {
+      console.error("Failed to load auth state", e);
+      await clearSession();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const clearSession = async () => {
+    await TokenService.clearAuthData();
+    setAccessToken(null);
+    setUser(null);
+  };
+
   const signIn = async (idTokenOrEmail: string, googleSignIn: boolean) => {
     try {
-      let accessToken: string | undefined;
-      let refreshToken: string | undefined;
-      let user: User | undefined;
+      const response = googleSignIn
+        ? await loginWithGoogleBackend(idTokenOrEmail)
+        : await loginWithEmailBackend(idTokenOrEmail);
 
-      if (googleSignIn) {
-        const response = await loginWithGoogleBackend(idTokenOrEmail);
-        accessToken = response.accessToken;
-        refreshToken = response.refreshToken;
-        user = response.user;
-      } else {
-        const response = await loginWithEmailBackend(idTokenOrEmail);
-        accessToken = response.accessToken;
-        refreshToken = response.refreshToken;
-        user = response.user;
-      }
+      const { accessToken, refreshToken, user } = response;
 
       if (!accessToken || !refreshToken || !user) {
         return { success: false };
@@ -133,20 +131,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
-      const response = await signOutBackend();
-      if (!response.success) {
-        throw new Error("Backend sign out failed");
-      }
-      console.log("Response from backend sign out:", response);
-
-      await Storage.removeItem(TOKEN_KEY);
-      await Storage.removeItem(REFRESH_TOKEN_KEY);
-      await Storage.removeItem(USER_KEY);
-
-      setAccessToken(null);
-      setUser(null);
+      await signOutBackend();
     } catch (e) {
       console.error("Sign out failed", e);
+    } finally {
+      // Always clear local session, regardless of backend response
+      await clearSession();
     }
   };
 

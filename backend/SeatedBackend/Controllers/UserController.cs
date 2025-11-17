@@ -225,7 +225,7 @@ namespace SeatedBackend.Controllers
                 var refreshToken = _tokenService.GenerateRefreshToken();
 
                 user.RefreshToken = refreshToken;
-                user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(7);
+                user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(60);
                 await _context.SaveChangesAsync();
 
                 Console.WriteLine($"[GoogleLogin] Login successful for: {email}");
@@ -291,6 +291,7 @@ namespace SeatedBackend.Controllers
             // Find user ID in claims
             var sub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            
 
             if (sub == null || !int.TryParse(sub, out var userId))
                 return Unauthorized(new { message = "Invalid token." });
@@ -359,7 +360,7 @@ namespace SeatedBackend.Controllers
             var refreshToken = _tokenService.GenerateRefreshToken();
 
             user.RefreshToken = refreshToken;
-            user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(7);
+            user.RefreshTokenExpAt = DateTime.UtcNow.AddDays(60);
             await _context.SaveChangesAsync();
 
             // Delete OTP after successful login
