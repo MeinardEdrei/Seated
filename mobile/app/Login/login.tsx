@@ -24,9 +24,18 @@ export default function Login() {
   const [showInvalidEmailModal, setShowInvalidEmailModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isEmailSigningIn, setIsEmailSigningIn] = useState(false); 
+  const scrollViewRef = React.useRef<ScrollView>(null);
   const router = useRouter();
   const { promptGoogleSignIn, isSigningIn, isDisabled } = useGoogleSignIn();
   const { sendLoginOtpCode } = useEmailLogin();
+
+  const handleInputFocus = () => {
+    setTimeout(() => {
+      // Scroll just enough to see the "Sign up" link
+      // Adjust the y value (250-350) to control how far it scrolls
+      scrollViewRef.current?.scrollTo({ y: 280, animated: true });
+    }, 100);
+  };
 
   const handleEmailSignIn = async () => {
     setErrorMessage("");
@@ -94,10 +103,7 @@ export default function Login() {
       backgroundColor: "#941418",
       borderTopLeftRadius: 30,
       borderTopRightRadius: 30,
-      position: "absolute",
-      bottom: 0,
-      left: 0,
-      right: 0,
+      paddingBottom: 40, // Extra padding to cover keyboard rounded corners
     },
 
     // ===== Illustration Section =====
@@ -114,14 +120,11 @@ export default function Login() {
 
     // ===== Sign In Section =====
     signInSection: {
-      backgroundColor: "#941418",
       width: "100%",
-      height: 440,
-      borderTopLeftRadius: 30,
-      borderTopRightRadius: 30,
+      minHeight: 440,
       paddingTop: 20,
       paddingHorizontal: 33,
-      // paddingBottom: 0,
+      paddingBottom: 40,
       alignItems: "center",
     },
 
@@ -281,6 +284,7 @@ export default function Login() {
           style={styles.container}
         >
           <ScrollView
+            ref={scrollViewRef}
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
@@ -304,7 +308,7 @@ export default function Login() {
             </View>
 
             {/* Main Content Card */}
-            <SafeAreaView edges={["bottom"]} style={styles.redContainer}>
+            <View style={styles.redContainer}>
               <View style={styles.signInSection}>
                 <View style={styles.textContainer}>
                   <Text style={styles.title}>Get started with us</Text>
@@ -353,6 +357,7 @@ export default function Login() {
                         setEmail(text);
                         setErrorMessage(""); // Clear error when typing
                       }}
+                      onFocus={handleInputFocus}
                       keyboardType="email-address"
                       autoCapitalize="none"
                       autoCorrect={false}
@@ -385,7 +390,7 @@ export default function Login() {
                   <Text style={styles.signUpLink}>Sign up</Text>
                 </TouchableOpacity>
               </View>
-            </SafeAreaView>
+            </View>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
