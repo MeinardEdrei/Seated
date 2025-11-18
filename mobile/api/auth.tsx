@@ -1,8 +1,6 @@
 import axiosInstance from "../services/axiosInstance";
-import Constants from "expo-constants";
 import { TokenService } from "../services/tokenService";
 
-const API_URL = Constants.expoConfig?.extra?.API_URL + "/api";
 
 // Define the types for your backend response
 type User = {

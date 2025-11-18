@@ -22,7 +22,7 @@ WebBrowser.maybeCompleteAuthSession();
 export default function Login() {
   const [email, setEmail] = useState("");
   const [showInvalidEmailModal, setShowInvalidEmailModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
   const [isEmailSigningIn, setIsEmailSigningIn] = useState(false); 
   const scrollViewRef = React.useRef<ScrollView>(null);
   const router = useRouter();
@@ -31,16 +31,13 @@ export default function Login() {
 
   const handleInputFocus = () => {
     setTimeout(() => {
-      // Scroll just enough to see the "Sign up" link
-      // Adjust the y value (250-350) to control how far it scrolls
-      scrollViewRef.current?.scrollTo({ y: 280, animated: true });
+      scrollViewRef.current?.scrollTo({ y: 281, animated: true });
     }, 100);
   };
 
   const handleEmailSignIn = async () => {
-    setErrorMessage("");
-
     if (!email.trim()) {
+      setModalMessage("Please enter your email address.");
       setShowInvalidEmailModal(true);
       return;
     }
@@ -50,7 +47,8 @@ export default function Login() {
       const result = await sendLoginOtpCode(email.trim());
 
       if (!result) {
-        setErrorMessage("Email not registered. Please sign up first.");
+        setModalMessage("Email not registered. Please sign up first.");
+        setShowInvalidEmailModal(true);
         return;
       }
       router.push({
@@ -59,7 +57,8 @@ export default function Login() {
       });
     } catch (error) {
       console.error("Email Sign-In Error:", error);
-      setErrorMessage("Email not registered. Please sign up first.");
+      setModalMessage("Email not registered. Please sign up first.");
+      setShowInvalidEmailModal(true);
     } finally {
       setIsEmailSigningIn(false); 
     }
@@ -355,7 +354,6 @@ export default function Login() {
                       value={email}
                       onChangeText={(text) => {
                         setEmail(text);
-                        setErrorMessage(""); // Clear error when typing
                       }}
                       onFocus={handleInputFocus}
                       keyboardType="email-address"
@@ -396,7 +394,11 @@ export default function Login() {
       </SafeAreaView>
 
       {/* Invalid Email Modal */}
-      <InvalidEmailModal visible={showInvalidEmailModal} onClose={closeModal} />
+      <InvalidEmailModal 
+        visible={showInvalidEmailModal} 
+        onClose={closeModal}
+        message={modalMessage}
+      />
     </>
   );
 }

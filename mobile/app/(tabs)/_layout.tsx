@@ -1,11 +1,16 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { View, Platform, Dimensions } from "react-native";
+import { useAuth } from "@/context/AuthContext";
 
 export default function TabsLayout() {
   const { width } = Dimensions.get("window");
-  const horizontalMargin = width * 0.06; // 6% of screen width for responsive spacing
+  const horizontalMargin = width * 0.06;
   const bottomMargin = Platform.OS === "ios" ? 20 : 10;
+  const { user } = useAuth();
+  
+  const isOrganizer = user?.role?.toLowerCase() === "organizer";
+
   return (
     <Tabs
       screenOptions={{
@@ -14,8 +19,8 @@ export default function TabsLayout() {
         tabBarActiveTintColor: "#941418",
         tabBarInactiveTintColor: "#000000",
         tabBarStyle: {
-          position: "absolute", // Make it float
-          bottom: bottomMargin, // Distance from bottom
+          position: "absolute",
+          bottom: bottomMargin,
           marginLeft: horizontalMargin,
           marginRight: horizontalMargin,
           backgroundColor: "#ffffff",
@@ -34,14 +39,14 @@ export default function TabsLayout() {
           <View
             style={{
               flex: 1,
-              backgroundColor: "transparent", // Transparent background
+              backgroundColor: "transparent",
             }}
           />
         ),
         tabBarItemStyle: {
           marginTop: 5,
           paddingVertical: 5,
-          paddingHorizontal: 2, // More spacing between items
+          paddingHorizontal: 2,
         },
         tabBarLabelStyle: {
           fontFamily: "Poppins-Regular",
@@ -56,22 +61,11 @@ export default function TabsLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, focused }) => (
-            <View
-            //   style={{
-            //     backgroundColor: focused ? "#941418" : "transparent",
-            //     borderRadius: 15,
-            //     paddingHorizontal: 20,
-            //     paddingVertical: 8,
-            //     minWidth: 80,
-            //     alignItems: "center",
-            //   }}
-            >
-              <Ionicons
-                name={focused ? "home" : "home-outline"}
-                color={focused ? "#941418" : color}
-                size={24}
-              />
-            </View>
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              color={focused ? "#941418" : color}
+              size={24}
+            />
           ),
           tabBarLabelStyle: {
             fontFamily: "Poppins-Regular",
@@ -81,37 +75,13 @@ export default function TabsLayout() {
           },
         }}
       />
+      
       {/* Hidden Files in Homepage */}
-      <Tabs.Screen
-        name="Homepage/styles/HomeStyles"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Homepage/components/Settings"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Homepage/styles/EventDetailsModalStyles"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Homepage/components/EventDetailsModal"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Homepage/components/CancelReservationModal"
-        options={{
-          href: null,
-        }}
-      />
+      <Tabs.Screen name="Homepage/styles/HomeStyles" options={{ href: null }} />
+      <Tabs.Screen name="Homepage/components/Settings" options={{ href: null }} />
+      <Tabs.Screen name="Homepage/styles/EventDetailsModalStyles" options={{ href: null }} />
+      <Tabs.Screen name="Homepage/components/EventDetailsModal" options={{ href: null }} />
+      <Tabs.Screen name="Homepage/components/CancelReservationModal" options={{ href: null }} />
 
       {/* Event */}
       <Tabs.Screen
@@ -127,60 +97,38 @@ export default function TabsLayout() {
           ),
         }}
       />
-      {/* Hidden Files in Homepage */}
+      
+      {/* Hidden Files in Eventpage */}
+      <Tabs.Screen name="Eventpage/styles/EventStyles" options={{ href: null }} />
+      <Tabs.Screen name="Eventpage/components/ViewEvent" options={{ href: null }} />
+      <Tabs.Screen name="Eventpage/Queuing" options={{ href: null }} />
+      <Tabs.Screen name="Eventpage/SeatMapView" options={{ href: null }} />
+      <Tabs.Screen name="Eventpage/components/CancelQueueModal" options={{ href: null }} />
+      <Tabs.Screen name="Eventpage/styles/ViewEventStyles" options={{ href: null }} />
+      <Tabs.Screen name="Eventpage/styles/QueuingStyles" options={{ href: null }} />
+      <Tabs.Screen name="Eventpage/styles/CancelQueueModalStyles" options={{ href: null }} />
+
+      {/* Scanner - Only for Organizers */}
       <Tabs.Screen
-        name="Eventpage/styles/EventStyles"
+        name="Scanner/Scanner"
         options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Eventpage/components/ViewEvent"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Eventpage/Queuing"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Eventpage/SeatMapView"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Eventpage/components/CancelQueueModal"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Eventpage/styles/ViewEventStyles"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Eventpage/styles/QueuingStyles"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Eventpage/styles/CancelQueueModalStyles"
-        options={{
-          href: null,
+          href: isOrganizer ? undefined : null,
+          title: "Scanner",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "scan" : "scan-outline"}
+              color={color}
+              size={24}
+            />
+          ),
         }}
       />
 
-      {/* Feedback */}
+      {/* Feedback - Only for non-Organizers */}
       <Tabs.Screen
         name="Feedback/Feedback"
         options={{
+          href: !isOrganizer ? undefined : null,
           title: "Feedback",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
@@ -191,24 +139,11 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="Feedback/styles/FeedbackStyles"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Feedback/styles/FeedbackFormStyles"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="Feedback/components/FeedbackForm"
-        options={{
-          href: null,
-        }}
-      />
+
+      {/* Hidden Files in Feedback */}
+      <Tabs.Screen name="Feedback/styles/FeedbackStyles" options={{ href: null }} />
+      <Tabs.Screen name="Feedback/styles/FeedbackFormStyles" options={{ href: null }} />
+      <Tabs.Screen name="Feedback/components/FeedbackForm" options={{ href: null }} />
 
       {/* Notification */}
       <Tabs.Screen
