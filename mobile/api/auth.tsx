@@ -49,6 +49,21 @@ export const loginWithGoogleBackend = async (
 
 // Email Sign In
 
+export const sendLoginOtp = async (email: string): Promise<sendOtpResponse> => {
+  try {
+    const { data } = await axiosInstance.post<sendOtpResponse>(
+      "/User/send-login-otp",
+      { email },
+      { timeout: 30000 } // Override timeout 
+    );
+    console.log("Login OTP sent successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("Error sending login OTP:", error);
+    throw new Error("Failed to send login OTP.");
+  }
+};
+
 export const sendOtpToEmail = async (
   email: string,
 ): Promise<sendOtpResponse> => {
@@ -56,6 +71,7 @@ export const sendOtpToEmail = async (
     const { data } = await axiosInstance.post<sendOtpResponse>(
       "/User/send-signup-otp",
       { email },
+      { timeout: 30000 } // Override timeout 
     );
     console.log("OTP sent successfully:", data);
     return data;
@@ -65,7 +81,6 @@ export const sendOtpToEmail = async (
   }
 };
 
-// Sign Up / Verify - OTP
 export const signUpOtp = async (
   email: string,
   otp: string,
@@ -121,20 +136,6 @@ export const loginWithEmailBackend = async (
   } catch (error) {
     console.error("Error during backend email login:", error);
     throw new Error("Backend email login failed.");
-  }
-};
-
-export const sendLoginOtp = async (email: string): Promise<sendOtpResponse> => {
-  try {
-    const { data } = await axiosInstance.post<sendOtpResponse>(
-      "/User/send-login-otp",
-      { email },
-    );
-    console.log("Login OTP sent successfully:", data);
-    return data;
-  } catch (error) {
-    console.error("Error sending login OTP:", error);
-    throw new Error("Failed to send login OTP.");
   }
 };
 

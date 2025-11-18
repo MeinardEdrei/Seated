@@ -23,6 +23,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [showInvalidEmailModal, setShowInvalidEmailModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isEmailSigningIn, setIsEmailSigningIn] = useState(false); 
   const router = useRouter();
   const { promptGoogleSignIn, isSigningIn, isDisabled } = useGoogleSignIn();
   const { sendLoginOtpCode } = useEmailLogin();
@@ -35,6 +36,7 @@ export default function Login() {
       return;
     }
 
+    setIsEmailSigningIn(true); 
     try {
       const result = await sendLoginOtpCode(email.trim());
 
@@ -49,6 +51,8 @@ export default function Login() {
     } catch (error) {
       console.error("Email Sign-In Error:", error);
       setErrorMessage("Email not registered. Please sign up first.");
+    } finally {
+      setIsEmailSigningIn(false); 
     }
   };
 
@@ -239,6 +243,9 @@ export default function Login() {
       // shadowRadius: 4,
       // elevation: 4,
     },
+    signInButtonDisabled: {
+      opacity: 0.6,
+    },
     signInButtonText: {
       fontSize: 18,
       fontWeight: "bold",
@@ -355,11 +362,17 @@ export default function Login() {
 
                 {/* Sign In Button */}
                 <TouchableOpacity
-                  style={styles.signInButton}
+                  style={[
+                    styles.signInButton,
+                    (isEmailSigningIn || isSigningIn || isDisabled) && styles.signInButtonDisabled,
+                  ]}
                   onPress={handleEmailSignIn}
                   activeOpacity={0.8}
+                  disabled={isEmailSigningIn || isSigningIn || isDisabled} // Disable during any loading
                 >
-                  <Text style={styles.signInButtonText}>Sign In</Text>
+                  <Text style={styles.signInButtonText}>
+                    {isEmailSigningIn ? "Signing in..." : "Sign In"}
+                  </Text>
                 </TouchableOpacity>
 
                 {/* Sign Up Link */}
