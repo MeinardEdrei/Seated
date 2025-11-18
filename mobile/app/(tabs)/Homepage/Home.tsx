@@ -15,6 +15,7 @@ import { Stack, useRouter } from "expo-router";
 import { Menu, Settings, Download, X } from "lucide-react-native";
 import { BlurView } from "expo-blur";
 
+import Header from "../../../components/Header";
 import EventDetailsModal from "./components/EventDetailsModal"; // Modal Component
 import CancelReservationModal from "./components/CancelReservationModal";
 
@@ -41,10 +42,6 @@ const Home = () => {
   // This should come from your state management (Redux, Context, etc.)
   const [hasEvent, setHasEvent] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-
-  const handleSettings = () => {
-    router.push("/(tabs)/Homepage/components/Settings");
-  };
 
   const handleJoinEvent = () => {
     router.push("/(tabs)/Eventpage/Event");
@@ -338,25 +335,6 @@ const Home = () => {
       paddingBottom: 100,
     },
 
-    // ===== Header =====
-    header: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginHorizontal: 16,
-      marginBottom: 8,
-      // backgroundColor: "#47fc00ff",
-    },
-    logoContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    headerLogo: {
-      width: 137,
-      height: 40,
-      resizeMode: "contain",
-    },
-
     // ===== Empty State =====
     illustrationContainer: {
       alignItems: "center",
@@ -626,18 +604,7 @@ const Home = () => {
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
         {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require("../../../assets/images/header-logo.png")}
-              style={styles.headerLogo}
-            />
-          </View>
-          <TouchableOpacity onPress={handleSettings}>
-            <Settings size={24} strokeWidth={2} color="#941418" />
-            {/* <Menu color="#941418" /> */}
-          </TouchableOpacity>
-        </View>
+        <Header />
 
         {/* Conditional Content Rendering */}
         {hasEvent ? <EventState /> : <EmptyState />}

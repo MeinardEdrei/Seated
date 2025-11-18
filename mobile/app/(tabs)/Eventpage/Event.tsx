@@ -9,8 +9,8 @@ import {
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Settings } from "lucide-react-native";
 
+import Header from "../../../components/Header";
 import {
   Camera,
   Home,
@@ -31,9 +31,6 @@ interface ScanResult {
 export default function EventPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("event");
-  const handleSettings = () => {
-    router.push("/(tabs)/Homepage/components/settings");
-  };
 
   const handleViewEvent = () => {
     router.push("/Eventpage/components/ViewEvent");
@@ -44,24 +41,6 @@ export default function EventPage() {
     container: {
       flex: 1,
       backgroundColor: "#ffffffff",
-    },
-    // ===== Header =====
-    header: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginHorizontal: 16,
-      marginBottom: 8,
-      // backgroundColor: "#47fc00ff",
-    },
-    logoContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    headerLogo: {
-      width: 137,
-      height: 40,
-      resizeMode: "contain",
     },
 
     mainContent: {
@@ -252,18 +231,7 @@ export default function EventPage() {
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
         {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require("../../../assets/images/header-logo.png")}
-              style={styles.headerLogo}
-            />
-          </View>
-          <TouchableOpacity onPress={handleSettings}>
-            <Settings size={24} strokeWidth={2} color="#941418" />
-            {/* <Menu color="#941418" /> */}
-          </TouchableOpacity>
-        </View>
+        <Header />
 
         {/* Main Content */}
         <View style={styles.mainContent}>
