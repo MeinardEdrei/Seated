@@ -1,36 +1,9 @@
 import axiosInstance from "../services/axiosInstance";
+import { EventPayload, EventResponse, EventListResponse } from "@/types/event";
 
-export type EventPayload = {
-  venueId: number;
-  eventName: string;
-  description: string;
-  eventDate: string;
-  startTime: string;
-  endTime: string;
-  imageUrl: string;
-};
-
-export type Event = EventPayload & {
-  eventId: number;
-  organizerId: number;
-  status: "Pending" | "Approved" | "Rejected";
-  qrCode?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  approvalDate?: string | null;
-};
-
-export type EventResponse = {
-  message: string;
-  data: Event;
-};
-
-export type EventListResponse = {
-  data: Event[];
-};
-
-
-export const createEvent = async (eventData: EventPayload): Promise<EventResponse> => {
+export const createEvent = async (
+  eventData: EventPayload,
+): Promise<EventResponse> => {
   try {
     const { data } = await axiosInstance.post<EventResponse>(
       "/Event/create-event",
@@ -39,7 +12,7 @@ export const createEvent = async (eventData: EventPayload): Promise<EventRespons
     console.log("Event created successfully:", data);
     return data;
   } catch (error: any) {
-    const backendMessage = 
+    const backendMessage =
       error.response?.data?.message || "Failed to create event";
     throw new Error(backendMessage);
   }
@@ -49,7 +22,7 @@ export const updateEvent = async (
   eventData: Partial<EventPayload> & { eventId: number },
 ): Promise<EventResponse> => {
   const { eventId, ...updateData } = eventData;
-  
+
   try {
     const { data } = await axiosInstance.patch<EventResponse>(
       `/Event/update-event/${eventId}`,
@@ -58,13 +31,15 @@ export const updateEvent = async (
     console.log("Event updated successfully:", data);
     return data;
   } catch (error: any) {
-    const backendMessage = 
+    const backendMessage =
       error.response?.data?.message || "Failed to update event";
     throw new Error(backendMessage);
   }
 };
 
-export const deleteEvent = async (eventId: number): Promise<{ message: string }> => { 
+export const deleteEvent = async (
+  eventId: number,
+): Promise<{ message: string }> => {
   try {
     const { data } = await axiosInstance.delete<{ message: string }>(
       `/Event/delete-event/${eventId}`,
@@ -72,14 +47,15 @@ export const deleteEvent = async (eventId: number): Promise<{ message: string }>
     console.log("Event deleted successfully:", data);
     return data;
   } catch (error: any) {
-    const backendMessage = 
+    const backendMessage =
       error.response?.data?.message || "Failed to delete event";
     throw new Error(backendMessage);
   }
 };
 
-
-export const getEventDetails = async (eventId: number): Promise<EventResponse> => {
+export const getEventDetails = async (
+  eventId: number,
+): Promise<EventResponse> => {
   try {
     const { data } = await axiosInstance.get<EventResponse>(
       `/Event/get-event/${eventId}`,
@@ -87,7 +63,7 @@ export const getEventDetails = async (eventId: number): Promise<EventResponse> =
     console.log("Fetched event details successfully:", data);
     return data;
   } catch (error: any) {
-    const backendMessage = 
+    const backendMessage =
       error.response?.data?.message || "Failed to fetch event details";
     throw new Error(backendMessage);
   }
@@ -101,7 +77,7 @@ export const listEvents = async (): Promise<EventListResponse> => {
     console.log("Fetched event list successfully:", data);
     return data;
   } catch (error: any) {
-    const backendMessage = 
+    const backendMessage =
       error.response?.data?.message || "Failed to fetch events";
     throw new Error(backendMessage);
   }

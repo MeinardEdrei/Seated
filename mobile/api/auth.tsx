@@ -1,36 +1,16 @@
 import axiosInstance from "../services/axiosInstance";
 import Constants from "expo-constants";
 import { TokenService } from "../services/tokenService";
+import {
+  User,
+  BackendLoginResponse,
+  sendOtpResponse,
+  signUpOtpResponse,
+} from "@/types/auth";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL + "/api";
 
-// Define the types for your backend response
-type User = {
-  id: string;
-  email: string;
-  role: string;
-};
-
-type BackendLoginResponse = {
-  accessToken: string;
-  refreshToken: string;
-  user: User;
-};
-
-type sendOtpResponse = {
-  success: boolean;
-  message: string;
-};
-
-type signUpOtpResponse = {
-  success: boolean;
-  message: string;
-  role: string;
-};
-
-/**
- * Sends the Google ID Token to your backend to be verified.
- */
+// Sends the Google ID Token to backend to be verified.
 export const loginWithGoogleBackend = async (
   idToken: string,
 ): Promise<BackendLoginResponse> => {
@@ -48,7 +28,6 @@ export const loginWithGoogleBackend = async (
 };
 
 // Email Sign In
-
 export const sendOtpToEmail = async (
   email: string,
 ): Promise<sendOtpResponse> => {
@@ -84,7 +63,6 @@ export const signUpOtp = async (
 };
 
 // Sign Out from backend
-
 export const signOutBackend = async (): Promise<{
   success: boolean;
   sessionExpired?: boolean;
@@ -154,4 +132,3 @@ export const verifyLoginOtp = async (
     throw new Error("Login OTP verification failed.");
   }
 };
-
