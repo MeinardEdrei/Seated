@@ -277,9 +277,9 @@ const Home = () => {
       visible={modalVisible}
       onRequestClose={handleCloseModal}
     >
-      <View style={modalStyles.modalOverlay}>
+      <View >
         <Pressable style={StyleSheet.absoluteFill} onPress={handleCloseModal}>
-          <BlurView intensity={5} tint="dark" style={modalStyles.blurOverlay} />
+          <BlurView intensity={5} tint="dark"  />
         </Pressable>
 
         {/* Close Button */}
@@ -608,6 +608,7 @@ const Home = () => {
 
         {/* Conditional Content Rendering */}
         {hasEvent ? <EventState /> : <EmptyState />}
+
         {/* Event Details Modal */}
         <EventDetailsModal
           visible={modalVisible}
