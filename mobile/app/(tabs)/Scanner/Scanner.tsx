@@ -112,22 +112,6 @@ export default function Scanner() {
               )}
             </ScannerFrame>
 
-            {/* Divider */}
-            <View style={styles.dividerContainer}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* Upload QR Code Button */}
-            <TouchableOpacity 
-              style={styles.uploadButton} 
-              activeOpacity={0.8}
-              onPress={handleUploadQR}
-            >
-              <Upload size={20} strokeWidth={2.5} color="#FFE2A3" />
-              <Text style={styles.uploadButtonText}>Upload QR Code</Text>
-            </TouchableOpacity>
 
             {/* See Attendance List Button */}
             <TouchableOpacity 
