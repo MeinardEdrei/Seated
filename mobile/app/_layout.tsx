@@ -57,6 +57,8 @@ export default function RootLayout() {
 
     return (
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+
+      <StatusBar style="dark" backgroundColor="transparent" translucent={false}/>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Login/login" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -74,7 +76,6 @@ export default function RootLayout() {
             options={{ headerShown: false }}
           />
         </Stack>
-        <StatusBar style="auto" />
       </ThemeProvider>
     );
   };

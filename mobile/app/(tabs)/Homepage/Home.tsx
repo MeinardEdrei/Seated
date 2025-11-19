@@ -22,19 +22,19 @@ import CancelReservationModal from "./components/CancelReservationModal";
 const { width, height } = Dimensions.get("window");
 
 // Sample event data - replace with actual data from your API/state management
-const EventData = {
-  title: "CCIS: General Meeting 2025",
-  seatNum: "H62",
-  date: "October 25, 2025",
-  time: "01:00 PM - 04:30 PM",
-  venue: "UMak Performing Arts Theater",
-  description:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea...",
-  eventImage:
-    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=EVENT-IMAGE", // Replace with actual event image URL
-  qrCode:
-    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=CCIS-GM-2025-USER123",
-};
+// const EventData = {
+//   title: "CCIS: General Meeting 2025",
+//   seatNum: "H62",
+//   date: "October 25, 2025",
+//   time: "01:00 PM - 04:30 PM",
+//   venue: "UMak Performing Arts Theater",
+//   description:
+//     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea...",
+//   eventImage:
+//     "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=EVENT-IMAGE", // Replace with actual event image URL
+//   qrCode:
+//     "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=CCIS-GM-2025-USER123",
+// };
 
 const Home = () => {
   const router = useRouter();
@@ -42,7 +42,7 @@ const Home = () => {
   // This should come from your state management (Redux, Context, etc.)
   const [hasEvent, setHasEvent] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [EventData, setEventData] = useState([]);
   const handleJoinEvent = () => {
     router.push("/(tabs)/Eventpage/Event");
     // After successful event join, you would set hasEvent to true
@@ -158,162 +158,6 @@ const Home = () => {
     </ScrollView>
   );
 
-  // // Event Details Modal Component
-  // const EventDetailsModal = () => (
-  //   <Modal
-  //     animationType="fade"
-  //     transparent={true}
-  //     visible={modalVisible}
-  //     onRequestClose={handleCloseModal}
-  //   >
-  //     <View style={modalStyles.modalOverlay}>
-  //       {/* Background blur and tap-to-close area */}
-  //       <Pressable style={StyleSheet.absoluteFill} onPress={handleCloseModal}>
-  //         <BlurView intensity={5} tint="dark" style={modalStyles.blurOverlay} />
-  //       </Pressable>
-
-  //       {/* Foreground modal content */}
-  //       <View style={modalStyles.modalContainer}>
-  //         <ScrollView
-  //           showsVerticalScrollIndicator={false}
-  //           contentContainerStyle={modalStyles.scrollContent}
-  //         >
-  //           {/* Close Button */}
-  //           <TouchableOpacity
-  //             style={modalStyles.closeButton}
-  //             onPress={handleCloseModal}
-  //           >
-  //             <X color="#FFFFFF" size={20} />
-  //           </TouchableOpacity>
-
-  //           {/* Event Image */}
-  //           <Image
-  //             source={require("../../../assets/images/eventImage1.jpg")}
-  //             style={modalStyles.eventImage}
-  //             resizeMode="cover"
-  //           />
-
-  //           {/* Event Details Content */}
-  //           <View style={modalStyles.contentContainer}>
-  //             <Text style={modalStyles.eventTitle}>{EventData.title}</Text>
-  //             <Text style={modalStyles.seatNumber}>
-  //               Seat: {EventData.seatNum}
-  //             </Text>
-
-  //             <View style={modalStyles.details}>
-  //               <Text style={modalStyles.detailContents}>
-  //                 Date: {EventData.date}
-  //               </Text>
-  //             </View>
-
-  //             <View style={modalStyles.details}>
-  //               <Text style={modalStyles.detailContents}>
-  //                 Time: {EventData.time}
-  //               </Text>
-  //             </View>
-
-  //             <View style={modalStyles.details}>
-  //               <Text style={modalStyles.detailContents}>
-  //                 Venue: {EventData.venue}
-  //               </Text>
-  //             </View>
-
-  //             <View style={modalStyles.divider} />
-
-  //             <Text style={modalStyles.descriptionLabel}>Description:</Text>
-  //             <Text style={modalStyles.descriptionText}>
-  //               {EventData.description}
-  //             </Text>
-
-  //             <View style={modalStyles.divider} />
-
-  //             {/* My Ticket Section */}
-  //             <Text style={modalStyles.ticketTitle}>My Ticket</Text>
-  //             <Text style={modalStyles.ticketSubtitle}>
-  //               Show this QR code to the event's organizer
-  //             </Text>
-
-  //             <View style={modalStyles.qrContainer}>
-  //               <Image
-  //                 source={{ uri: EventData.qrCode }}
-  //                 style={modalStyles.qrCode}
-  //                 resizeMode="contain"
-  //               />
-  //             </View>
-
-  //             <View style={modalStyles.divider} />
-
-  //             {/* Action Buttons */}
-  //             <View style={modalStyles.buttonContainer}>
-  //               <TouchableOpacity
-  //                 style={modalStyles.downloadButton}
-  //                 onPress={handleDownload}
-  //               >
-  //                 <Download color="#FFE2A3" size={18} strokeWidth={2.5} />
-  //                 <Text style={modalStyles.downloadButtonText}>Download</Text>
-  //               </TouchableOpacity>
-
-  //               <TouchableOpacity
-  //                 style={modalStyles.cancelButton}
-  //                 onPress={handleCancelReservation}
-  //               >
-  //                 <X color="#525252" size={18} />
-  //                 <Text style={modalStyles.cancelButtonText}>
-  //                   Cancel Reservation
-  //                 </Text>
-  //               </TouchableOpacity>
-  //             </View>
-  //           </View>
-  //         </ScrollView>
-  //       </View>
-  //     </View>
-  //   </Modal>
-  // );
-
-  const CancelReservation = () => (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={handleCloseModal}
-    >
-      <View >
-        <Pressable style={StyleSheet.absoluteFill} onPress={handleCloseModal}>
-          <BlurView intensity={5} tint="dark"  />
-        </Pressable>
-
-        {/* Close Button */}
-        <TouchableOpacity style={styles.closeButton} onPress={handleCloseModal}>
-          <X size={20} strokeWidth={2} color="rgba(82, 82, 82, 0.5)" />
-        </TouchableOpacity>
-
-        {/* Error Icon */}
-        <View style={styles.iconContainer}>
-          <View style={styles.errorCircle}>
-            <X size={25} color="#FFFFFF" strokeWidth={3} />
-          </View>
-        </View>
-
-        {/* Title */}
-        <Text style={styles.title}>Invalid Email</Text>
-
-        {/* Message */}
-        <Text style={styles.message}>
-          We couldn't find an account associated with this email. Please check
-          for typos or sign up first.
-        </Text>
-
-        {/* Try Again Button */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleCloseModal}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.buttonText}>Try Again</Text>
-        </TouchableOpacity>
-      </View>
-    </Modal>
-  );
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -400,10 +244,6 @@ const Home = () => {
 
     eventHeader: {
       width: 270,
-      // marginBottom: 16, // margin for my ticket text
-      // paddingBottom: 20, // padding between more details and line
-      // borderBottomWidth: 1,
-      // borderBottomColor: "#F3F4F6",
     },
     eventTitle: {
       fontFamily: "Poppins-Semibold",
@@ -427,7 +267,6 @@ const Home = () => {
       fontFamily: "Poppins-Regular",
       fontSize: 14,
       color: "rgba(28, 28, 28, 0.8)",
-      // marginBottom: 5,
     },
     moreDetails: {
       fontFamily: "Poppins-Regular",
@@ -435,7 +274,6 @@ const Home = () => {
       color: "#941418",
       textDecorationLine: "underline",
     },
-    // ===== Divider =====
     dividerContainer: {
       flexDirection: "row",
       alignItems: "center",
@@ -453,14 +291,12 @@ const Home = () => {
 
     ticketSection: {
       alignItems: "center",
-      // marginBottom: 24,
     },
     ticketTitle: {
       fontFamily: "Poppins-Bold",
       fontSize: 24,
       fontWeight: "bold",
       color: "#1C1C1C",
-      // marginBottom: 4,
     },
     ticketSubtitle: {
       fontFamily: "Poppins-Regular",
@@ -468,15 +304,7 @@ const Home = () => {
       color: "#525252",
       marginBottom: 8,
       textAlign: "center",
-      // paddingHorizontal: 20,
     },
-    // qrContainer: {
-    //   backgroundColor: "#FFFFFF",
-    //   padding: 16,
-    //   borderRadius: 8,
-    //   borderWidth: 1,
-    //   borderColor: "#E5E7EB",
-    // },
     qrCode: {
       width: 270,
       height: 275,
@@ -537,13 +365,7 @@ const Home = () => {
       justifyContent: "center",
       alignItems: "center",
     },
-    // title: {
-    //   fontFamily: "Poppins-Bold",
-    //   fontSize: 24,
-    //   color: "#D91818",
-    //   marginBottom: 8,
-    //   textAlign: "center",
-    // },
+ 
     message: {
       fontFamily: "Poppins-Regular",
       fontSize: 12,
@@ -553,52 +375,44 @@ const Home = () => {
       marginBottom: 32,
     },
 
-    // ===== Bottom Navigation =====
-    // bottomNav: {
-    //   flexDirection: "row",
-    //   backgroundColor: "#FFFFFF",
-    //   borderTopWidth: 1,
-    //   borderTopColor: "#E5E7EB",
-    //   paddingHorizontal: 24,
-    //   paddingVertical: 12,
-    //   justifyContent: "space-between",
-    //   shadowColor: "#000",
-    //   shadowOffset: { width: 0, height: -2 },
-    //   shadowOpacity: 0.05,
-    //   shadowRadius: 4,
-    //   elevation: 8,
-    // },
-    // navItem: {
-    //   alignItems: "center",
-    //   gap: 4,
-    // },
-    // navIconContainer: {
-    //   width: 40,
-    //   height: 40,
-    //   justifyContent: "center",
-    //   alignItems: "center",
-    // },
-    // navIconActive: {
-    //   width: 40,
-    //   height: 40,
-    //   backgroundColor: "#991B1B",
-    //   borderRadius: 12,
-    //   justifyContent: "center",
-    //   alignItems: "center",
-    // },
-    // navIcon: {
-    //   fontSize: 20,
-    // },
-    // navLabel: {
-    //   fontSize: 11,
-    //   color: "#6B7280",
-    // },
-    // navLabelActive: {
-    //   fontSize: 11,
-    //   fontWeight: "600",
-    //   color: "#991B1B",
-    // },
   });
+
+  const eventDetailModal = (
+    modalVisible: boolean, 
+    eventData: any,
+    onClose: () => void,
+    onDownload: () => void,
+    onCancelReservation: () => void
+  ) => {
+    return (
+
+      <EventDetailsModal
+        visible={modalVisible}
+        eventData={eventData}
+        onClose={onClose}
+        onDownload={onDownload}
+        onCancelReservation={onCancelReservation}
+      />
+
+    );
+  }
+
+  const cancelReservationModal = (
+    cancelModalVisible: boolean,
+    onClose: () => void,
+    onConfirm: () => void,
+    seatNumber: string
+  ) => {
+    return (
+      <CancelReservationModal
+        visible={cancelModalVisible}
+        onClose={onClose}
+        onConfirm={onConfirm}
+        seatNumber={seatNumber}
+      />
+    );
+  }
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -607,29 +421,12 @@ const Home = () => {
         <Header />
 
         {/* Conditional Content Rendering */}
-        {hasEvent ? <EventState /> : <EmptyState />}
-
-        {/* Event Details Modal */}
-        <EventDetailsModal
-          visible={modalVisible}
-          eventData={EventData}
-          onClose={handleCloseModal}
-          onDownload={handleDownload}
-          onCancelReservation={() => {
-            setCancelModalVisible(true); // show the CancelReservationModal
-            setModalVisible(false); // close EventDetailsModal
-          }}
-        />
-        {/* Cancel Reservation Modal */}
-        <CancelReservationModal
-          visible={cancelModalVisible}
-          onClose={() => setCancelModalVisible(false)}
-          onConfirm={confirmCancelReservation}
-          seatNumber={EventData.seatNum}
-        />
+        {EventData.length > 1 ? <EventState /> : <EmptyState /> }
+      
       </SafeAreaView>
     </>
   );
+
 };
 
 export default Home;
