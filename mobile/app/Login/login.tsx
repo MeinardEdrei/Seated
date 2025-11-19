@@ -22,24 +22,33 @@ WebBrowser.maybeCompleteAuthSession();
 export default function Login() {
   const [email, setEmail] = useState("");
   const [showInvalidEmailModal, setShowInvalidEmailModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
+  const [isEmailSigningIn, setIsEmailSigningIn] = useState(false); 
+  const scrollViewRef = React.useRef<ScrollView>(null);
   const router = useRouter();
   const { promptGoogleSignIn, isSigningIn, isDisabled } = useGoogleSignIn();
   const { sendLoginOtpCode } = useEmailLogin();
 
-  const handleEmailSignIn = async () => {
-    setErrorMessage("");
+  const handleInputFocus = () => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollTo({ y: 281, animated: true });
+    }, 100);
+  };
 
+  const handleEmailSignIn = async () => {
     if (!email.trim()) {
+      setModalMessage("Please enter your email address.");
       setShowInvalidEmailModal(true);
       return;
     }
 
+    setIsEmailSigningIn(true); 
     try {
       const result = await sendLoginOtpCode(email.trim());
 
       if (!result) {
-        setErrorMessage("Email not registered. Please sign up first.");
+        setModalMessage("Email not registered. Please sign up first.");
+        setShowInvalidEmailModal(true);
         return;
       }
       router.push({
@@ -48,7 +57,10 @@ export default function Login() {
       });
     } catch (error) {
       console.error("Email Sign-In Error:", error);
-      setErrorMessage("Email not registered. Please sign up first.");
+      setModalMessage("Email not registered. Please sign up first.");
+      setShowInvalidEmailModal(true);
+    } finally {
+      setIsEmailSigningIn(false); 
     }
   };
 
@@ -90,10 +102,7 @@ export default function Login() {
       backgroundColor: "#941418",
       borderTopLeftRadius: 30,
       borderTopRightRadius: 30,
-      position: "absolute",
-      bottom: 0,
-      left: 0,
-      right: 0,
+      paddingBottom: 40, // Extra padding to cover keyboard rounded corners
     },
 
     // ===== Illustration Section =====
@@ -110,14 +119,11 @@ export default function Login() {
 
     // ===== Sign In Section =====
     signInSection: {
-      backgroundColor: "#941418",
       width: "100%",
-      height: 440,
-      borderTopLeftRadius: 30,
-      borderTopRightRadius: 30,
+      minHeight: 440,
       paddingTop: 20,
       paddingHorizontal: 33,
-      // paddingBottom: 0,
+      paddingBottom: 40,
       alignItems: "center",
     },
 
@@ -239,6 +245,9 @@ export default function Login() {
       // shadowRadius: 4,
       // elevation: 4,
     },
+    signInButtonDisabled: {
+      opacity: 0.6,
+    },
     signInButtonText: {
       fontSize: 18,
       fontWeight: "bold",
@@ -274,6 +283,7 @@ export default function Login() {
           style={styles.container}
         >
           <ScrollView
+            ref={scrollViewRef}
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
@@ -297,7 +307,7 @@ export default function Login() {
             </View>
 
             {/* Main Content Card */}
-            <SafeAreaView edges={["bottom"]} style={styles.redContainer}>
+            <View style={styles.redContainer}>
               <View style={styles.signInSection}>
                 <View style={styles.textContainer}>
                   <Text style={styles.title}>Get started with us</Text>
@@ -344,8 +354,8 @@ export default function Login() {
                       value={email}
                       onChangeText={(text) => {
                         setEmail(text);
-                        setErrorMessage(""); // Clear error when typing
                       }}
+                      onFocus={handleInputFocus}
                       keyboardType="email-address"
                       autoCapitalize="none"
                       autoCorrect={false}
@@ -355,11 +365,17 @@ export default function Login() {
 
                 {/* Sign In Button */}
                 <TouchableOpacity
-                  style={styles.signInButton}
+                  style={[
+                    styles.signInButton,
+                    (isEmailSigningIn || isSigningIn || isDisabled) && styles.signInButtonDisabled,
+                  ]}
                   onPress={handleEmailSignIn}
                   activeOpacity={0.8}
+                  disabled={isEmailSigningIn || isSigningIn || isDisabled} // Disable during any loading
                 >
-                  <Text style={styles.signInButtonText}>Sign In</Text>
+                  <Text style={styles.signInButtonText}>
+                    {isEmailSigningIn ? "Signing in..." : "Sign In"}
+                  </Text>
                 </TouchableOpacity>
 
                 {/* Sign Up Link */}
@@ -372,13 +388,17 @@ export default function Login() {
                   <Text style={styles.signUpLink}>Sign Up</Text>
                 </TouchableOpacity>
               </View>
-            </SafeAreaView>
+            </View>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
 
       {/* Invalid Email Modal */}
-      <InvalidEmailModal visible={showInvalidEmailModal} onClose={closeModal} />
+      <InvalidEmailModal 
+        visible={showInvalidEmailModal} 
+        onClose={closeModal}
+        message={modalMessage}
+      />
     </>
   );
 }

@@ -3,9 +3,17 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Octicons from "react-native-vector-icons/Octicons";
-import { View, Platform } from "react-native";
+import { View, Platform, Dimensions } from "react-native";
+import { useAuth } from "@/context/AuthContext";
 
 export default function TabsLayout() {
+  const { width } = Dimensions.get("window");
+  const horizontalMargin = width * 0.06;
+  const bottomMargin = Platform.OS === "ios" ? 20 : 10;
+  const { user } = useAuth();
+  
+  const isOrganizer = user?.role?.toLowerCase() === "organizer";
+
   return (
     <View
       style={{

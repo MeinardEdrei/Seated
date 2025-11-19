@@ -1,87 +1,116 @@
 import React, { useState } from "react";
 import {
   View,
-  Image,
   Text,
   TouchableOpacity,
   StyleSheet,
-  StatusBar,
+  Alert,
 } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Settings } from "lucide-react-native";
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import { Upload } from "lucide-react-native";
 
-import {
-  Camera,
-  Home,
-  Calendar,
-  MessageSquare,
-  Bell,
-  Upload,
-} from "lucide-react-native";
-
-interface ScanResult {
-  success: boolean;
-  name?: string;
-  table?: string;
-  guests?: number;
-  message?: string;
-}
+import Header from "../../../components/Header";
+import ScannerFrame from "../../../components/ScannerFrame";
 
 export default function EventPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("event");
-  const handleSettings = () => {
-    router.push("/(tabs)/Homepage/components/Settings");
-  };
+  const [scanned, setScanned] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
 
   const handleViewEvent = () => {
     router.push("/Eventpage/components/ViewEvent");
-    // console.log("Navigate to sign up");
   };
+
+  const handleBarcodeScanned = ({ type, data }: { type: string; data: string }) => {
+    if (scanned) return;
+    
+    setScanned(true);
+
+    Alert.alert(
+      'QR Code Scanned',
+      `Event Data: ${data}`,
+      [
+        {
+          text: 'View Details',
+          onPress: () => {
+            setScanned(false);
+            handleViewEvent();
+          },
+        },
+        {
+          text: 'Scan Again',
+          onPress: () => setScanned(false),
+        },
+      ]
+    );
+
+    console.log('QR Code Type:', type);
+    console.log('QR Code Data:', data);
+  };
+
+  const handleUploadQR = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Required',
+          'Please enable photo library access to upload QR codes.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        Alert.alert(
+          'Image Selected',
+          'QR code uploaded successfully. Processing event data...',
+          [{ text: 'OK' }]
+        );
+        
+        console.log('Selected image URI:', result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to upload image. Please try again.');
+    }
+  };
+
+  // Request camera permission on mount
+  React.useEffect(() => {
+    if (permission && !permission.granted) {
+      requestPermission();
+    }
+  }, [permission]);
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: "#ffffffff",
+      backgroundColor: "#FFFFFF",
     },
-    // ===== Header =====
-    header: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginHorizontal: 16,
-      marginBottom: 8,
-      // backgroundColor: "#47fc00ff",
-    },
-    logoContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    headerLogo: {
-      width: 137,
-      height: 40,
-      resizeMode: "contain",
-    },
-
     mainContent: {
       flex: 1,
       alignItems: "center",
-      // justifyContent: "center",
-      // paddingHorizontal: 55,
       width: "100%",
       top: 70,
     },
     eventcontainer: {
       flex: 1,
       alignItems: "center",
-      // justifyContent: "center",
-      // paddingHorizontal: 55,
       width: 280,
     },
-
     caption: {
-      fontFamily: "Poppins-Semibold",
+      fontFamily: "Poppins-SemiBold",
       fontSize: 16,
       color: "#1C1C1C",
     },
@@ -90,55 +119,12 @@ export default function EventPage() {
       fontFamily: "Poppins-Regular",
       fontSize: 12,
       textAlign: "center",
-      // paddingHorizontal: 32,
       marginBottom: 16,
     },
-    scannerFrame: {
-      width: 280,
-      height: 280,
-      backgroundColor: "rgba(82, 82, 82, 0.2)",
-      borderRadius: 20,
-      alignItems: "center",
-      justifyContent: "center",
-      // marginBottom: 32,
-      position: "relative",
+    camera: {
+      width: '100%',
+      height: '100%',
     },
-    corner: {
-      position: "absolute",
-      width: 28,
-      height: 28,
-      borderColor: "#1C1C1C",
-      borderWidth: 1,
-    },
-    topLeft: {
-      borderTopLeftRadius: 10,
-      top: 20,
-      left: 20,
-      borderRightWidth: 0,
-      borderBottomWidth: 0,
-    },
-    topRight: {
-      borderTopRightRadius: 10,
-      top: 20,
-      right: 20,
-      borderLeftWidth: 0,
-      borderBottomWidth: 0,
-    },
-    bottomLeft: {
-      borderBottomLeftRadius: 10,
-      bottom: 20,
-      left: 20,
-      borderRightWidth: 0,
-      borderTopWidth: 0,
-    },
-    bottomRight: {
-      borderBottomRightRadius: 10,
-      bottom: 20,
-      right: 20,
-      borderLeftWidth: 0,
-      borderTopWidth: 0,
-    },
-    // ===== Divider =====
     dividerContainer: {
       flexDirection: "row",
       alignItems: "center",
@@ -160,8 +146,6 @@ export default function EventPage() {
     },
     photoButton: {
       backgroundColor: "#941418",
-      // paddingHorizontal: 32,
-      // paddingVertical: 12,
       width: "100%",
       height: 50,
       borderRadius: 10,
@@ -169,24 +153,19 @@ export default function EventPage() {
       alignItems: "center",
       justifyContent: "center",
       gap: 8,
-
-      // Drop shadow from Figma settings
       shadowColor: "#1C1C1C",
       shadowOffset: { width: 1, height: 1 },
-      shadowOpacity: 1, // 20% opacity
-      shadowRadius: 4, // corresponds to blur 4
-      elevation: 2, // Android shadow
+      shadowOpacity: 1,
+      shadowRadius: 4,
+      elevation: 2,
     },
     photoButtonText: {
       color: "#FFE2A3",
       fontFamily: "Poppins-Bold",
       fontSize: 14,
     },
-
     tempButton: {
-      backgroundColor: "#151515ff",
-      // paddingHorizontal: 32,
-      // paddingVertical: 12,
+      backgroundColor: "#151515",
       width: "100%",
       height: 50,
       borderRadius: 10,
@@ -195,96 +174,52 @@ export default function EventPage() {
       justifyContent: "center",
       gap: 8,
       marginTop: 50,
-
-      // Drop shadow from Figma settings
       shadowColor: "#1C1C1C",
       shadowOffset: { width: 1, height: 1 },
-      shadowOpacity: 1, // 20% opacity
-      shadowRadius: 4, // corresponds to blur 4
-      elevation: 2, // Android shadow
+      shadowOpacity: 1,
+      shadowRadius: 4,
+      elevation: 2,
     },
     tempButtonText: {
-      color: "#ffffffff",
+      color: "#FFFFFF",
       fontFamily: "Poppins-Bold",
       fontSize: 14,
     },
-
-    // bottomNav: {
-    //   backgroundColor: "#fff",
-    //   flexDirection: "row",
-    //   justifyContent: "space-around",
-    //   alignItems: "center",
-    //   paddingVertical: 8,
-    //   borderTopWidth: 1,
-    //   borderTopColor: "#E5E7EB",
-    //   shadowColor: "#000",
-    //   shadowOffset: { width: 0, height: -2 },
-    //   shadowOpacity: 0.1,
-    //   shadowRadius: 4,
-    //   elevation: 8,
-    // },
-    // navItem: {
-    //   alignItems: "center",
-    //   paddingVertical: 8,
-    //   paddingHorizontal: 16,
-    //   gap: 4,
-    // },
-    // navItemActive: {
-    //   backgroundColor: "#991B1B",
-    //   borderRadius: 8,
-    // },
-    // navText: {
-    //   fontSize: 12,
-    //   fontWeight: "500",
-    //   color: "#6B7280",
-    // },
-    // navTextActive: {
-    //   color: "#991B1B",
-    // },
-    // navTextActiveWhite: {
-    //   color: "#fff",
-    // },
   });
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <Header />
 
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require("../../../assets/images/header-logo.png")}
-              style={styles.headerLogo}
-            />
-          </View>
-          <TouchableOpacity onPress={handleSettings}>
-            <Settings size={24} strokeWidth={2} color="#941418" />
-            {/* <Menu color="#941418" /> */}
-          </TouchableOpacity>
-        </View>
-
-        {/* Main Content */}
         <View style={styles.mainContent}>
           <View style={styles.eventcontainer}>
             <Text style={styles.caption}>Find a code to scan</Text>
-            {/* Info Text */}
+            
             <Text style={styles.infoText}>
               Position the QR code within the frame to scan
             </Text>
 
-            {/* Scanner Frame */}
-            <TouchableOpacity style={styles.scannerFrame} activeOpacity={0.8}>
-              {/* Corner Brackets */}
-              <View style={[styles.corner, styles.topLeft]} />
-              <View style={[styles.corner, styles.topRight]} />
-              <View style={[styles.corner, styles.bottomLeft]} />
-              <View style={[styles.corner, styles.bottomRight]} />
-
-              {/* Camera Icon */}
-              {/* <Camera size={48} color="#9CA3AF" /> */}
-            </TouchableOpacity>
+            {/* Scanner Frame with Camera inside */}
+            <ScannerFrame isScanning={scanned}>
+              {permission?.granted ? (
+                <CameraView
+                  style={styles.camera}
+                  facing="back"
+                  onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+                  barcodeScannerSettings={{
+                    barcodeTypes: ['qr'],
+                  }}
+                />
+              ) : (
+                <View style={{ flex: 1, backgroundColor: 'rgba(82, 82, 82, 0.2)', justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ color: '#525252', fontFamily: 'Poppins-Regular', fontSize: 12 }}>
+                    Camera permission required
+                  </Text>
+                </View>
+              )}
+            </ScannerFrame>
 
             {/* Divider */}
             <View style={styles.dividerContainer}>
@@ -293,20 +228,23 @@ export default function EventPage() {
               <View style={styles.dividerLine} />
             </View>
 
-            {/* Scan from Photo Button */}
-            <TouchableOpacity style={styles.photoButton} activeOpacity={0.8}>
+            {/* Upload QR Code Button */}
+            <TouchableOpacity 
+              style={styles.photoButton} 
+              activeOpacity={0.8}
+              onPress={handleUploadQR}
+            >
               <Upload size={20} strokeWidth={2.5} color="#FFE2A3" />
               <Text style={styles.photoButtonText}>Upload QR Code</Text>
             </TouchableOpacity>
 
-            {/* Temporary Button to proceed to next page*/}
+            {/* Temp Button for ViewEvent */}
             <TouchableOpacity
               style={styles.tempButton}
               onPress={handleViewEvent}
               activeOpacity={0.8}
             >
-              {/* <Upload size={20} strokeWidth={2.5} color="#FFE2A3" /> */}
-              <Text style={styles.tempButtonText}>Next Page</Text>
+              <Text style={styles.tempButtonText}>View Event (Temp)</Text>
             </TouchableOpacity>
           </View>
         </View>
