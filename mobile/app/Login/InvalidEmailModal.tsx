@@ -14,11 +14,13 @@ import { BlurView } from "expo-blur";
 interface InvalidEmailModalProps {
   visible: boolean;
   onClose: () => void;
+  message?: string;
 }
 
 export default function InvalidEmailModal({
   visible,
   onClose,
+  message = "We couldn't find an account associated with this email. Please check for typos or sign up first.",
 }: InvalidEmailModalProps) {
   const styles = StyleSheet.create({
     overlay: {
@@ -132,8 +134,7 @@ export default function InvalidEmailModal({
 
             {/* Message */}
             <Text style={styles.message}>
-              We couldn't find an account associated with this email. Please
-              check for typos or sign up first.
+              {message}
             </Text>
 
             {/* Try Again Button */}

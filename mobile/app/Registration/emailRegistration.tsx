@@ -70,10 +70,9 @@ export default function EmailRegistration() {
       flex: 1,
     },
     scrollContent: {
-      flexGrow: 1,
       justifyContent: "center", // centers vertically
       alignItems: "center", // centers horizontally
-      paddingVertical: 20, // optional, adds breathing room on smaller screens
+      paddingVertical: 6,
     },
     // Header
     header: {
@@ -90,7 +89,6 @@ export default function EmailRegistration() {
       position: "relative",
       // paddingBottom: 14,
     },
-
     backButton: {
       position: "absolute",
       left: 16,
@@ -226,7 +224,7 @@ export default function EmailRegistration() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <SafeAreaView
-        style={[styles.container, { flex: 1 }]}
+        style={[styles.container]}
         edges={["top", "left", "right", "bottom"]}
       >
         <KeyboardAvoidingView
