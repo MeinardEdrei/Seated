@@ -303,6 +303,13 @@ export default function TabsLayout() {
             href: null,
           }}
         />
+        {/* Hidden Files in Notification */}
+        <Tabs.Screen
+          name="Organizer/Dashboard/Dashboard"
+          options={{
+            href: null,
+          }}
+        />
       </Tabs>
     </View>
   );
