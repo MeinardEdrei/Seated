@@ -82,7 +82,7 @@ export default function Scanner() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-        <Header showSettings={false} />
+        <Header  />
 
         <View style={styles.mainContent}>
           <View style={styles.scannerContainer}>
