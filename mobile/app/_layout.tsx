@@ -4,10 +4,10 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+// import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { useEffect } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, StatusBar } from "react-native";
 import { useFonts } from "expo-font";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { setDefaultTextFont } from "@/utils/setDefaultTextFont";
@@ -56,27 +56,34 @@ export default function RootLayout() {
     }
 
     return (
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-
-      <StatusBar style="dark" backgroundColor="transparent" translucent={false}/>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login/login" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="Registration/registration"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="Registration/emailRegistration"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Registration/otpVerification"
-            options={{ headerShown: false }}
-          />
-        </Stack>
-      </ThemeProvider>
+      <>
+        <StatusBar
+          style={colorScheme === "dark" ? "light" : "dark"}
+          backgroundColor="transparent"
+          translucent={false}
+        />
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Login/login" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="Registration/registration"
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="Registration/emailRegistration"
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Registration/otpVerification"
+              options={{ headerShown: false }}
+            />
+          </Stack>
+        </ThemeProvider>
+      </>
     );
   };
   return (
