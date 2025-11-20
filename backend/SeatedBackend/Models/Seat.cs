@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -16,6 +17,8 @@ namespace SeatedBackend.Models
     }
 
     [Table("seats")]
+    [Index(nameof(VenueId), nameof(FloorType), nameof(Section))]
+    [Index(nameof(Status))]
     public class Seat
     {
         [Key]
@@ -28,17 +31,17 @@ namespace SeatedBackend.Models
         public int VenueId { get; set; }
         public Venue? Venue { get; set; }
 
+        [Required]
+        [Column("section")]
+        [MaxLength(100)]
+        public string Section { get; set; } = string.Empty;
+
         [Column("seat_row")]
         [MaxLength(10)]
         public string? SeatRow { get; set; }
 
         [Column("seat_column")]
         public int? SeatColumn { get; set; }
-
-        [Required]
-        [Column("section")]
-        [MaxLength(100)]
-        public string Section { get; set; } = string.Empty;
 
         [Required]
         [Column("floor_type")]
@@ -63,11 +66,11 @@ namespace SeatedBackend.Models
 
         [Required]
         [Column("created_at")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         [Required]
         [Column("updated_at")]
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();

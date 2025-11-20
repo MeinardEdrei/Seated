@@ -9,13 +9,10 @@ namespace SeatedBackend.Models
     {
         [EnumMember(Value = "Reserved")]
         Reserved,
-
         [EnumMember(Value = "Cancelled")]
         Cancelled,
-
         [EnumMember(Value = "Attended")]
         Attended,
-
         [EnumMember(Value = "Absent")]
         Absent,
     }

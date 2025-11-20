@@ -7,22 +7,17 @@ namespace SeatedBackend.Models
 {
     public enum UserRole
     {
-        [EnumMember(Value = "guest")]
+        [EnumMember(Value = "Guest")]
         Guest,
-
-        [EnumMember(Value = "student")]
+        [EnumMember(Value = "Student")]
         Student,
-
-        [EnumMember(Value = "faculty")]
+        [EnumMember(Value = "Faculty")]
         Faculty,
-
-        [EnumMember(Value = "organizer")]
+        [EnumMember(Value = "Organizer")]
         Organizer,
-
-        [EnumMember(Value = "staff")]
+        [EnumMember(Value = "Staff")]
         Staff,
-
-        [EnumMember(Value = "office_head")]
+        [EnumMember(Value = "Office_Head")]
         OfficeHead
     }
 
@@ -66,11 +61,11 @@ namespace SeatedBackend.Models
 
         [Required]
         [Column("created_at")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         [Required]
         [Column("updated_at")]
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; }
 
         // Navigation Properties
         public ICollection<Event> Events { get; set; } = new List<Event>();

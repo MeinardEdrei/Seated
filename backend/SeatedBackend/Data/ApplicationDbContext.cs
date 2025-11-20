@@ -21,8 +21,8 @@ namespace SeatedBackend.Data
             modelBuilder.Entity<User>()
                 .Property(u => u.Role)
                 .HasConversion(
-                    v => v.ToString().ToLower(),
-                    v => Enum.Parse<UserRole>(v, true)
+                    v => v.ToString(),
+                    v => Enum.Parse<UserRole>(v)
                 )
                 .HasDefaultValue(UserRole.Guest);
 
@@ -39,8 +39,8 @@ namespace SeatedBackend.Data
             modelBuilder.Entity<Event>()
                 .Property(u => u.Status)
                 .HasConversion(
-                    v => v.ToString().ToLower(),
-                    v => Enum.Parse<EventStatus>(v, true)
+                    v => v.ToString(),
+                    v => Enum.Parse<EventStatus>(v)
                 )
                 .HasDefaultValue(EventStatus.Pending);
 
@@ -52,6 +52,43 @@ namespace SeatedBackend.Data
                 .Property(u => u.UpdatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP(6)")
                 .ValueGeneratedOnAddOrUpdate();
+
+            // Seat Config
+            modelBuilder.Entity<Seat>()
+                .Property(u => u.Status)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Enum.Parse<SeatStatus>(v)
+                )
+                .HasDefaultValue(SeatStatus.Available);
+
+            modelBuilder.Entity<Seat>()
+                .Property(u => u.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+            modelBuilder.Entity<Seat>()
+                .Property(u => u.UpdatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP(6)")
+                .ValueGeneratedOnAddOrUpdate();
+
+            // Reservation Config
+            modelBuilder.Entity<Reservation>()
+                .Property(u => u.Status)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Enum.Parse<ReservationStatus>(v)
+                )
+                .HasDefaultValue(ReservationStatus.Reserved);
+
+            // SeatRequest Config
+            modelBuilder.Entity<SeatRequest>()
+                .Property(u => u.Status)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Enum.Parse<SeatRequestStatus>(v)
+                )
+                .HasDefaultValue(SeatRequestStatus.Pending);
+
 
             // Relationships
             // User - Events

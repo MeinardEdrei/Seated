@@ -24,6 +24,7 @@ builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<CloudinaryService>();
+builder.Services.AddScoped<SeatSeederService>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddOpenApi();
@@ -83,7 +84,28 @@ FirebaseApp.Create(new AppOptions()
     Credential = GoogleCredential.FromFile("serviceAccountKey.json")
 
 });
+
 var app = builder.Build();
+
+// Seed database on startup (runs once if seats don't exist)
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        var seeder = services.GetRequiredService<SeatSeederService>();
+
+        // Seed seats for UPAT Theater
+        await seeder.SeedSeatsForVenue(venueId: 1, venueName: "UMak Performing Arts Theater");
+
+        Console.WriteLine("✅ Database seeding completed successfully");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Error during database seeding: {ex.Message}");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

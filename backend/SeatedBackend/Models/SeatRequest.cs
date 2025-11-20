@@ -9,10 +9,8 @@ namespace SeatedBackend.Models
     {
         [EnumMember(Value = "Pending")]
         Pending,
-
         [EnumMember(Value = "Approved")]
         Approved,
-
         [EnumMember(Value = "Rejected")]
         Rejected,
     }
