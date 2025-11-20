@@ -6,8 +6,4 @@ namespace SeatedBackend.DTOs
         public string EventName { get; set; } = string.Empty;
     }
 
-    public class ImageDeleteDto
-    {
-        public string PublicId { get; set; } = string.Empty;
-    }
 }

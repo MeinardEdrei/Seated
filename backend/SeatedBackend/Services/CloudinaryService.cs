@@ -39,13 +39,10 @@ public class CloudinaryService
         return uploadResult;
     }
 
-
-    public async Task<bool> DeleteImageAsync(string publicId)
+    public async Task<(bool Success, string? ErrorMessage)> DeleteImageAsync(string publicId)
     {
         if (string.IsNullOrEmpty(publicId))
-        {
             throw new ArgumentException("Public ID cannot be null or empty.", nameof(publicId));
-        }
 
         var deleteParams = new DeletionParams(publicId)
         {
@@ -55,13 +52,31 @@ public class CloudinaryService
         try
         {
             var result = await _cloudinary.DestroyAsync(deleteParams);
-            return result.Result == "ok";
+            if (result.Result == "ok")
+                return (true, null);
+
+            return (false, result.Error?.Message ?? "Unknown error from Cloudinary");
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
-            Console.WriteLine($"Error deleting image from Cloudinary: {ex.Message}");
-            return false;
+            return (false, ex.Message);
         }
+    }
+
+
+    public static string GetPublicId(string Url)
+    {
+        if (string.IsNullOrEmpty(Url))
+            return string.Empty;
+
+        string pattern = @"Seated.*(?=\.)";
+
+        Match match = Regex.Match(Url, pattern);
+        if (match.Success)
+        {
+            return match.Value;
+        }
+        return string.Empty;
     }
 
     public static string Sanitize(string input)

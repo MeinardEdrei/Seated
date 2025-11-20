@@ -23,10 +23,10 @@ namespace SeatedBackend.Controllers
             _context = context;
             _cloudinaryService = cloudinaryService;
         }
-        
+
         // Image Endpoints
-       
-        [Authorize]
+
+        // [Authorize]
         [HttpPost("upload-image")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadImage([FromForm] ImageUploadDto dto)
@@ -40,20 +40,6 @@ namespace SeatedBackend.Controllers
             var uploadResult = await _cloudinaryService.UploadImageAsync(dto.ImageFile, dto.EventName);
 
             return Ok(new { imageUrl = uploadResult.SecureUrl.AbsoluteUri, publicId = uploadResult.PublicId });
-        }
-
-        [Authorize]
-        [HttpDelete("delete-image")]
-        public async Task<IActionResult> DeleteImage([FromBody] ImageDeleteDto dto)
-        {
-            if (string.IsNullOrEmpty(dto.PublicId))
-                return BadRequest(new { message = "Public ID is required" });
-
-            var result = await _cloudinaryService.DeleteImageAsync(dto.PublicId);
-            if (result)
-                return Ok(new { message = "Image deleted successfully." });
-            else
-                return StatusCode(500, new { message = "Failed to delete image." });
         }
 
         [Authorize(Roles = "organizer")]
@@ -102,7 +88,7 @@ namespace SeatedBackend.Controllers
             if (existingEvent == null)
                 return NotFound(new { message = "Event not found." });
 
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
                        ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (userIdClaim == null)
@@ -138,21 +124,40 @@ namespace SeatedBackend.Controllers
         [HttpDelete("delete-event/{eventId}")]
         public async Task<IActionResult> DeleteEvent(int eventId)
         {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                           ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "User identifier not found." });
+
             var existingEvent = await _context.Events.FindAsync(eventId);
             if (existingEvent == null)
                 return NotFound(new { message = "Event not found." });
 
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
-                       ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (userIdClaim == null)
-                return Unauthorized(new { message = "User identifier not found." });
             var userId = int.Parse(userIdClaim);
+
             if (existingEvent.OrganizerId != userId)
                 return StatusCode(403, new { message = "You are not authorized to delete this event." });
 
+            var imageUrl = existingEvent.ImageUrl;
+            var publicId = CloudinaryService.GetPublicId(imageUrl);
+
+            if (!string.IsNullOrEmpty(publicId))
+            {
+                var (deletionSuccess, errorMessage) = await _cloudinaryService.DeleteImageAsync(publicId);
+                if (!deletionSuccess)
+                {
+                    return StatusCode(500, new
+                    {
+                        message = "Failed to delete event image from Cloudinary.",
+                        error = errorMessage
+                    });
+                }
+            }
+
             _context.Events.Remove(existingEvent);
             await _context.SaveChangesAsync();
+
             return Ok(new { message = "Event deleted successfully." });
         }
 
@@ -180,7 +185,7 @@ namespace SeatedBackend.Controllers
         [HttpGet("get-events-by-organizer")]
         public async Task<IActionResult> GetEventsByOrganizer()
         {
-            var nameIdentifiedClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value 
+            var nameIdentifiedClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
                        ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (nameIdentifiedClaim == null)
