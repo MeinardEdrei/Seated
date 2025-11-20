@@ -23,7 +23,7 @@ public class CreateEventDto
     public required TimeSpan EndTime { get; set; }
 
     [Required]
-    public required string ImageUrl { get; set; }
+    public required IFormFile ImageFile { get; set; }
 }
 
 public class UpdateEventDto {
@@ -33,5 +33,5 @@ public class UpdateEventDto {
     public DateTime? EventDate { get; set; }
     public TimeSpan? StartTime { get; set; }
     public TimeSpan? EndTime { get; set; }
-    public string? ImageUrl { get; set; }
+    public IFormFile? ImageFile { get; set; }
 }

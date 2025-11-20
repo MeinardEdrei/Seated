@@ -24,42 +24,31 @@ namespace SeatedBackend.Controllers
             _cloudinaryService = cloudinaryService;
         }
 
-        // Image Endpoints
 
-        // [Authorize]
-        [HttpPost("upload-image")]
+        // [ApiExplorerSettings(IgnoreApi = true)]
+        [Authorize(Roles = "Organizer")]
+        [HttpPost("create-event")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadImage([FromForm] ImageUploadDto dto)
+        public async Task<IActionResult> CreateEvent([FromForm] CreateEventDto dto)
         {
             if (dto.ImageFile == null || dto.ImageFile.Length == 0)
-                return BadRequest(new { message = "Image file is required" });
+                return BadRequest(new { message = "Event image is required" });
 
-            if (string.IsNullOrEmpty(dto.EventName))
-                return BadRequest(new { message = "Event name is required" });
-
-            var uploadResult = await _cloudinaryService.UploadImageAsync(dto.ImageFile, dto.EventName);
-
-            return Ok(new { imageUrl = uploadResult.SecureUrl.AbsoluteUri, publicId = uploadResult.PublicId });
-        }
-
-        [Authorize(Roles = "organizer")]
-        [HttpPost("create-event")]
-        public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto dto)
-        {
             if (string.IsNullOrEmpty(dto.EventName))
                 return BadRequest(new { message = "Event name is required." });
 
             if (string.IsNullOrEmpty(dto.Description))
                 return BadRequest(new { message = "Event description is required." });
 
-            if (string.IsNullOrEmpty(dto.ImageUrl))
-                return BadRequest(new { message = "Event imageUrl is required." });
 
             var organizerId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
                                    ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(organizerId))
                 return Unauthorized(new { message = "Organizer identifier not found." });
+
+            var uploadResult = await _cloudinaryService.UploadImageAsync(dto.ImageFile, dto.EventName);
+            var ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
 
             var newEvent = new Event
             {
@@ -70,7 +59,7 @@ namespace SeatedBackend.Controllers
                 EventDate = dto.EventDate,
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,
-                ImageUrl = dto.ImageUrl,
+                ImageUrl = ImageUrl,
                 Status = EventStatus.Pending,
             };
             _context.Events.Add(newEvent);
@@ -79,9 +68,10 @@ namespace SeatedBackend.Controllers
             return Ok(new { message = "Event created successfully", data = newEvent });
         }
 
-        [Authorize(Roles = "organizer")]
+        [Authorize(Roles = "Organizer")]
         [HttpPatch("update-event/{eventId}")]
-        public async Task<IActionResult> UpdateEvent(int eventId, [FromBody] UpdateEventDto dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateEvent(int eventId, [FromForm] UpdateEventDto dto)
         {
 
             var existingEvent = await _context.Events.FindAsync(eventId);
@@ -99,6 +89,8 @@ namespace SeatedBackend.Controllers
             if (existingEvent.OrganizerId != userId)
                 return StatusCode(403, new { message = "You are not authorized to update this event." });
 
+
+
             if (dto.VenueId.HasValue)
                 existingEvent.VenueId = dto.VenueId.Value;
             if (!string.IsNullOrEmpty(dto.EventName))
@@ -111,8 +103,19 @@ namespace SeatedBackend.Controllers
                 existingEvent.StartTime = dto.StartTime.Value;
             if (dto.EndTime.HasValue)
                 existingEvent.EndTime = dto.EndTime.Value;
-            if (!string.IsNullOrEmpty(dto.ImageUrl))
-                existingEvent.ImageUrl = dto.ImageUrl;
+
+            if (dto.ImageFile != null && dto.ImageFile.Length > 0)
+            {
+                if (!string.IsNullOrEmpty(existingEvent.ImageUrl))
+                {
+                    var oldPublicId = CloudinaryService.GetPublicId(existingEvent.ImageUrl);
+                    if (!string.IsNullOrEmpty(oldPublicId))
+                        await _cloudinaryService.DeleteImageAsync(oldPublicId);
+                }
+
+                var uploadResult = await _cloudinaryService.UploadImageAsync(dto.ImageFile, existingEvent.EventName);
+                existingEvent.ImageUrl = uploadResult.SecureUrl.AbsoluteUri;
+            }
 
             await _context.SaveChangesAsync();
 
@@ -120,7 +123,7 @@ namespace SeatedBackend.Controllers
 
         }
 
-        [Authorize(Roles = "organizer")]
+        [Authorize(Roles = "Organizer")]
         [HttpDelete("delete-event/{eventId}")]
         public async Task<IActionResult> DeleteEvent(int eventId)
         {
@@ -162,7 +165,7 @@ namespace SeatedBackend.Controllers
         }
 
 
-        [Authorize(Roles = "staff,loffice_head")]
+        [Authorize(Roles = "Staff,Office_head")]
         [HttpGet("get-all-events")]
         public async Task<IActionResult> GetAllEvents()
         {
@@ -181,7 +184,7 @@ namespace SeatedBackend.Controllers
         }
 
 
-        [Authorize(Roles = "organizer")]
+        [Authorize(Roles = "Organizer")]
         [HttpGet("get-events-by-organizer")]
         public async Task<IActionResult> GetEventsByOrganizer()
         {
