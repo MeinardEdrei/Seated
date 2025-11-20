@@ -7,10 +7,9 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function TabsLayout() {
   const { user } = useAuth();
-  
+
   const isOrganizer = user?.role?.toLowerCase() === "organizer";
 
-  
   return (
     <View
       style={{
@@ -19,6 +18,10 @@ export default function TabsLayout() {
       }}
     >
       <Tabs
+        // initialRouteName={isOrganizer ? "Homepage/OrgHome" : "Homepage/Home"}
+        // initialRouteName={
+        //   isOrganizer ? "Eventpage/OrgEvent" : "Eventpage/Event"
+        // }
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: true,
@@ -54,10 +57,11 @@ export default function TabsLayout() {
           },
         }}
       >
-        {/* Home - Show for both */}
+        {/* User: Home */}
         <Tabs.Screen
           name="Homepage/Home"
           options={{
+            href: isOrganizer ? null : undefined, // hide user home for organizers
             title: "Home",
             tabBarItemStyle: { flex: 1, alignItems: "center" },
             tabBarIcon: ({ color, focused }) => (
@@ -71,16 +75,32 @@ export default function TabsLayout() {
         />
 
         {/* Hidden Files in Homepage */}
-        <Tabs.Screen name="Homepage/styles/HomeStyles" options={{ href: null }} />
-        <Tabs.Screen name="Homepage/components/Settings" options={{ href: null }} />
-        <Tabs.Screen name="Homepage/styles/EventDetailsModalStyles" options={{ href: null }} />
-        <Tabs.Screen name="Homepage/components/EventDetailsModal" options={{ href: null }} />
-        <Tabs.Screen name="Homepage/components/CancelReservationModal" options={{ href: null }} />
+        <Tabs.Screen
+          name="Homepage/styles/HomeStyles"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Homepage/components/Settings"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Homepage/styles/EventDetailsModalStyles"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Homepage/components/EventDetailsModal"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Homepage/components/CancelReservationModal"
+          options={{ href: null }}
+        />
 
-        {/* Event - Show for both */}
+        {/* User: Event */}
         <Tabs.Screen
           name="Eventpage/Event"
           options={{
+            href: isOrganizer ? null : undefined, // hide user event for organizers
             title: "Event",
             tabBarItemStyle: { flex: 1, alignItems: "center" },
             tabBarIcon: ({ color, focused }) => (
@@ -94,20 +114,42 @@ export default function TabsLayout() {
         />
 
         {/* Hidden Files in Eventpage */}
-        <Tabs.Screen name="Eventpage/styles/EventStyles" options={{ href: null }} />
-        <Tabs.Screen name="Eventpage/components/ViewEvent" options={{ href: null }} />
+        <Tabs.Screen
+          name="Eventpage/styles/EventStyles"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Eventpage/components/ViewEvent"
+          options={{ href: null }}
+        />
         <Tabs.Screen name="Eventpage/Queuing" options={{ href: null }} />
         <Tabs.Screen name="Eventpage/SeatMapView" options={{ href: null }} />
-        <Tabs.Screen name="Eventpage/components/queuing" options={{ href: null }} />
-        <Tabs.Screen name="Eventpage/components/CancelQueueModal" options={{ href: null }} />
-        <Tabs.Screen name="Eventpage/styles/ViewEventStyles" options={{ href: null }} />
-        <Tabs.Screen name="Eventpage/styles/QueuingStyles" options={{ href: null }} />
-        <Tabs.Screen name="Eventpage/styles/CancelQueueModalStyles" options={{ href: null }} />
+        <Tabs.Screen
+          name="Eventpage/components/queuing"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Eventpage/components/CancelQueueModal"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Eventpage/styles/ViewEventStyles"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Eventpage/styles/QueuingStyles"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Eventpage/styles/CancelQueueModalStyles"
+          options={{ href: null }}
+        />
 
-        {/* Feedback - Show for both */}
+        {/* User: Feedback */}
         <Tabs.Screen
           name="Feedback/Feedback"
           options={{
+            href: isOrganizer ? null : undefined, // hide user feedback for organizers
             title: "Feedback",
             tabBarItemStyle: { flex: 1, alignItems: "center" },
             tabBarIcon: ({ color, focused }) => (
@@ -121,16 +163,25 @@ export default function TabsLayout() {
         />
 
         {/* Hidden Files in Feedback */}
-        <Tabs.Screen name="Feedback/styles/FeedbackStyles" options={{ href: null }} />
-        <Tabs.Screen name="Feedback/styles/FeedbackFormStyles" options={{ href: null }} />
-        <Tabs.Screen name="Feedback/components/FeedbackForm" options={{ href: null }} />
+        <Tabs.Screen
+          name="Feedback/styles/FeedbackStyles"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Feedback/styles/FeedbackFormStyles"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Feedback/components/FeedbackForm"
+          options={{ href: null }}
+        />
 
-        {/* Notification - Show ONLY for Students */}
+        {/* User: Notification */}
         <Tabs.Screen
           name="Notification/Notification"
           options={{
+            href: isOrganizer ? null : undefined, // hide user notification for organizers
             title: "Notification",
-            href: isOrganizer ? null : undefined,
             tabBarItemStyle: { flex: 1, alignItems: "center" },
             tabBarIcon: ({ color, focused }) => (
               <Ionicons
@@ -143,8 +194,41 @@ export default function TabsLayout() {
         />
 
         {/* Hidden Files in Notification */}
-        <Tabs.Screen name="Notification/styles/NotificationStyles" options={{ href: null }} />
+        <Tabs.Screen
+          name="Notification/styles/NotificationStyles"
+          options={{ href: null }}
+        />
 
+        {/* Organizer: Home Page */}
+        <Tabs.Screen
+          name="Homepage/OrgHome"
+          options={{
+            // href: isOrganizer ? undefined : null, //hides the organizer's home to user
+            title: "Home",
+            tabBarIcon: ({ color, focused }) => (
+              <Ionicons
+                name={focused ? "home" : "home-outline"}
+                color={color}
+                size={24}
+              />
+            ),
+          }}
+        />
+        {/* Organizer: Event Page */}
+        <Tabs.Screen
+          name="Eventpage/OrgEvent"
+          options={{
+            title: "Event",
+            tabBarItemStyle: { flex: 1, alignItems: "center" },
+            tabBarIcon: ({ color, focused }) => (
+              <Ionicons
+                name={focused ? "calendar" : "calendar-outline"}
+                color={color}
+                size={24}
+              />
+            ),
+          }}
+        />
         {/* Scanner/Dashboard - Show ONLY for Organizers */}
         <Tabs.Screen
           name="Scanner/Scanner"
@@ -161,11 +245,33 @@ export default function TabsLayout() {
             ),
           }}
         />
+        {/* Organizer: Notifcation */}
+        <Tabs.Screen
+          name="Notification/OrgNotification"
+          options={{
+            // href: isOrganizer ? null : undefined, // hide user notification for organizers
+            title: "Notification",
+            tabBarItemStyle: { flex: 1, alignItems: "center" },
+            tabBarIcon: ({ color, focused }) => (
+              <Ionicons
+                name={focused ? "notifications" : "notifications-outline"}
+                color={color}
+                size={24}
+              />
+            ),
+          }}
+        />
 
         {/* Hide Organizer folder from tabs */}
         <Tabs.Screen name="Organizer" options={{ href: null }} />
-        <Tabs.Screen name="Organizer/Dashboard/styles" options={{ href: null }} />
-        <Tabs.Screen name="Organizer/Dashboard/components" options={{ href: null }} />
+        <Tabs.Screen
+          name="Organizer/Dashboard/styles"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Organizer/Dashboard/components"
+          options={{ href: null }}
+        />
       </Tabs>
     </View>
   );

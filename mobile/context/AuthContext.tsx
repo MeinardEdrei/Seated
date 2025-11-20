@@ -62,7 +62,7 @@ export function useProtectedRoute(user: User | null, isLoading: boolean) {
     } else if (user && (inAuthGroup || isRootIndex)) {
       // User exists and trying to access auth route or root -> redirect based on role
       if (user.role === "organizer") {
-        router.replace("/(tabs)/Organizer/Dashboard/Dashboard");
+        router.replace("/(tabs)/Organizer/Homepage/Home");
       } else {
         router.replace("/(tabs)/Homepage/Home");
       }
