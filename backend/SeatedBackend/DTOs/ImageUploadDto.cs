@@ -5,4 +5,9 @@ namespace SeatedBackend.DTOs
         public IFormFile ImageFile { get; set; } = null!;
         public string EventName { get; set; } = string.Empty;
     }
+
+    public class ImageDeleteDto
+    {
+        public string PublicId { get; set; } = string.Empty;
+    }
 }

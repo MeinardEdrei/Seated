@@ -7,7 +7,8 @@ using SeatedBackend.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 namespace SeatedBackend.Controllers
 {
     [ApiController]
@@ -22,7 +23,9 @@ namespace SeatedBackend.Controllers
             _context = context;
             _cloudinaryService = cloudinaryService;
         }
-
+        
+        // Image Endpoints
+       
         [Authorize]
         [HttpPost("upload-image")]
         [Consumes("multipart/form-data")]
@@ -34,8 +37,23 @@ namespace SeatedBackend.Controllers
             if (string.IsNullOrEmpty(dto.EventName))
                 return BadRequest(new { message = "Event name is required" });
 
-            var imageUrl = await _cloudinaryService.UploadImageAsync(dto.ImageFile, dto.EventName);
-            return Ok(new { imageUrl });
+            var uploadResult = await _cloudinaryService.UploadImageAsync(dto.ImageFile, dto.EventName);
+
+            return Ok(new { imageUrl = uploadResult.SecureUrl.AbsoluteUri, publicId = uploadResult.PublicId });
+        }
+
+        [Authorize]
+        [HttpDelete("delete-image")]
+        public async Task<IActionResult> DeleteImage([FromBody] ImageDeleteDto dto)
+        {
+            if (string.IsNullOrEmpty(dto.PublicId))
+                return BadRequest(new { message = "Public ID is required" });
+
+            var result = await _cloudinaryService.DeleteImageAsync(dto.PublicId);
+            if (result)
+                return Ok(new { message = "Image deleted successfully." });
+            else
+                return StatusCode(500, new { message = "Failed to delete image." });
         }
 
         [Authorize(Roles = "organizer")]
@@ -175,6 +193,8 @@ namespace SeatedBackend.Controllers
             var events = await _context.Events.Where(e => e.OrganizerId == userId).ToListAsync();
             return Ok(new { data = events });
         }
+
+
 
         // Add Archive Event Endpoint
 
