@@ -58,6 +58,7 @@ export default ({ config }) => ({
     ],
     "expo-font",
     "@react-native-google-signin/google-signin",
+    "expo-barcode-scanner",
   ],
   experiments: {
     typedRoutes: true,
