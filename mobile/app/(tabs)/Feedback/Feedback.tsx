@@ -1,18 +1,18 @@
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Image,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
-  View,
-  ScrollView,
   TouchableOpacity,
-  Image,
-  StatusBar,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 
+import FeedbackForm from "@/components/feedback/FeedbackForm"; // Import the modal
 import Header from "../../../components/Header";
-import FeedbackForm from "./components/FeedbackForm"; // Import the modal
 
 const Feedback = () => {
   const router = useRouter();

@@ -1,11 +1,11 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
+import OrgNotifications from "@/components/notifications/OrgNotification";
+import StudentNotifications from "@/components/notifications/StudentNotifications";
+import { useAuth } from "@/context/AuthContext";
+import { Stack } from "expo-router";
 import React from "react";
-import { Stack, useRouter } from "expo-router";
+import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../../components/Header";
-import StudentNotifications from "./components/StudentNotifications";
-import OrgNotifications from "./components/OrgNotification";
-import { useAuth } from "@/context/AuthContext";
 
 const Notification = () => {
   const { user } = useAuth();
@@ -22,7 +22,7 @@ const Notification = () => {
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
         <Header />
-       
+
         {user?.role?.toLowerCase() !== "organizer" ? <StudentNotifications /> : <OrgNotifications />}
 
       </SafeAreaView>

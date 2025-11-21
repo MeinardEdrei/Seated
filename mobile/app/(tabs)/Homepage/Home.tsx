@@ -1,27 +1,17 @@
+import EmptyState from "@/components/homepage/EmptyState";
+import { Stack } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Image,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Modal,
-  StyleSheet,
-  Dimensions,
-  Pressable,
+  StyleSheet
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack, useRouter } from "expo-router";
-import { Menu, Settings, Download, X } from "lucide-react-native";
-import { BlurView } from "expo-blur";
-import EmptyState from "./components/EmptyState"; 
 
+import EventState from "@/components/homepage/EventState";
+import { useAuth } from "@/context/AuthContext";
 import Header from "../../../components/Header";
-
-const { width, height } = Dimensions.get("window");
-import EventState from "./components/EventState";
-
 const Home = () => {
+
+  const { user } = useAuth();
 
   const [EventData, setEventData] = useState([]);
 
@@ -40,8 +30,9 @@ const Home = () => {
         <Header />
 
         {/* Conditional Content Rendering */}
-        {EventData.length > 1 ? <EventState EventData={EventData} /> : <EmptyState /> }
-      
+
+        {EventData.length > 1 ? <EventState EventData={EventData} /> : <EmptyState />}
+
       </SafeAreaView>
     </>
   );

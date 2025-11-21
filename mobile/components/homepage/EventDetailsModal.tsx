@@ -1,17 +1,17 @@
-import React from "react";
-import {
-  Modal,
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  Pressable,
-  Dimensions,
-} from "react-native";
 import { BlurView } from "expo-blur";
 import { Download, X } from "lucide-react-native";
+import React from "react";
+import {
+  Dimensions,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface EventDetailsModalProps {
   visible: boolean;
@@ -202,7 +202,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
 
             {/* Event Image */}
             <Image
-              source={require("../../../../assets/images/eventImage1.jpg")}
+              source={require("@/assets/images/eventImage1.jpg")}
               style={modalStyles.eventImage}
               resizeMode="cover"
             />

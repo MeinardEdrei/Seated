@@ -1,15 +1,15 @@
-import React from "react";
-import {
-  Modal,
-  Image,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Pressable,
-} from "react-native";
 import { BlurView } from "expo-blur";
 import { X } from "lucide-react-native";
+import React from "react";
+import {
+  Image,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface CancelReservationModalProps {
   visible: boolean;
@@ -60,7 +60,7 @@ const CancelReservationModal: React.FC<CancelReservationModalProps> = ({
           <View style={styles.seatContainer}>
             <View style={styles.seatIcon}>
               <Image
-                source={require("../../../../assets/images/illustration6.png")}
+                source={require("@/assets/images/illustration6.png")}
                 style={styles.illustration6}
                 resizeMode="contain"
               />
