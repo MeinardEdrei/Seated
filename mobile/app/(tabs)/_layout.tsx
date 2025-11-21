@@ -6,9 +6,9 @@ import { useAuth } from "@/context/AuthContext";
 export default function TabsLayout() {
   const { width } = Dimensions.get("window");
   const horizontalMargin = width * 0.06;
-  const bottomMargin = Platform.OS === "ios" ? 20 : 10;
+  const bottomMargin = Platform.OS === "ios" ? 20 : 15;
   const { user } = useAuth();
-  
+
   const isOrganizer = user?.role?.toLowerCase() === "organizer";
 
   return (
@@ -75,13 +75,25 @@ export default function TabsLayout() {
           },
         }}
       />
-      
+
       {/* Hidden Files in Homepage */}
       <Tabs.Screen name="Homepage/styles/HomeStyles" options={{ href: null }} />
-      <Tabs.Screen name="Homepage/components/Settings" options={{ href: null }} />
-      <Tabs.Screen name="Homepage/styles/EventDetailsModalStyles" options={{ href: null }} />
-      <Tabs.Screen name="Homepage/components/EventDetailsModal" options={{ href: null }} />
-      <Tabs.Screen name="Homepage/components/CancelReservationModal" options={{ href: null }} />
+      <Tabs.Screen
+        name="Homepage/components/Settings"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="Homepage/styles/EventDetailsModalStyles"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="Homepage/components/EventDetailsModal"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="Homepage/components/CancelReservationModal"
+        options={{ href: null }}
+      />
 
       {/* Event */}
       <Tabs.Screen
@@ -97,16 +109,34 @@ export default function TabsLayout() {
           ),
         }}
       />
-      
+
       {/* Hidden Files in Eventpage */}
-      <Tabs.Screen name="Eventpage/styles/EventStyles" options={{ href: null }} />
-      <Tabs.Screen name="Eventpage/components/ViewEvent" options={{ href: null }} />
+      <Tabs.Screen
+        name="Eventpage/styles/EventStyles"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="Eventpage/components/ViewEvent"
+        options={{ href: null }}
+      />
       <Tabs.Screen name="Eventpage/Queuing" options={{ href: null }} />
       <Tabs.Screen name="Eventpage/SeatMapView" options={{ href: null }} />
-      <Tabs.Screen name="Eventpage/components/CancelQueueModal" options={{ href: null }} />
-      <Tabs.Screen name="Eventpage/styles/ViewEventStyles" options={{ href: null }} />
-      <Tabs.Screen name="Eventpage/styles/QueuingStyles" options={{ href: null }} />
-      <Tabs.Screen name="Eventpage/styles/CancelQueueModalStyles" options={{ href: null }} />
+      <Tabs.Screen
+        name="Eventpage/components/CancelQueueModal"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="Eventpage/styles/ViewEventStyles"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="Eventpage/styles/QueuingStyles"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="Eventpage/styles/CancelQueueModalStyles"
+        options={{ href: null }}
+      />
 
       {/* Scanner - Only for Organizers */}
       <Tabs.Screen
@@ -141,9 +171,18 @@ export default function TabsLayout() {
       />
 
       {/* Hidden Files in Feedback */}
-      <Tabs.Screen name="Feedback/styles/FeedbackStyles" options={{ href: null }} />
-      <Tabs.Screen name="Feedback/styles/FeedbackFormStyles" options={{ href: null }} />
-      <Tabs.Screen name="Feedback/components/FeedbackForm" options={{ href: null }} />
+      <Tabs.Screen
+        name="Feedback/styles/FeedbackStyles"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="Feedback/styles/FeedbackFormStyles"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="Feedback/components/FeedbackForm"
+        options={{ href: null }}
+      />
 
       {/* Notification */}
       <Tabs.Screen

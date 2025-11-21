@@ -8,8 +8,22 @@ import {
   Platform,
   ActivityIndicator,
   StyleSheet,
+  LayoutAnimation,
+  UIManager,
+  Modal,
+  Image,
 } from "react-native";
 import Constants from "expo-constants";
+import { useRouter } from "expo-router";
+import {
+  ChevronLeft,
+  ChevronDown,
+  ChevronUp,
+  Map as MapIcon,
+} from "lucide-react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+// Types
 import {
   SectionData,
   FloorSeatsResponse,
@@ -17,12 +31,17 @@ import {
   SeatGridProps,
 } from "@/types/seat-map";
 
-import { SafeAreaView } from "react-native-safe-area-context";
+// Enable LayoutAnimation for Android
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const API_BASE_URL = Constants.expoConfig?.extra?.API_URL + "/api";
-// const VENUE_ID = 1;
 
-// Detect device
+// Device Detection
 const useResponsive = () => {
   const [dimensions, setDimensions] = useState(Dimensions.get("window"));
 
@@ -39,23 +58,36 @@ const useResponsive = () => {
   const isTablet = width >= 768 && width < 1024;
   const isDesktop = width >= 1024;
 
-  // (To be removed) Determine max columns based on screen size
-  const maxColumns = isDesktop ? undefined : isTablet ? 12 : 9;
-
-  return { width, isMobile, isTablet, isDesktop, isWeb, maxColumns };
+  return { width, isMobile, isTablet, isDesktop, isWeb };
 };
 
-// Main
+// Main SeatMapView
 const SeatMapView = () => {
+  const router = useRouter();
+
   const [selectedFloor, setSelectedFloor] = useState<"First" | "Second">(
     "First",
   );
   const [sectionsData, setSectionsData] = useState<SectionData[]>([]);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [currentViewIndex, setCurrentViewIndex] = useState(0);
+
+  // Loading & Error States
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Selection State
   const [selectedSeat, setSelectedSeat] = useState<number>(0);
+
+  // MODAL STATES
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [pendingSeat, setPendingSeat] = useState<{
+    id: number;
+    code: string;
+  } | null>(null);
+
+  // Visibility of Bottom Controls
+  const [isPanelExpanded, setIsPanelExpanded] = useState(false);
 
   const { isMobile, isTablet, isDesktop } = useResponsive();
 
@@ -64,7 +96,7 @@ const SeatMapView = () => {
     fetchSeats(selectedFloor);
   }, [selectedFloor, isMobile]);
 
-  // Fetch seats
+  // API Calls
   const fetchSeats = async (floor: string) => {
     try {
       setLoading(true);
@@ -75,11 +107,6 @@ const SeatMapView = () => {
         url += `?mobile=true`;
       }
 
-      console.log(
-        "Fetching from:",
-        url,
-        isMobile ? "(Mobile view)" : "(Desktop view)",
-      );
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -87,11 +114,6 @@ const SeatMapView = () => {
       }
 
       const data: FloorSeatsResponse = await response.json();
-      console.log("Received data:", {
-        sections: data.sections.length,
-        totalSeats: data.metadata.totalSeats,
-      });
-
       setSectionsData(data.sections);
       setCurrentSectionIndex(0);
       setCurrentViewIndex(0);
@@ -103,26 +125,52 @@ const SeatMapView = () => {
     }
   };
 
-  // Seat Selection One Reservation
-  const toggleSeatSelection = (seatId: number, status: string) => {
+  // Open Modal
+  const handleSeatClick = (
+    seatId: number,
+    seatCode: string,
+    status: string,
+  ) => {
     if (status !== "Available") return;
-
-    setSelectedSeat(seatId);
+    setPendingSeat({ id: seatId, code: seatCode });
+    setModalVisible(true);
   };
 
-  const handleReserveSeat = () => {};
+  // Confirm Modal
+  const handleConfirmSeat = () => {
+    if (pendingSeat) {
+      setSelectedSeat(pendingSeat.id);
+    }
+    setModalVisible(false);
+    setPendingSeat(null);
+  };
 
-  // Loading state
+  // Cancel Modal
+  const handleCancelModal = () => {
+    setModalVisible(false);
+    setPendingSeat(null);
+  };
+
+  const handleBack = () => {
+    router.back();
+  };
+
+  const togglePanel = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsPanelExpanded(!isPanelExpanded);
+  };
+
+  // Render Loading State
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color="#941418" />
         <Text style={styles.loadingText}>Loading seat map...</Text>
       </View>
     );
   }
 
-  // Error state
+  // Render Error State
   if (error) {
     return (
       <View style={styles.centerContainer}>
@@ -146,14 +194,16 @@ const SeatMapView = () => {
     .flatMap((section) => section.views)
     .flatMap((view) => view.seats)
     .filter((seat) => seat.status === "Available").length;
-  // const totalViews = currentSection?.views.length || 0;
 
-  // ==================== DESKTOP VIEW ====================
+  // DESKTOP VIEW
   if (isDesktop) {
     return (
       <View style={styles.desktopContainer}>
-        {/* Header */}
+        {/* ... (Desktop view remains mostly same, passing new handler) ... */}
         <View style={styles.desktopHeader}>
+          <TouchableOpacity onPress={handleBack} style={{ marginRight: 15 }}>
+            <ChevronLeft size={30} color="#000" />
+          </TouchableOpacity>
           <Text style={styles.desktopTitle}>
             UPAT Theater - {selectedFloor} Floor
           </Text>
@@ -179,7 +229,6 @@ const SeatMapView = () => {
           </View>
         </View>
 
-        {/* All Sections Side-by-Side */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator
@@ -192,25 +241,65 @@ const SeatMapView = () => {
                 {section.totalSeats} seats • Rows {section.rowRange.start}-
                 {section.rowRange.end}
               </Text>
-
-              {/* Single view (no split on desktop) */}
               <SeatGrid
                 seats={section.views[0].seats}
-                onSeatPress={toggleSeatSelection}
+                onSeatPress={handleSeatClick}
                 selectedSeats={selectedSeat}
                 isDesktop={isDesktop}
               />
             </View>
           ))}
         </ScrollView>
+
+        {/* Modal for Desktop */}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={isModalVisible}
+          onRequestClose={handleCancelModal}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Seat Confirmation</Text>
+              <Text style={styles.modalText}>
+                Is this your desired seat? Seat {pendingSeat?.code}
+              </Text>
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity
+                  style={styles.modalCancelButton}
+                  onPress={handleCancelModal}
+                >
+                  <Text style={styles.modalCancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalConfirmButton}
+                  onPress={handleConfirmSeat}
+                >
+                  <Text style={styles.modalConfirmText}>Confirm</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   }
 
-  // ==================== MOBILE VIEW ====================
+  // MOBILE VIEW
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      {/* Section Header */}
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <ChevronLeft size={24} color="#941418" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Select Seat</Text>
+        </View>
+        <View style={styles.dividerLine} />
+      </View>
+
+      {/* Section Title Banner */}
       <View style={styles.sectionContainer}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>{currentSection?.section}</Text>
@@ -218,12 +307,15 @@ const SeatMapView = () => {
       </View>
 
       {/* Seat Grid */}
-      <ScrollView style={styles.seatGridScrollView}>
+      <ScrollView
+        style={styles.seatGridScrollView}
+        contentContainerStyle={{ paddingBottom: 150 }}
+      >
         <View style={styles.seatGridContainer}>
           {currentView && (
             <SeatGrid
               seats={currentView.seats}
-              onSeatPress={toggleSeatSelection}
+              onSeatPress={handleSeatClick}
               selectedSeats={selectedSeat}
               isDesktop={isDesktop}
             />
@@ -231,188 +323,220 @@ const SeatMapView = () => {
         </View>
       </ScrollView>
 
-      {/* View Navigation */}
-      {totalViews > 1 && (
-        <View style={styles.viewNavigation}>
-          <TouchableOpacity
-            style={[
-              styles.viewNavButton,
-              currentViewIndex === 0 &&
-                currentSectionIndex === 0 &&
-                styles.viewNavButtonDisabled,
-            ]}
-            onPress={() => {
-              if (currentViewIndex > 0) {
-                setCurrentViewIndex(
-                  Math.min(totalViews - 1, currentViewIndex - 1),
-                );
-              } else if (currentSectionIndex > 0) {
-                // Move to previous section, last view
-                const prevSection = sectionsData[currentSectionIndex - 1];
-                setCurrentSectionIndex(currentSectionIndex - 1);
-                setCurrentViewIndex(prevSection.views.length - 1);
-              }
-            }}
-            disabled={currentViewIndex === 0 && currentSectionIndex === 0}
-          >
-            <Text style={styles.viewNavText}>◀ View</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.viewIndicator}>
-            View{" "}
-            {sectionsData
-              .slice(0, currentSectionIndex)
-              .reduce((sum, s) => sum + s.views.length, 0) +
-              currentViewIndex +
-              1}{" "}
-            of {totalViews}
-          </Text>
-
-          <TouchableOpacity
-            style={[
-              styles.viewNavButton,
-              currentViewIndex === currentSectionTotalViews - 1 &&
-                currentSectionIndex === sectionsData.length - 1 &&
-                styles.viewNavButtonDisabled,
-            ]}
-            onPress={() => {
-              if (currentViewIndex < currentSectionTotalViews - 1) {
-                setCurrentViewIndex(
-                  Math.min(totalViews - 1, currentViewIndex + 1),
-                );
-              } else if (currentSectionIndex < sectionsData.length - 1) {
-                setCurrentSectionIndex(currentSectionIndex + 1);
-                setCurrentViewIndex(0);
-              }
-            }}
-            disabled={
-              currentViewIndex === currentSectionTotalViews - 1 &&
-              currentSectionIndex === sectionsData.length - 1
-            }
-          >
-            <Text style={styles.viewNavText}>View ▶</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Section Navigation */}
-      {/* <View style={styles.sectionNavigation}> */}
-      {/*   <TouchableOpacity */}
-      {/*     style={[ */}
-      {/*       styles.navButton, */}
-      {/*       currentSectionIndex === 0 && styles.navButtonDisabled, */}
-      {/*     ]} */}
-      {/*     onPress={() => { */}
-      {/*       setCurrentSectionIndex(Math.max(0, currentSectionIndex - 1)); */}
-      {/*       setCurrentViewIndex(0); */}
-      {/*     }} */}
-      {/*     disabled={currentSectionIndex === 0} */}
-      {/*   > */}
-      {/*     <Text style={styles.navButtonText}>◀ Section</Text> */}
-      {/*   </TouchableOpacity> */}
-      {/**/}
-      {/*   <Text style={styles.sectionIndicator}> */}
-      {/*     {currentSectionIndex + 1} / {sectionsData.length} */}
-      {/*   </Text> */}
-      {/**/}
-      {/*   <TouchableOpacity */}
-      {/*     style={[ */}
-      {/*       styles.navButton, */}
-      {/*       currentSectionIndex === sectionsData.length - 1 && */}
-      {/*         styles.navButtonDisabled, */}
-      {/*     ]} */}
-      {/*     onPress={() => { */}
-      {/*       setCurrentSectionIndex( */}
-      {/*         Math.min(sectionsData.length - 1, currentSectionIndex + 1), */}
-      {/*       ); */}
-      {/*       setCurrentViewIndex(0); */}
-      {/*     }} */}
-      {/*     disabled={currentSectionIndex === sectionsData.length - 1} */}
-      {/*   > */}
-      {/*     <Text style={styles.navButtonText}>Section ▶</Text> */}
-      {/*   </TouchableOpacity> */}
-      {/* </View> */}
-
-      {/* Floor Selector */}
-      <View style={styles.floorSelector}>
-        <View style={styles.floorInnerContainer}>
-          <TouchableOpacity
-            style={[
-              styles.floorButton,
-              selectedFloor === "First" && styles.floorButtonActive,
-            ]}
-            onPress={() => setSelectedFloor("First")}
-          >
-            <Text
-              style={[
-                styles.floorButtonText,
-                selectedFloor === "First" && styles.floorButtonTextActive,
-              ]}
-            >
-              First Floor
+      {/* Collapsible Bottom Control Panel */}
+      <View
+        style={[
+          styles.bottomPanel,
+          !isPanelExpanded && styles.bottomPanelCollapsed,
+        ]}
+      >
+        {/* Panel Handle */}
+        <TouchableOpacity
+          style={styles.panelHandleContainer}
+          onPress={togglePanel}
+          activeOpacity={0.9}
+        >
+          <View style={styles.panelHandleBar} />
+          <View style={styles.panelHeaderContent}>
+            <MapIcon size={16} color="#525252" />
+            <Text style={styles.panelTitle}>
+              {isPanelExpanded ? "Hide Controls" : "Show Controls"}
             </Text>
-          </TouchableOpacity>
+            {isPanelExpanded ? (
+              <ChevronDown size={16} color="#525252" />
+            ) : (
+              <ChevronUp size={16} color="#525252" />
+            )}
+          </View>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.floorButton,
-              selectedFloor === "Second" && styles.floorButtonActive,
-            ]}
-            onPress={() => setSelectedFloor("Second")}
-          >
-            <Text
-              style={[
-                styles.floorButtonText,
-                selectedFloor === "Second" && styles.floorButtonTextActive,
-              ]}
-            >
-              Second Floor
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Collapsible Content */}
+        {isPanelExpanded && (
+          <View style={styles.panelContent}>
+            {/* View Navigation */}
+            {totalViews > 1 && (
+              <View style={styles.viewNavigation}>
+                <TouchableOpacity
+                  style={[
+                    styles.viewNavButton,
+                    currentViewIndex === 0 &&
+                      currentSectionIndex === 0 &&
+                      styles.viewNavButtonDisabled,
+                  ]}
+                  onPress={() => {
+                    if (currentViewIndex > 0) {
+                      setCurrentViewIndex(
+                        Math.min(totalViews - 1, currentViewIndex - 1),
+                      );
+                    } else if (currentSectionIndex > 0) {
+                      const prevSection = sectionsData[currentSectionIndex - 1];
+                      setCurrentSectionIndex(currentSectionIndex - 1);
+                      setCurrentViewIndex(prevSection.views.length - 1);
+                    }
+                  }}
+                  disabled={currentViewIndex === 0 && currentSectionIndex === 0}
+                >
+                  <Text style={styles.viewNavText}>◀</Text>
+                </TouchableOpacity>
+
+                <Text style={styles.viewIndicator}>
+                  View{" "}
+                  {sectionsData
+                    .slice(0, currentSectionIndex)
+                    .reduce((sum, s) => sum + s.views.length, 0) +
+                    currentViewIndex +
+                    1}{" "}
+                  of {totalViews}
+                </Text>
+
+                <TouchableOpacity
+                  style={[
+                    styles.viewNavButton,
+                    currentViewIndex === currentSectionTotalViews - 1 &&
+                      currentSectionIndex === sectionsData.length - 1 &&
+                      styles.viewNavButtonDisabled,
+                  ]}
+                  onPress={() => {
+                    if (currentViewIndex < currentSectionTotalViews - 1) {
+                      setCurrentViewIndex(
+                        Math.min(totalViews - 1, currentViewIndex + 1),
+                      );
+                    } else if (currentSectionIndex < sectionsData.length - 1) {
+                      setCurrentSectionIndex(currentSectionIndex + 1);
+                      setCurrentViewIndex(0);
+                    }
+                  }}
+                  disabled={
+                    currentViewIndex === currentSectionTotalViews - 1 &&
+                    currentSectionIndex === sectionsData.length - 1
+                  }
+                >
+                  <Text style={styles.viewNavText}>▶</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Floor Selector */}
+            <View style={styles.floorSelector}>
+              <View style={styles.floorInnerContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.floorButton,
+                    selectedFloor === "First" && styles.floorButtonActive,
+                  ]}
+                  onPress={() => setSelectedFloor("First")}
+                >
+                  <Text
+                    style={[
+                      styles.floorButtonText,
+                      selectedFloor === "First" && styles.floorButtonTextActive,
+                    ]}
+                  >
+                    1st Floor
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.floorButton,
+                    selectedFloor === "Second" && styles.floorButtonActive,
+                  ]}
+                  onPress={() => setSelectedFloor("Second")}
+                >
+                  <Text
+                    style={[
+                      styles.floorButtonText,
+                      selectedFloor === "Second" &&
+                        styles.floorButtonTextActive,
+                    ]}
+                  >
+                    2nd Floor
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Legend & Stats */}
+            <View style={styles.seatDetailsContainer}>
+              <Text style={styles.availableSeatsText}>
+                Available: {totalAvailableSeats}
+              </Text>
+
+              <View style={styles.legendContainer}>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendBox, styles.legendAvailable]} />
+                  <Text style={styles.legendText}>Available</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendBox, styles.legendReserved]} />
+                  <Text style={styles.legendText}>Reserved</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendBox, styles.legendSpecial]} />
+                  <Text style={styles.legendText}>Special</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendBox, styles.legendSelected]} />
+                  <Text style={styles.legendText}>You</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
       </View>
 
-      {/* Seat Details */}
-      <View style={styles.seatDetails}>
-        <View style={styles.seatDetailsContainer}>
-          <Text style={styles.availableSeatsText}>
-            Available Seats: {totalAvailableSeats}
-          </Text>
+      {/* SEAT CONFIRMATION MODAL */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={handleCancelModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            {/* Title */}
+            <Text style={styles.modalTitle}>Seat Confirmation</Text>
+            <Text style={styles.modalText}>Is this your desired seat?</Text>
 
-          <View style={styles.legendContainer}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendBox, styles.legendAvailable]} />
-              <Text style={styles.legendText}>Available</Text>
-            </View>
+            <Image
+              source={require("@/assets/images/illustration6.png")}
+              style={styles.modalImage}
+              resizeMode="contain"
+            />
 
-            <View style={styles.legendItem}>
-              <View style={[styles.legendBox, styles.legendReserved]} />
-              <Text style={styles.legendText}>Reserved</Text>
-            </View>
+            <Text style={styles.modalSeatCode}>Seat {pendingSeat?.code}</Text>
 
-            <View style={styles.legendItem}>
-              <View style={[styles.legendBox, styles.legendSpecial]} />
-              <Text style={styles.legendText}>Special</Text>
-            </View>
+            {/* Buttons */}
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={handleCancelModal}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
 
-            <View style={styles.legendItem}>
-              <View style={[styles.legendBox, styles.legendSelected]} />
-              <Text style={styles.legendText}>Selected</Text>
+              <TouchableOpacity
+                style={styles.modalConfirmButton}
+                onPress={handleConfirmSeat}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.modalConfirmText}>Confirm</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
-      </View>
+      </Modal>
     </SafeAreaView>
   );
 };
 
 // Component Section
-const SeatGrid: React.FC<SeatGridProps> = ({
-  seats,
-  onSeatPress,
-  selectedSeats,
-  isDesktop,
-}) => {
+const SeatGrid: React.FC<
+  SeatGridProps & {
+    onSeatPress: (id: number, code: string, status: string) => void;
+  }
+> = ({ seats, onSeatPress, selectedSeats, isDesktop }) => {
   // Group seats by row
   const seatsByRow = seats.reduce(
     (acc, seat) => {
@@ -458,14 +582,22 @@ const SeatGrid: React.FC<SeatGridProps> = ({
                         isDisabled && styles.seatButtonDisabled,
                         seat.isSpecial && styles.seatButtonSpecial,
                       ]}
-                      onPress={() => onSeatPress(seat.seatId, seat.status)}
+                      onPress={() =>
+                        onSeatPress(
+                          seat.seatId,
+                          seat.displaySeatCode,
+                          seat.status,
+                        )
+                      }
                       disabled={!isAvailable || isSelected}
                     >
                       <Text
                         style={[
                           styles.seatButtonText,
+                          { fontSize: buttonSize.fontSize },
                           isSelected && styles.seatButtonTextSelected,
                         ]}
+                        numberOfLines={1}
                       >
                         {seat.displaySeatCode}
                       </Text>
@@ -482,9 +614,10 @@ const SeatGrid: React.FC<SeatGridProps> = ({
 
 // Styles Section
 const styles = StyleSheet.create({
+  // Base Layout
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#fff",
   },
   centerContainer: {
     flex: 1,
@@ -492,6 +625,281 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
+
+  // Header
+  header: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+    backgroundColor: "#fff",
+  },
+  headerTop: {
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+    paddingVertical: 5,
+  },
+  backButton: {
+    position: "absolute",
+    left: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  headerTitle: {
+    fontFamily: "Poppins-Semibold",
+    fontSize: 16,
+    color: "#941418",
+    textAlign: "center",
+  },
+  dividerLine: {
+    width: "100%",
+    height: 1,
+    backgroundColor: "#525252",
+    opacity: 0.5,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+
+  // Section Banner
+  sectionContainer: {
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    alignItems: "center",
+    width: "100%",
+    backgroundColor: "#fff",
+  },
+  sectionHeader: {
+    paddingVertical: 8,
+    width: "100%",
+    alignItems: "center",
+    backgroundColor: "#941418",
+    borderRadius: 10,
+  },
+  sectionTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontFamily: "Poppins-Semibold",
+  },
+
+  // Seat Grid Area
+  seatGridScrollView: {
+    flex: 1,
+  },
+  seatGridContainer: {
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+  },
+  seatGrid: {
+    gap: 4,
+  },
+  seatRow: {
+    marginBottom: 1,
+  },
+  rowSeats: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 3,
+  },
+
+  // Bottom Control Panel
+  bottomPanel: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 15,
+    paddingBottom: 90,
+    width: "100%",
+    position: "absolute",
+    bottom: 0,
+  },
+  bottomPanelCollapsed: {
+    paddingBottom: 90,
+  },
+  panelHandleContainer: {
+    width: "100%",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  panelHandleBar: {
+    width: 40,
+    height: 4,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 2,
+    marginBottom: 8,
+  },
+  panelHeaderContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  panelTitle: {
+    fontFamily: "Poppins-Regular",
+    fontSize: 12,
+    color: "#525252",
+  },
+  panelContent: {
+    width: "100%",
+    paddingTop: 10,
+  },
+  viewNavigation: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 25,
+    marginBottom: 15,
+  },
+  viewNavButton: {
+    width: 36,
+    height: 36,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 18,
+    backgroundColor: "#941418",
+  },
+  viewNavButtonDisabled: {
+    backgroundColor: "#f0f0f0",
+  },
+  viewNavText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#FFF",
+  },
+  viewIndicator: {
+    fontSize: 14,
+    fontFamily: "Poppins-Semibold",
+    color: "#1C1C1C",
+  },
+
+  // Mobile Styles
+
+  floorSelector: {
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  floorInnerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 4,
+    gap: 3,
+    width: "70%",
+    borderWidth: 1,
+    borderRadius: 100,
+    borderColor: "#e0e0e0",
+    backgroundColor: "#f9f9f9",
+  },
+  floorButton: {
+    flex: 1,
+    paddingVertical: 5,
+    borderRadius: 100,
+    alignItems: "center",
+  },
+  floorButtonActive: {
+    backgroundColor: "#941418",
+  },
+  floorButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#525252",
+  },
+  floorButtonTextActive: {
+    color: "#FFF",
+  },
+  seatDetailsContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  availableSeatsText: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 12,
+    color: "#525252",
+  },
+  legendContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 15,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  legendBox: {
+    width: 12,
+    height: 12,
+    borderRadius: 3,
+    borderWidth: 1,
+  },
+  legendAvailable: {
+    backgroundColor: "#1C1C1C",
+    borderColor: "#1C1C1C",
+  },
+  legendReserved: {
+    backgroundColor: "#525252",
+    borderColor: "#525252",
+  },
+  legendSpecial: {
+    backgroundColor: "#F7BD03",
+    borderColor: "#F7BD03",
+  },
+  legendSelected: {
+    backgroundColor: "#941418",
+    borderColor: "#941418",
+  },
+  legendText: {
+    fontSize: 12,
+    color: "#525252",
+  },
+
+  // Seat Buttons
+  seatButton: {
+    borderRadius: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+  },
+  seatButtonAvailable: {
+    backgroundColor: "#1C1C1C",
+    borderColor: "#1C1C1C",
+  },
+  seatButtonSelected: {
+    backgroundColor: "#941418",
+    borderColor: "#941418",
+  },
+  seatButtonReserved: {
+    backgroundColor: "#525252",
+    borderColor: "#525252",
+  },
+  seatButtonDisabled: {
+    backgroundColor: "#E0E0E0",
+    borderColor: "#E0E0E0",
+  },
+  seatButtonSpecial: {
+    backgroundColor: "#F7BD03",
+    borderColor: "#F7BD03",
+  },
+  seatButtonText: {
+    color: "#FFF",
+    fontWeight: "bold",
+  },
+  seatButtonTextSelected: {
+    color: "#FFF",
+  },
+
+  // Loading / Error
   loadingText: {
     marginTop: 12,
     fontSize: 16,
@@ -506,7 +914,7 @@ const styles = StyleSheet.create({
   retryButton: {
     paddingVertical: 12,
     paddingHorizontal: 24,
-    backgroundColor: "#007AFF",
+    backgroundColor: "#941418",
     borderRadius: 8,
   },
   retryButtonText: {
@@ -515,7 +923,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // Desktop Styles
+  // Desktop Specific
   desktopContainer: {
     flex: 1,
     backgroundColor: "#FFF",
@@ -572,236 +980,80 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
-  // Mobile Styles
-
-  floorSelector: {
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-  },
-  floorInnerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 5,
-    margin: 10,
-    gap: 3,
-    width: "75%",
-    borderWidth: 1,
-    borderRadius: 100,
-    borderColor: "black",
-  },
-  floorButton: {
+  // MODAL STYLES
+  modalOverlay: {
     flex: 1,
-    paddingVertical: 5,
-    borderRadius: 100,
-    alignItems: "center",
-  },
-  floorButtonActive: {
-    backgroundColor: "#941418",
-  },
-  floorButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000",
-  },
-  floorButtonTextActive: {
-    color: "#FFF",
-  },
-  seatDetails: {
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-  },
-  seatDetailsContainer: {
-    width: "90%",
-    alignItems: "center",
-    marginTop: 15,
-    paddingBottom: 30,
-  },
-  availableSeatsText: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 12,
-    color: "#000",
-  },
-  legendContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
-    gap: 15,
-    marginTop: 8,
-  },
-  legendItem: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: 6,
   },
-  legendBox: {
-    width: 15,
-    height: 15,
-    borderRadius: 4,
-    borderWidth: 1,
-  },
-  legendAvailable: {
-    backgroundColor: "#1C1C1C",
-    borderColor: "#1C1C1C",
-  },
-  legendReserved: {
-    backgroundColor: "#525252",
-    borderColor: "#525252",
-  },
-  legendSpecial: {
-    backgroundColor: "#F7BD03",
-    borderColor: "#F7BD03",
-  },
-  legendSelected: {
-    backgroundColor: "#941418",
-    borderColor: "#941418",
-  },
-  legendText: {
-    fontSize: 12,
-    color: "#333",
-    fontWeight: "500",
-  },
-  sectionContainer: {
-    padding: 15,
-    alignItems: "center",
-    width: "100%",
+  modalContainer: {
+    width: "85%",
     backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 25,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  sectionHeader: {
-    padding: 15,
+  modalTitle: {
+    fontSize: 24,
+    fontFamily: "Poppins-Bold",
+    color: "#941418",
+  },
+  modalText: {
+    fontSize: 14,
+    fontFamily: "Poppins-Regular",
+    color: "#1C1C1C",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  modalImage: {
+    width: 150,
+    height: 100,
+    marginBottom: 10,
+  },
+  modalSeatCode: {
+    fontFamily: "Poppins-Bold",
+    fontSize: 40,
+    color: "#1C1C1C",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    gap: 15,
     width: "100%",
-    alignItems: "center",
-    backgroundColor: "#525252",
-    borderRadius: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E5E5",
-  },
-  sectionTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "semibold",
-    marginBottom: 4,
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 2,
-  },
-  seatGridScrollView: {
-    flex: 1,
-    padding: 12,
-  },
-  seatGridContainer: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  seatGrid: {
-    gap: 5,
-  },
-  seatRow: {
-    marginBottom: 1,
-  },
-  rowSeats: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 3,
-    justifyContent: "flex-end",
-  },
-  seatButton: {
-    borderRadius: 6,
     justifyContent: "center",
+  },
+  modalCancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#a1a1a1",
     alignItems: "center",
-    borderWidth: 2,
   },
-  seatButtonAvailable: {
-    backgroundColor: "#1C1C1C",
-    borderColor: "#1C1C1C",
+  modalCancelText: {
+    fontFamily: "Poppins-Bold",
+    fontSize: 14,
+    color: "#525252",
   },
-  seatButtonSelected: {
+  modalConfirmButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
     backgroundColor: "#941418",
-    borderColor: "#941418",
-  },
-  seatButtonReserved: {
-    backgroundColor: "#525252",
-    borderColor: "#525252",
-  },
-  seatButtonDisabled: {
-    backgroundColor: "#6E6E6E",
-    borderColor: "#6E6E6E",
-  },
-  seatButtonSpecial: {
-    backgroundColor: "#F7BD03",
-    borderColor: "#F7BD03",
-  },
-  seatButtonText: {
-    fontSize: 12,
-    color: "#FFF",
-  },
-  seatButtonTextSelected: {
-    color: "#FFF",
-  },
-
-  // Navigation
-  viewNavigation: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    padding: 12,
-    backgroundColor: "#F9F9F9",
-    borderTopWidth: 1,
-    borderTopColor: "#E5E5E5",
   },
-  viewNavButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-    backgroundColor: "#941418",
-  },
-  viewNavButtonDisabled: {
-    backgroundColor: "#CCC",
-  },
-  viewNavText: {
+  modalConfirmText: {
+    fontFamily: "Poppins-Bold",
     fontSize: 14,
-    fontWeight: "600",
     color: "#FFF",
   },
-  viewIndicator: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  // sectionNavigation: {
-  //   flexDirection: "row",
-  //   justifyContent: "space-between",
-  //   alignItems: "center",
-  //   padding: 16,
-  //   backgroundColor: "#FFF",
-  //   borderTopWidth: 1,
-  //   borderTopColor: "#E5E5E5",
-  // },
-  // navButton: {
-  //   paddingVertical: 10,
-  //   paddingHorizontal: 16,
-  //   borderRadius: 8,
-  //   backgroundColor: "#941418",
-  // },
-  // navButtonDisabled: {
-  //   backgroundColor: "#CCC",
-  // },
-  // navButtonText: {
-  //   fontSize: 16,
-  //   fontWeight: "600",
-  //   color: "#FFF",
-  // },
-  // sectionIndicator: {
-  //   fontSize: 16,
-  //   fontWeight: "600",
-  // },
-  // selectionText: {
-  //   fontSize: 16,
-  //   fontWeight: "600",
-  //   color: "#FFF",
-  // },
 });
 
 export default SeatMapView;

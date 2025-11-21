@@ -38,7 +38,7 @@ export interface FloorSeatsResponse {
 
 export interface SeatGridProps {
   seats: SeatDto[];
-  onSeatPress: (seatId: number, status: string) => void;
+  onSeatPress: (seatId: number, seatCode: string, status: string) => void;
   selectedSeats: number;
   isDesktop: boolean;
 }
