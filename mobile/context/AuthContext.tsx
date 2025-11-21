@@ -55,13 +55,17 @@ export function useProtectedRoute(user: User | null, isLoading: boolean) {
 
     const isRootIndex = segments.length < 1;
 
-    // Redirect logic
-    // if no user and trying to access protected route, go to login
-    // if user exists and trying to access auth route, go to homepage
+    // Redirect logic based on user role
     if (!user && !inAuthGroup && !isRootIndex) {
+      // No user and trying to access protected route -> go to login
       router.replace("/Login/login");
     } else if (user && (inAuthGroup || isRootIndex)) {
-      router.replace("/(tabs)/Homepage/Home");
+      // User exists and trying to access auth route or root -> redirect based on role
+      if (user.role === "organizer") {
+        router.replace("/(tabs)/Organizer/Homepage/Home");
+      } else {
+        router.replace("/(tabs)/Homepage/Home");
+      }
     }
   }, [user, segments, router, isLoading]);
 }

@@ -100,10 +100,10 @@ const Home = () => {
         {/* Event Info Header */}
         <View style={styles.eventHeader}>
           <View>
-            <Text style={styles.eventTitle}>{EventData.title}</Text>
-            <Text style={styles.eventSeat}>Seat: {EventData.seatNum}</Text>
-            <Text style={styles.eventDate}>Date: {EventData.date}</Text>
-            <Text style={styles.eventTime}>Time: {EventData.time}</Text>
+            <Text style={styles.eventTitle}>{EventData}</Text>
+            <Text style={styles.eventSeat}>Seat: {EventData}</Text>
+            <Text style={styles.eventDate}>Date: {EventData}</Text>
+            <Text style={styles.eventTime}>Time: {EventData}</Text>
             <TouchableOpacity onPress={handleMoreDetails}>
               <Text style={styles.moreDetails}>more details...</Text>
             </TouchableOpacity>

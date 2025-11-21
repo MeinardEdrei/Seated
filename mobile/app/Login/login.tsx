@@ -385,7 +385,7 @@ export default function Login() {
                   activeOpacity={0.7}
                 >
                   <Text style={styles.signUpText}>Don't have an account?</Text>
-                  <Text style={styles.signUpLink}>Sign up</Text>
+                  <Text style={styles.signUpLink}>Sign Up</Text>
                 </TouchableOpacity>
               </View>
             </View>

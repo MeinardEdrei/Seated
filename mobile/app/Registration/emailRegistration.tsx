@@ -81,7 +81,6 @@ export default function EmailRegistration() {
       justifyContent: "center",
       // paddingBottom: 14,
     },
-
     headerTop: {
       width: "100%",
       justifyContent: "center",
