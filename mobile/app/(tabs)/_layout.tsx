@@ -127,8 +127,6 @@ export default function TabsLayout() {
             ),
           }}
         />
-        {/* Hide Organizer folder from tabs */}
-        <Tabs.Screen name="Organizer" options={{ href: null }} />
 
         {/* Notification - for both students and organizers */}
         <Tabs.Screen
