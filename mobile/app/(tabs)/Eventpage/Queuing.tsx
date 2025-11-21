@@ -6,13 +6,13 @@ import {
   Image,
   StatusBar,
   TouchableOpacity,
-  ScrollView,
+  Platform,
 } from "react-native";
 import { ChevronLeft, X } from "lucide-react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { Stack, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import CancelQueueModal from "./components/CancelQueueModal"; // Import the modal
+import CancelQueueModal from "./components/CancelQueueModal";
 
 const Queuing = () => {
   const router = useRouter();
@@ -50,111 +50,94 @@ const Queuing = () => {
   };
 
   const handleReserveSeat = () => {
-    if (!isRunning) {
-      router.push("/Eventpage/SeatMapView");
-    }
+    if (!isRunning) router.push("/Eventpage/SeatMapView");
   };
-
   const handleCancelQueue = () => {
-    setShowCancelModal(true); // Show the modal instead of alert
+    setShowCancelModal(true);
   };
-
   const handleModalCancel = () => {
-    setShowCancelModal(false); // Just close the modal
+    setShowCancelModal(false);
   };
-
   const handleModalConfirm = () => {
     setShowCancelModal(false);
-    // Add your queue cancellation logic here
-    router.back(); // or navigate to another screen
+    router.back();
   };
 
-  // Determine icon/text color based on timer
   const textAndIconColor = !isRunning ? "#FFE2A3" : "#FFFFFF";
+
+  const bottomPadding = Platform.OS === "ios" ? 110 : 90;
 
   const queueStyles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: "#fff",
     },
-    // Header
     header: {
       width: "100%",
       alignItems: "center",
       justifyContent: "center",
-      // paddingBottom: 14,
     },
-
     headerTop: {
       width: "100%",
       justifyContent: "center",
       alignItems: "center",
       position: "relative",
-      // paddingBottom: 14,
     },
-
     backButton: {
       position: "absolute",
       left: 16,
       justifyContent: "center",
       alignItems: "center",
+      zIndex: 10,
     },
-
     headerTitle: {
       fontFamily: "Poppins-Semibold",
       fontSize: 16,
       color: "#941418",
       textAlign: "center",
     },
-
     dividerLine: {
       width: "100%",
       height: 1,
       backgroundColor: "#525252",
       opacity: 0.5,
       marginTop: 14,
-      marginBottom: 25,
+      marginBottom: 10,
     },
 
-    scrollView: {
+    mainContent: {
       flex: 1,
-    },
-    queueCard: {
       width: "100%",
-      justifyContent: "flex-end",
+      paddingBottom: bottomPadding,
+      justifyContent: "center",
       alignItems: "center",
     },
+
     queueContents: {
-      width: 340,
-      // justifyContent: "flex-end",
-      // alignItems: "center",
+      width: "90%",
       borderWidth: 1,
       borderColor: "rgba(82, 82, 82, 0.3)",
       borderRadius: 20,
-      padding: 35,
-      // backgroundColor: "#000",
-
+      padding: 20,
+      backgroundColor: "#fff",
       shadowColor: "#1C1C1C",
       shadowOffset: { width: 1, height: 1 },
-      shadowOpacity: 0.2, // 20% opacity
-      shadowRadius: 4, // corresponds to blur 4
-      elevation: 2, // Android shadow
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 2,
     },
-
     illustration7: {
       width: "100%",
-      height: 255,
-      // backgroundColor: "#1a1a2e",
+      height: 270,
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
       marginBottom: 16,
+      resizeMode: "cover",
     },
     textContainer: {
       width: "100%",
       alignItems: "center",
-      // alignContent: "center",
-      marginBottom: 32,
-      // backgroundColor: "#1a1a2e",
+      marginBottom: 20,
     },
     text: {
       fontFamily: "Poppins-Regular",
@@ -163,7 +146,7 @@ const Queuing = () => {
     },
     textNumber: {
       fontFamily: "Poppins-Black",
-      fontSize: 60,
+      fontSize: 50,
       color: "#941418",
     },
     timerContainer: {
@@ -171,9 +154,7 @@ const Queuing = () => {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      // alignContent: "center",
-      marginBottom: 32,
-      // backgroundColor: "#1a1a2e",
+      marginBottom: 20,
     },
     textCaption: {
       fontFamily: "Poppins-Regular",
@@ -207,7 +188,6 @@ const Queuing = () => {
     reserveSeatText: {
       fontFamily: "Poppins-Bold",
       fontSize: 14,
-      color: "#ffffffff",
     },
     cancelQueue: {
       flexDirection: "row",
@@ -224,7 +204,7 @@ const Queuing = () => {
     cancelQueueText: {
       fontFamily: "Poppins-Bold",
       fontSize: 14,
-      color: "#rgba(28, 28, 28, 0.7)",
+      color: "rgba(28, 28, 28, 0.7)",
     },
   });
 
@@ -252,80 +232,70 @@ const Queuing = () => {
           <View style={queueStyles.dividerLine} />
         </View>
 
-        <ScrollView
-          style={queueStyles.scrollView}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={queueStyles.queueCard}>
-            <View style={queueStyles.queueContents}>
-              {/* Event Image */}
-              <Image
-                source={require("@/assets/images/illustration7.png")}
-                style={queueStyles.illustration7}
-                resizeMode="cover"
-              />
+        <View style={queueStyles.mainContent}>
+          <View style={queueStyles.queueContents}>
+            <Image
+              source={require("@/assets/images/illustration7.png")}
+              style={queueStyles.illustration7}
+              resizeMode="cover"
+            />
 
-              {/* Queue info */}
-              <View style={queueStyles.textContainer}>
-                <Text style={queueStyles.text}>You are currently number</Text>
-                <Text style={queueStyles.textNumber}>10</Text>
-                <Text style={queueStyles.text}>in line</Text>
-              </View>
+            {/* Queue info */}
+            <View style={queueStyles.textContainer}>
+              <Text style={queueStyles.text}>You are currently number</Text>
+              <Text style={queueStyles.textNumber}>10</Text>
+              <Text style={queueStyles.text}>in line</Text>
+            </View>
 
-              {/* Timer */}
-              <View style={queueStyles.timerContainer}>
-                <Text style={queueStyles.textCaption}>
-                  Estimated wait time:{" "}
-                </Text>
-                <Text style={queueStyles.timer}>
-                  {isRunning ? formatTime(timeLeft) : "Go Reserve!"}
-                </Text>
-              </View>
+            {/* Timer */}
+            <View style={queueStyles.timerContainer}>
+              <Text style={queueStyles.textCaption}>Estimated wait time: </Text>
+              <Text style={queueStyles.timer}>
+                {isRunning ? formatTime(timeLeft) : "Go Reserve!"}
+              </Text>
+            </View>
 
-              {/* Buttons */}
-              <View style={queueStyles.buttonContainer}>
-                {/* Reserve Seat Button */}
-                <TouchableOpacity
+            {/* Buttons */}
+            <View style={queueStyles.buttonContainer}>
+              <TouchableOpacity
+                style={[
+                  queueStyles.reserveSeat,
+                  {
+                    backgroundColor: isRunning
+                      ? "rgba(82,82,82,0.5)"
+                      : "#941418",
+                  },
+                ]}
+                disabled={isRunning}
+                onPress={handleReserveSeat}
+                activeOpacity={0.8}
+              >
+                <MaterialIcons
+                  name="event-seat"
+                  color={textAndIconColor}
+                  size={20}
+                />
+                <Text
                   style={[
-                    queueStyles.reserveSeat,
-                    {
-                      backgroundColor: isRunning
-                        ? "rgba(82,82,82,0.5)"
-                        : "#941418",
-                    },
+                    queueStyles.reserveSeatText,
+                    { color: textAndIconColor },
                   ]}
-                  disabled={isRunning}
-                  onPress={handleReserveSeat}
-                  activeOpacity={0.8}
                 >
-                  <MaterialIcons
-                    name="event-seat"
-                    color={textAndIconColor}
-                    size={20}
-                  />
-                  <Text
-                    style={[
-                      queueStyles.reserveSeatText,
-                      { color: textAndIconColor },
-                    ]}
-                  >
-                    Reserve Seat
-                  </Text>
-                </TouchableOpacity>
+                  Reserve Seat
+                </Text>
+              </TouchableOpacity>
 
-                {/* Cancel Queue Button */}
-                <TouchableOpacity
-                  style={queueStyles.cancelQueue}
-                  onPress={handleCancelQueue}
-                  activeOpacity={0.8}
-                >
-                  <X size={20} strokeWidth={2} color="rgba(28, 28, 28, 0.7)" />
-                  <Text style={queueStyles.cancelQueueText}>Cancel Queue</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                style={queueStyles.cancelQueue}
+                onPress={handleCancelQueue}
+                activeOpacity={0.8}
+              >
+                <X size={20} strokeWidth={2} color="rgba(28, 28, 28, 0.7)" />
+                <Text style={queueStyles.cancelQueueText}>Cancel Queue</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </ScrollView>
+        </View>
 
         {/* Cancel Queue Modal */}
         <CancelQueueModal
@@ -339,5 +309,3 @@ const Queuing = () => {
 };
 
 export default Queuing;
-
-const styles = StyleSheet.create({});
