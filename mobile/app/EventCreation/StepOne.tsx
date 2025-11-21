@@ -6,14 +6,17 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Image
 } from "react-native";
 import { ImagePlus } from "lucide-react-native";
-
+import * as ImagePicker from "expo-image-picker";
 type StepOneProps = {
   eventName: string;
   setEventName: (text: string) => void;
   description: string;
   setDescription: (text: string) => void;
+  imageUri: string | null;
+  setImageUri: (uri: string) => void;
 };
 
 export default function StepOne({
@@ -21,7 +24,31 @@ export default function StepOne({
   setEventName,
   description,
   setDescription,
+  imageUri,
+  setImageUri
 }: StepOneProps) {
+
+
+  const pickImage = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      alert("Permission to access media library is required!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+      // You can set the selected image URI to state here if needed
+    }
+  };
   return (
     <>
       {/* Event Name */}
@@ -54,19 +81,30 @@ export default function StepOne({
       {/* Event Image */}
       <View style={styles.formGroup}>
         <Text style={styles.label}>Event Image</Text>
-        <TouchableOpacity style={styles.imageUploadContainer}>
-          <ImagePlus
-            size={50}
-            color="rgba(28, 28, 28, 0.5)"
-            strokeWidth={1.5}
-          />
-          <Text style={styles.imageUploadText}>Tap to upload image</Text>
+        <TouchableOpacity
+          style={styles.imageUploadContainer}
+          onPress={pickImage}
+        >
+          {imageUri ? (
+            <Image
+              source={{ uri: imageUri }}
+              style={{ width: "100%", height: "100%", borderRadius: 10 }}
+            />
+          ) : (
+            <>
+              <ImagePlus
+                size={50}
+                color="rgba(28, 28, 28, 0.5)"
+                strokeWidth={1.5}
+              />
+              <Text style={styles.imageUploadText}>Tap to upload image</Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </>
   );
 }
-
 
 const styles = StyleSheet.create({
   formGroup: {

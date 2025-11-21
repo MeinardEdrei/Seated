@@ -59,10 +59,14 @@ export default ({ config }) => ({
     "expo-font",
     "@react-native-google-signin/google-signin",
     "expo-barcode-scanner",
+    "expo-image-picker",
+    {
+      photosPermission:
+        "The app needs access to your photos to upload event images.",
+    },
   ],
   experiments: {
     typedRoutes: true,
     reactCompiler: true,
   },
 });
-
