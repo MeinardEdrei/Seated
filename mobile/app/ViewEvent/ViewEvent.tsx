@@ -204,7 +204,7 @@ const viewEventstyles = StyleSheet.create({
             <View style={viewEventstyles.eventContents}>
               {/* Event Image */}
               <Image
-                source={require("../../../../assets/images/eventImage1.jpg")}
+                source={require("@/assets/images/eventImage1.jpg")}
                 style={viewEventstyles.eventImage}
                 resizeMode="cover"
               />
