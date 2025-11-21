@@ -22,6 +22,7 @@ export default function CreateEvent() {
   // Step 1 - Details
   const [eventName, setEventName] = useState("");
   const [description, setDescription] = useState("");
+  const [eventImage, setEventImage] = useState<string | null>(null);
 
   // Step 2 - Schedule
   const [eventDate, setEventDate] = useState("October 25, 2025");
@@ -149,6 +150,8 @@ export default function CreateEvent() {
               setEventName={setEventName}
               description={description}
               setDescription={setDescription}
+              imageUri={eventImage}
+              setImageUri={setEventImage}
             />
           )}
 
