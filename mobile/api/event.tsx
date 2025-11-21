@@ -35,6 +35,11 @@ export const createEvent = async (eventData: EventPayload): Promise<EventRespons
     const { data } = await axiosInstance.post<EventResponse>(
       "/Event/create-event",
       eventData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        }
+      }
     );
     console.log("Event created successfully:", data);
     return data;
