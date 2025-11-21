@@ -199,36 +199,35 @@ export default function TabsLayout() {
           options={{ href: null }}
         />
 
-        {/* Organizer: Home Page */}
-        <Tabs.Screen
-          name="Homepage/OrgHome"
-          options={{
-            // href: isOrganizer ? undefined : null, //hides the organizer's home to user
-            title: "Home",
-            tabBarIcon: ({ color, focused }) => (
-              <Ionicons
-                name={focused ? "home" : "home-outline"}
-                color={color}
-                size={24}
-              />
-            ),
-          }}
-        />
-        {/* Organizer: Event Page */}
-        <Tabs.Screen
-          name="Eventpage/OrgEvent"
-          options={{
-            title: "Event",
-            tabBarItemStyle: { flex: 1, alignItems: "center" },
-            tabBarIcon: ({ color, focused }) => (
-              <Ionicons
-                name={focused ? "calendar" : "calendar-outline"}
-                color={color}
-                size={24}
-              />
-            ),
-          }}
-        />
+        {/* {/* Organizer: Home Page */} 
+        {/* <Tabs.Screen */}
+        {/*   name="Homepage/OrgHome" */}
+        {/*   options={{ */}
+        {/*     // href: isOrganizer ? undefined : null, //hides the organizer's home to user */}
+        {/*     title: "Home", */}
+        {/*     tabBarIcon: ({ color, focused }) => ( */}
+        {/*       <Ionicons */}
+        {/*         name={focused ? "home" : "home-outline"} */}
+        {/*         color={color} */}
+        {/*         size={24} */}
+        {/*       /> */}
+        {/*     ), */}
+        {/*   }} */}
+        {/* /> */}
+        {/* <Tabs.Screen */}
+        {/*   name="Eventpage/OrgEvent" */}
+        {/*   options={{ */}
+        {/*     title: "Event", */}
+        {/*     tabBarItemStyle: { flex: 1, alignItems: "center" }, */}
+        {/*     tabBarIcon: ({ color, focused }) => ( */}
+        {/*       <Ionicons */}
+        {/*         name={focused ? "calendar" : "calendar-outline"} */}
+        {/*         color={color} */}
+        {/*         size={24} */}
+        {/*       /> */}
+        {/*     ), */}
+        {/*   }} */}
+        {/* /> */}
         {/* Scanner/Dashboard - Show ONLY for Organizers */}
         <Tabs.Screen
           name="Scanner/Scanner"

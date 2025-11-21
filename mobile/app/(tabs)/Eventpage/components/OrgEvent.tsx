@@ -9,7 +9,6 @@ import {
 import { CirclePlus } from "lucide-react-native";
 
 import React from "react";
-import Header from "../../../components/Header";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
@@ -24,7 +23,7 @@ export default function OrgEvent() {
     <View style={styles.emptyContent}>
       <View style={styles.illustrationContainer}>
         <Image
-          source={require("../../../assets/images/illustration9.png")}
+          source={require("@/assets/images/illustration9.png")}
           style={styles.illustration9}
         />
       </View>
@@ -50,7 +49,6 @@ export default function OrgEvent() {
       >
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
         {/* Header */}
-        <Header />
 
         {/* Empty State UI */}
         <EmptyState />

@@ -27,7 +27,7 @@ const ViewEvent: React.FC = () => {
   };
 
   const handleEnterQueue = () => {
-    router.push("/Eventpage/Queuing");
+    router.push("/Eventpage/components/Queuing");
     // console.log("Entering queue...");
   };
 
