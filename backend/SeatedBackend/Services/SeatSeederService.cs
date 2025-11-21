@@ -13,7 +13,7 @@ namespace SeatedBackend.Services
             _context = context;
         }
 
-        public async Task SeedSeatsForVenue(int venueId, string venueName = "UMak Performing Arts Theater")
+        public async Task SeedSeatsForVenue(int venueId, string venueName, string description, string imageUrl, string status)
         {
             // Check if venue exists, create if not
             var venue = await _context.Venues.FindAsync(venueId);
@@ -23,9 +23,13 @@ namespace SeatedBackend.Services
                 {
                     VenueId = venueId,
                     VenueName = venueName,
-                    Capacity = 0
+                    Description = description,
+                    Capacity = 0,
+                    ImageUrl = imageUrl,
+                    Status = status,
                 };
                 _context.Venues.Add(venue);
+                await _context.SaveChangesAsync();
             }
 
             // Check if seats already exist
@@ -35,19 +39,30 @@ namespace SeatedBackend.Services
                 return;
             }
 
-            Console.WriteLine($"Seeding seats for {venueName}...");
-
             var allSeats = new List<Seat>();
 
-            // First Floor
-            allSeats.AddRange(SeedFirstFloor(venueId));
-            // Second Floor
-            allSeats.AddRange(SeedSecondFloor(venueId));
+            switch (venueId)
+            {
+                case 1: // UPAT
+                    Console.WriteLine($"Seeding seats for UPAT ({venueName})...");
+                    allSeats.AddRange(SeedFirstFloor(venueId));
+                    allSeats.AddRange(SeedSecondFloor(venueId));
+                    break;
+
+                case 2: // Auditorium
+                    Console.WriteLine($"Venue {venueName} created, but skipping seat generation (WIP).");
+                    return;
+
+                default:
+                    Console.WriteLine($"No seat map configuration found for Venue ID {venueId}");
+                    return;
+            }
 
             await _context.Seats.AddRangeAsync(allSeats);
 
             // Update venue capacity
             venue.Capacity = allSeats.Count;
+            _context.Venues.Update(venue);
 
             await _context.SaveChangesAsync();
 

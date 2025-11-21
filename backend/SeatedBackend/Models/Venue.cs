@@ -18,8 +18,21 @@ namespace SeatedBackend.Models
         public required string VenueName { get; set; }
 
         [Required]
+        [Column("description")]
+        public required string Description { get; set; }
+
+        [Required]
         [Column("capacity")]
         public required int Capacity { get; set; }
+
+        [Required]
+        [Column("image_url")]
+        [MaxLength(255)]
+        public required string ImageUrl { get; set; }
+
+        [Required]
+        [Column("status")]
+        public required string Status { get; set; }
 
         [Required]
         [Column("created_at")]

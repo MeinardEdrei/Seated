@@ -97,7 +97,20 @@ using (var scope = app.Services.CreateScope())
         var seeder = services.GetRequiredService<SeatSeederService>();
 
         // Seed seats for UPAT Theater
-        await seeder.SeedSeatsForVenue(venueId: 1, venueName: "UMak Performing Arts Theater");
+        await seeder.SeedSeatsForVenue(
+                venueId: 1,
+                venueName: "UMak Performing Arts Theater",
+                description: "The UMak Performing Arts Theater serves as a premier, world-class performance space for the University of Makati and the greater Makati community.",
+                imageUrl: "https://res.cloudinary.com/djlzvznes/image/upload/v1763731933/583107520_1825838958052704_8080861832280124321_n_ancnyz.jpg",
+                status: "Available");
+
+        // Seed seats for UMak Auditorium
+        await seeder.SeedSeatsForVenue(
+                venueId: 2,
+                venueName: "UMak Performing Arts Theater",
+                description: "The UMak Auditorium serves as a versatile, medium-capacity venue for various events within the university.",
+                imageUrl: "https://res.cloudinary.com/djlzvznes/image/upload/v1763731975/584551439_863455353291498_1676714407627109578_n_xvjjkn.jpg",
+                status: "Unavailable"); // Temporary
 
         Console.WriteLine("✅ Database seeding completed successfully");
     }
