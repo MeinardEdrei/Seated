@@ -12,7 +12,7 @@ import { ChevronLeft, X } from "lucide-react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { Stack, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import CancelQueueModal from "./CancelQueueModal"; // Import the modal
+import CancelQueueModal from "@/components/eventpage/CancelQueueModal"; // Import the modal
 
 const Queuing = () => {
   const router = useRouter();

@@ -10,7 +10,7 @@ import ScannerFrame from "@/components/ScannerFrame";
 export default function StudentEvent() {
   const router = useRouter();
   const handleViewEvent = () => {
-    router.push("/Eventpage/components/ViewEvent");
+    router.push("/ViewEvent/ViewEvent");
   };
 
   const [scanned, setScanned] = useState(false);

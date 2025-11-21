@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, Button } from 'react-native';
 import React from 'react';
-import { useAuth } from '../../../../context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
 const Settings = () => {
   const { signOut } = useAuth();

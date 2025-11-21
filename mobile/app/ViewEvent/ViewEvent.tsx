@@ -21,13 +21,13 @@ const ViewEvent: React.FC = () => {
     venue: "UMak Performing Arts Theater",
     date: "October 25, 2025",
     time: "01:00 PM - 04:30 PM",
-    image: require("../../../../assets/images/eventImage1.jpg"), // ✅ fixed line
+    image: require("@/assets/images/eventImage1.jpg"), // ✅ fixed line
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam...",
   };
 
   const handleEnterQueue = () => {
-    router.push("/Eventpage/components/Queuing");
+    router.push("/Queuing/Queuing");
     // console.log("Entering queue...");
   };
 
