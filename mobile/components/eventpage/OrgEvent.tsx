@@ -16,7 +16,7 @@ export default function OrgEvent() {
   const router = useRouter();
 
   const handleCreateEvent = () => {
-    router.push("/(tabs)/Eventpage/components/CreateEventForm");
+    router.push("/EventCreation/CreateEventForm");
   } 
 
   const EmptyState = () => (

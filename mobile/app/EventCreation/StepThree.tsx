@@ -27,7 +27,7 @@ const venues: Venue[] = [
     capacity: "Capacity: 1,182 Seats",
     description:
       "The UMak Performing Arts Theater serves as a premier, world-class performance space for the University of Makati and the greater Makati community.",
-    image: require("../../../../assets/images/VenueUPAT.jpg"),
+    image: require("@/assets/images/VenueUPAT.jpg"),
     disabled: false,
   },
   {
@@ -36,7 +36,7 @@ const venues: Venue[] = [
     capacity: "Capacity: 300 Seats",
     description:
       "The UMak Auditorium serves as a versatile, medium-capacity venue for various events within the university.",
-    image: require("../../../../assets/images/VenueAuditorium.jpg"),
+    image: require("@/assets/images/VenueAuditorium.jpg"),
     disabled: true, // 🚫 Disable Auditorium
   },
 ];
