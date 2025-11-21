@@ -6,12 +6,42 @@ import {
   StatusBar,
   TouchableOpacity,
 } from "react-native";
+import { CirclePlus } from "lucide-react-native";
+
 import React from "react";
 import Header from "../../../components/Header";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 export default function OrgEvent() {
+  const router = useRouter();
+
+  const handleCreateEvent = () => {
+    router.push("/(tabs)/Eventpage/components/CreateEventForm");
+  } 
+
+  const EmptyState = () => (
+    <View style={styles.emptyContent}>
+      <View style={styles.illustrationContainer}>
+        <Image
+          source={require("../../../assets/images/illustration9.png")}
+          style={styles.illustration9}
+        />
+      </View>
+
+      <Text style={styles.title}>No events yet</Text>
+      <Text style={styles.subtitle}>
+        Time to get started! Tap the 'Create Event' button below to plan your
+        event.
+      </Text>
+
+      <TouchableOpacity style={styles.button} onPress={handleCreateEvent}>
+        <CirclePlus size={20} color="#ffe2a3" strokeWidth={2.5} />
+        <Text style={styles.buttonText}>Create Event</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <>
       <SafeAreaView
@@ -22,25 +52,8 @@ export default function OrgEvent() {
         {/* Header */}
         <Header />
 
-        <View style={styles.emptyContent}>
-          <View style={styles.illustrationContainer}>
-            <Image
-              source={require("../../../assets/images/illustration9.png")}
-              style={styles.illustration9}
-            />
-          </View>
-
-          <Text style={styles.title}>No events yet</Text>
-          <Text style={styles.subtitle}>
-            Time to get started! Tap the 'Create Event' button below to plan
-            your event.
-          </Text>
-
-          <TouchableOpacity style={styles.button}>
-            
-            <Text style={styles.buttonText}>Create Event</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Empty State UI */}
+        <EmptyState />
       </SafeAreaView>
     </>
   );
@@ -56,6 +69,7 @@ const styles = StyleSheet.create({
   emptyContent: {
     flex: 1,
     alignSelf: "center",
+    alignItems: "center",
     justifyContent: "center",
     width: "100%",
     maxWidth: 250,
@@ -85,12 +99,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#525252",
     textAlign: "center",
+    marginBottom: 48,
   },
 
   button: {
     backgroundColor: "#941418",
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 5,
     borderRadius: 10,
     width: 270,
     height: 50,

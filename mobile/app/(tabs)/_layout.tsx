@@ -265,7 +265,19 @@ export default function TabsLayout() {
         {/* Hide Organizer folder from tabs */}
         <Tabs.Screen name="Organizer" options={{ href: null }} />
         <Tabs.Screen
-          name="Organizer/Dashboard/styles"
+          name="Eventpage/components/CreateEventForm"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Eventpage/components/StepOne"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Eventpage/components/StepTwo"
+          options={{ href: null }}
+        />
+        <Tabs.Screen
+          name="Eventpage/components/StepThree"
           options={{ href: null }}
         />
         <Tabs.Screen
