@@ -26,7 +26,7 @@ export default function EventPage() {
       <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
         <Header />
 
-        {role !== "Organizer" ? <StudentEvent />
+        {role !== "organizer" ? <StudentEvent />
           : <OrgEvent />}
 
       </SafeAreaView>

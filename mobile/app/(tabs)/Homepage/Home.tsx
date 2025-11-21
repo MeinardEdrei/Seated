@@ -9,9 +9,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import EventState from "@/components/homepage/EventState";
 import { useAuth } from "@/context/AuthContext";
 import Header from "../../../components/Header";
+import OrgHome from "@/components/homepage/OrgHome";
+
 const Home = () => {
 
   const { user } = useAuth();
+  
+  const role = user?.role?.toLowerCase();
 
   const [EventData, setEventData] = useState([]);
 
@@ -21,7 +25,6 @@ const Home = () => {
       backgroundColor: "#FFFFFF",
     }
   });
-
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -29,9 +32,7 @@ const Home = () => {
         {/* Header */}
         <Header />
 
-        {/* Conditional Content Rendering */}
-
-        {EventData.length > 1 ? <EventState EventData={EventData} /> : <EmptyState />}
+        {role !== "organizer" ? (EventData.length > 1 ? <EventState EventData={EventData} /> : <EmptyState />) : <OrgHome />}  
 
       </SafeAreaView>
     </>

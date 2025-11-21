@@ -10,6 +10,8 @@ import Header from "../../../components/Header";
 const Notification = () => {
   const { user } = useAuth();
 
+  const role = user?.role?.toLowerCase();
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -23,7 +25,7 @@ const Notification = () => {
       <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
         <Header />
 
-        {user?.role?.toLowerCase() !== "organizer" ? <StudentNotifications /> : <OrgNotifications />}
+        {role !== "organizer" ? <StudentNotifications /> : <OrgNotifications />}
 
       </SafeAreaView>
     </>
