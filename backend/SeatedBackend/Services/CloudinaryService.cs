@@ -17,7 +17,7 @@ public class CloudinaryService
         _cloudinary = new Cloudinary(account);
     }
 
-    public async Task<string> UploadImageAsync(IFormFile file, string eventName)
+    public async Task<ImageUploadResult> UploadImageAsync(IFormFile file, string eventName)
     {
         if (file == null || file.Length == 0)
             throw new Exception("File is empty");
@@ -35,7 +35,48 @@ public class CloudinaryService
         };
 
         var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-        return uploadResult.SecureUrl.AbsoluteUri;
+
+        return uploadResult;
+    }
+
+    public async Task<(bool Success, string? ErrorMessage)> DeleteImageAsync(string publicId)
+    {
+        if (string.IsNullOrEmpty(publicId))
+            throw new ArgumentException("Public ID cannot be null or empty.", nameof(publicId));
+
+        var deleteParams = new DeletionParams(publicId)
+        {
+            ResourceType = ResourceType.Image
+        };
+
+        try
+        {
+            var result = await _cloudinary.DestroyAsync(deleteParams);
+            if (result.Result == "ok")
+                return (true, null);
+
+            return (false, result.Error?.Message ?? "Unknown error from Cloudinary");
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+
+    public static string GetPublicId(string Url)
+    {
+        if (string.IsNullOrEmpty(Url))
+            return string.Empty;
+
+        string pattern = @"Seated.*(?=\.)";
+
+        Match match = Regex.Match(Url, pattern);
+        if (match.Success)
+        {
+            return match.Value;
+        }
+        return string.Empty;
     }
 
     public static string Sanitize(string input)

@@ -5,4 +5,5 @@ namespace SeatedBackend.DTOs
         public IFormFile ImageFile { get; set; } = null!;
         public string EventName { get; set; } = string.Empty;
     }
+
 }
