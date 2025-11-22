@@ -6,7 +6,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Image
+  Image,
 } from "react-native";
 import { ImagePlus } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -17,6 +17,11 @@ type StepOneProps = {
   setDescription: (text: string) => void;
   imageUri: string | null;
   setImageUri: (uri: string) => void;
+  errors: {
+    eventName?: string;
+    description?: string;
+    eventImage?: string;
+  };
 };
 
 export default function StepOne({
@@ -25,10 +30,9 @@ export default function StepOne({
   description,
   setDescription,
   imageUri,
-  setImageUri
+  setImageUri,
+  errors,
 }: StepOneProps) {
-
-
   const pickImage = async () => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -38,7 +42,7 @@ export default function StepOne({
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -55,19 +59,26 @@ export default function StepOne({
       <View style={styles.formGroup}>
         <Text style={styles.label}>Event Name</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, errors.eventName && styles.errorBorder]}
           value={eventName}
           onChangeText={setEventName}
           placeholder="CCIS General Assembly"
           placeholderTextColor="rgba(28, 28, 28, 0.5)"
         />
+        {errors.eventName && (
+          <Text style={styles.errorText}>{errors.eventName}</Text>
+        )}
       </View>
 
       {/* Description */}
       <View style={styles.formGroup}>
         <Text style={styles.label}>Description</Text>
         <TextInput
-          style={[styles.input, styles.textArea]}
+          style={[
+            styles.input,
+            styles.textArea,
+            errors.description && styles.errorBorder,
+          ]}
           value={description}
           onChangeText={setDescription}
           placeholder="CCIS General Assembly Lorem ipsum..."
@@ -76,13 +87,19 @@ export default function StepOne({
           numberOfLines={5}
           textAlignVertical="top"
         />
+        {errors.description && (
+          <Text style={styles.errorText}>{errors.description}</Text>
+        )}
       </View>
 
       {/* Event Image */}
       <View style={styles.formGroup}>
         <Text style={styles.label}>Event Image</Text>
         <TouchableOpacity
-          style={styles.imageUploadContainer}
+          style={[
+            styles.imageUploadContainer,
+            errors.eventImage && styles.errorBorder,
+          ]}
           onPress={pickImage}
         >
           {imageUri ? (
@@ -101,6 +118,9 @@ export default function StepOne({
             </>
           )}
         </TouchableOpacity>
+        {errors.eventImage && (
+          <Text style={styles.errorText}>{errors.eventImage}</Text>
+        )}
       </View>
     </>
   );
@@ -145,5 +165,14 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Regular",
     fontSize: 14,
     color: "rgba(28, 28, 28, 0.5)",
+  },
+  errorBorder: {
+    borderColor: "red",
+  },
+  errorText: {
+    color: "red",
+    marginTop: 4,
+    fontSize: 12,
+    fontFamily: "Poppins-Regular",
   },
 });

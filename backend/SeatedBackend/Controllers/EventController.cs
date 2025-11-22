@@ -60,7 +60,7 @@ namespace SeatedBackend.Controllers
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,
                 ImageUrl = ImageUrl,
-                Status = EventStatus.Pending,
+                Status = EventStatus.Approved, // Temporary Approved for testing
             };
             _context.Events.Add(newEvent);
             await _context.SaveChangesAsync();
