@@ -18,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({
     if (onSettingsPress) {
       onSettingsPress();
     } else {
-      router.push("/(tabs)/Homepage/components/Settings");
+      router.push("/Utils/Settings");
     }
   };
 
