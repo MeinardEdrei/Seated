@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   ScrollView,
   StatusBar,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
@@ -14,6 +16,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import StepOne from "./StepOne";
 import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
+import { createEvent } from "@/api/event";
+import { parse, format } from 'date-fns';
 
 export default function CreateEvent() {
   const router = useRouter();
@@ -32,6 +36,8 @@ export default function CreateEvent() {
   // Step 3 - Venue
   const [selectedVenue, setSelectedVenue] = useState<number | null>(1);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
@@ -46,9 +52,62 @@ export default function CreateEvent() {
     }
   };
 
-  const handleSubmit = () => {
-    console.log("Event created!");
-    router.back();
+  const handleSubmit = async () => {
+    const formdata = new FormData();
+    formdata.append("EventName", eventName);
+    formdata.append("Description", description);
+
+    try {
+      const parsedDate = parse(eventDate, 'MMMM d, yyyy', new Date());
+      const finalDate = format(parsedDate, 'yyyy-MM-dd');
+
+      formdata.append("EventDate", finalDate);
+
+      const parsedStartTime = parse(startTime, 'hh:mm a', new Date());
+      const formattedStartTime = format(parsedStartTime, 'HH:mm:ss');
+
+      formdata.append("StartTime", formattedStartTime);
+
+      const parsedEndTime = parse(endTime, 'hh:mm a', new Date());
+      const formattedEndTime = format(parsedEndTime, 'HH:mm:ss');
+
+      formdata.append("EndTime", formattedEndTime);
+
+    } catch (error) {
+      console.error("Error formatting date/time:", error);
+    }
+
+
+    formdata.append(
+      "VenueId",
+      selectedVenue ? selectedVenue.toString() : "",
+    );
+
+    if (eventImage) {
+      const filename = eventImage.split("/").pop();
+      const match = /\.(\w+)$/.exec(filename || "");
+      const type = match ? `image/${match[1]}` : `image`;
+
+      formdata.append("ImageFile", {
+        uri: eventImage,
+        name: filename,
+        type: type,
+      } as any);
+    }
+
+    setIsSubmitting(true);
+    try {
+      await createEvent(formdata);
+      Alert.alert("Success", "Event created successfully!", [{ text: "OK" }]);
+
+    } catch (error: any) {
+      console.log("Form Data:", formdata);
+      console.error("Error submitting event:", error);
+      throw new Error(error);
+    } finally {
+      setIsSubmitting(false);
+      router.back();
+    }
   };
 
   type StepIndicatorProps = {
@@ -217,9 +276,16 @@ export default function CreateEvent() {
               <TouchableOpacity
                 style={styles.submitButton}
                 onPress={handleSubmit}
+                disabled={isSubmitting} // Disable button when submitting
               >
-                <Text style={styles.submitButtonText}>Submit</Text>
-                <ChevronRight size={20} color="#fff" strokeWidth={2.5} />
+                {isSubmitting ? (
+                  <ActivityIndicator color="#fff" /> // Show loading indicator
+                ) : (
+                  <>
+                    <Text style={styles.submitButtonText}>Submit</Text>
+                    <ChevronRight size={20} color="#fff" strokeWidth={2.5} />
+                  </>
+                )}
               </TouchableOpacity>
             </View>
           )}

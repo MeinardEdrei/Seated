@@ -30,15 +30,18 @@ export type EventListResponse = {
 };
 
 
-export const createEvent = async (eventData: EventPayload): Promise<EventResponse> => {
+export const createEvent = async (formdata: FormData): Promise<EventResponse> => {
   try {
     const { data } = await axiosInstance.post<EventResponse>(
       "/Event/create-event",
-      eventData,
+      formdata,
       {
         headers: {
           "Content-Type": "multipart/form-data",
-        }
+        },
+        transformRequest: (data) => {
+          return data;
+        },
       }
     );
     console.log("Event created successfully:", data);

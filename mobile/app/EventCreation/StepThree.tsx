@@ -19,7 +19,7 @@ type Venue = {
   disabled?: boolean;
 };
 
-
+// STATIC PA TO
 const venues: Venue[] = [
   {
     id: 1,
