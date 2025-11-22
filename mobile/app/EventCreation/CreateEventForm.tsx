@@ -28,6 +28,11 @@ export default function CreateEvent() {
   const [description, setDescription] = useState("");
   const [eventImage, setEventImage] = useState<string | null>(null);
 
+  const [errors, setErrors] = useState({
+    eventName: "",
+    description: "",
+    eventImage: "",
+  });
   // Step 2 - Schedule
   const [eventDate, setEventDate] = useState("October 25, 2025");
   const [startTime, setStartTime] = useState("10:30 AM");
@@ -47,6 +52,17 @@ export default function CreateEvent() {
   };
 
   const handleNext = () => {
+    if (currentStep === 1) {
+      const newErrors = {
+        eventName: !eventName ? "*Event Name cannot be empty" : "",
+        description: !description ? "*Description cannot be empty" : "",
+        eventImage: !eventImage ? "*Event Image cannot be empty" : "",
+      };
+      setErrors(newErrors);
+      if (Object.values(newErrors).some((error) => error)) {
+        return;
+      }
+    }
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     }
@@ -211,6 +227,7 @@ export default function CreateEvent() {
               setDescription={setDescription}
               imageUri={eventImage}
               setImageUri={setEventImage}
+              errors={errors}
             />
           )}
 
