@@ -155,7 +155,7 @@ export default function StepTwo({
   };
 
   const handleTimeConfirm = (type: "start" | "end") => {
-    const timeString = `${tempHour}:${tempMinute} ${tempPeriod}`;
+   const timeString = `${tempHour}:${tempMinute} ${tempPeriod}`;
     if (type === "start") {
       setStartTime(timeString);
       setShowStartTimePicker(false);
