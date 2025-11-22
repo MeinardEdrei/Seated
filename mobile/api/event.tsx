@@ -114,3 +114,16 @@ export const listEvents = async (): Promise<EventListResponse> => {
     throw new Error(backendMessage);
   }
 };
+
+export const listEventsByOrganizer = async (): Promise<EventListResponse> => {
+  try {
+    const { data } = await axiosInstance.get<EventListResponse>(
+      "/Event/get-events-by-organizer",
+    );
+    return data;
+  } catch (error: any) {
+    const backendMessage = 
+      error.response?.data?.message || "Failed to fetch organizer's events";
+    throw new Error(backendMessage);
+  }
+};

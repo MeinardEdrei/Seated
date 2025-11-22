@@ -5,19 +5,40 @@ import {
   Image,
   StatusBar,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { CirclePlus } from "lucide-react-native";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { Event, listEventsByOrganizer } from "@/api/event";
 
 export default function OrgEvent() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const router = useRouter();
 
   const handleCreateEvent = () => {
     router.push("/EventCreation/CreateEventForm");
-  } 
+  };
+
+  const fetchEvents = async () => {
+    try {
+      const response = await listEventsByOrganizer();
+      setEvents(response.data);
+      console.log("Fetched Events:", response.data);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []); 
 
   const EmptyState = () => (
     <View style={styles.emptyContent}>
@@ -48,10 +69,17 @@ export default function OrgEvent() {
         edges={["top", "left", "right", "bottom"]}
       >
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-        {/* Header */}
-
-        {/* Empty State UI */}
-        <EmptyState />
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#941418" />
+          </View>
+        ) : events.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <View style={styles.eventListContainer}>
+            <Text style={styles.eventListText}>Events are loaded!</Text>
+          </View>
+        )}
       </SafeAreaView>
     </>
   );
@@ -62,7 +90,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#ffffffff",
   },
-
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   // ===== Empty State =====
   emptyContent: {
     flex: 1,
@@ -114,5 +146,16 @@ const styles = StyleSheet.create({
     color: "#FFE2A3",
     fontFamily: "Poppins-Bold",
     fontSize: 14,
+  },
+  // New styles for event list container
+  eventListContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  eventListText: {
+    fontFamily: "Poppins-Bold",
+    fontSize: 20,
+    color: "#1C1C1C",
   },
 });
