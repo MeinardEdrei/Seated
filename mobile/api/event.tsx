@@ -13,7 +13,7 @@ export type EventPayload = {
 export type Event = EventPayload & {
   eventId: number;
   organizerId: number;
-  status: "Pending" | "Approved" | "Rejected";
+  status: "pending" | "approved" | "rejected";
   qrCode?: string | null;
   createdAt: string;
   updatedAt: string;
