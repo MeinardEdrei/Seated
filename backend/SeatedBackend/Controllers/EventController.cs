@@ -60,7 +60,7 @@ namespace SeatedBackend.Controllers
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,
                 ImageUrl = ImageUrl,
-                Status = EventStatus.Pending, 
+                Status = EventStatus.Pending,
             };
             _context.Events.Add(newEvent);
             await _context.SaveChangesAsync();
@@ -197,9 +197,28 @@ namespace SeatedBackend.Controllers
             }
 
             var userId = int.Parse(nameIdentifiedClaim);
+            var events = await _context.Events
+                .Where(e => e.OrganizerId == userId)
+                .Select(e => new EventDto
+                {
+                    EventId = e.EventId,
+                    OrganizerId = e.OrganizerId,
+                    VenueId = e.VenueId,
+                    EventName = e.EventName,
+                    Description = e.Description,
+                    EventDate = e.EventDate,
+                    StartTime = e.StartTime,
+                    EndTime = e.EndTime,
+                    ImageUrl = e.ImageUrl,
+                    Status = e.Status.ToString(), 
+                    QrCode = e.QrCode,
+                    CreatedAt = e.CreatedAt,
+                    UpdatedAt = e.UpdatedAt,
+                    ApprovalDate = e.ApprovalDate
+                }).ToListAsync();
 
-            var events = await _context.Events.Where(e => e.OrganizerId == userId).ToListAsync();
             return Ok(new { data = events });
+
         }
 
 

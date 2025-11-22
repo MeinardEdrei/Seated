@@ -35,3 +35,23 @@ public class UpdateEventDto {
     public TimeSpan? EndTime { get; set; }
     public IFormFile? ImageFile { get; set; }
 }
+
+public class EventDto
+{
+    public int EventId { get; set; }
+    public int OrganizerId { get; set; }
+    public int VenueId { get; set; }
+    public string EventName { get; set; } = null!;
+    public string Description { get; set; } = null!;
+    public DateTime EventDate { get; set; }
+    public TimeSpan StartTime { get; set; }
+    public TimeSpan EndTime { get; set; }
+    public string ImageUrl { get; set; } = null!;
+    public string Status { get; set; } = "Pending";
+    public string? QrCode { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+    public DateTime? ApprovalDate { get; set; }
+}
+
+
