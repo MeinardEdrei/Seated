@@ -8,6 +8,7 @@ import {
   StatusBar,
   ActivityIndicator,
   Alert,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
@@ -100,15 +101,23 @@ export default function CreateEvent() {
     );
 
     if (eventImage) {
-      const filename = eventImage.split("/").pop();
-      const match = /\.(\w+)$/.exec(filename || "");
-      const type = match ? `image/${match[1]}` : `image`;
+      if (Platform.OS === "web") {
+        const response = await fetch(eventImage);
+        const blob = await response.blob();
+        const extension = blob.type.split("/")[1];
+        const filename = `${eventName.replace(/\s/g, "_")}.${extension}`;
+        formdata.append("ImageFile", blob, filename);
+      } else {
+        const filename = eventImage.split("/").pop();
+        const match = /\.(\w+)$/.exec(filename || "");
+        const type = match ? `image/${match[1]}` : `image`;
 
-      formdata.append("ImageFile", {
-        uri: eventImage,
-        name: filename,
-        type: type,
-      } as any);
+        formdata.append("ImageFile", {
+          uri: eventImage,
+          name: filename,
+          type: type,
+        } as any);
+      }
     }
 
     setIsSubmitting(true);
